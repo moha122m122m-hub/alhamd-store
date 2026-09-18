@@ -42,7 +42,6 @@
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
 
-        /* التحكم في الأقسام الأربعة بالواجهة بدون فرط */
         .categories-grid-top { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -67,7 +66,6 @@
         .cat-circle-card img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin: 0 auto 3px auto; display: block; border: 1px solid #e2e8f0; }
         .cat-circle-card h4 { font-size: 0.65rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* زر السهم المنسدل لعرض كل الأقسام تحت بعضها */
         .dropdown-toggle-bar {
             text-align: center;
             background: #ffffff;
@@ -84,7 +82,6 @@
         }
         .dropdown-toggle-bar:hover { background: #f8fafc; color: var(--primary-dark); }
         
-        /* قائمة كل الأقسام تحت بعضها */
         .all-categories-dropdown-list {
             display: none;
             background: #ffffff;
@@ -202,7 +199,7 @@
                     </div>
 
                     <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
-                        <h4 style="color:var(--dark); margin-bottom:0.4rem; font-size:0.85rem;">📥 طلبات العملاء المعلقة وحالاتها:</h4>
+                        <h4 style="color:var(--dark); margin-bottom:0.4rem; font-size:0.85rem;">📥 طلبات العملاء وحالاتها:</h4>
                         <div id="admin-orders-inbox" style="max-height:200px; overflow-y:auto;"><p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات جديدة.</p></div>
                     </div>
 
@@ -251,15 +248,12 @@
                     <h3>أقسام المنتجات (الرئيسية)</h3>
                 </div>
                 
-                <!-- الـ 4 أقسام الرئيسية في الواجهة -->
                 <div class="categories-grid-top" id="categories-top-grid"></div>
 
-                <!-- زر السهم المنسدل لكل الأقسام تحت بعضها -->
                 <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
                     📂 جميع الأقسام (اضغط للسحب والفتح) ⬇️
                 </div>
 
-                <!-- قائمة جميع الأقسام تحت بعضها -->
                 <div class="all-categories-dropdown-list" id="all-cats-dropdown">
                     <div id="all-cats-dropdown-content"></div>
                 </div>
@@ -339,7 +333,7 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل السعر للمنتج والأدمن -->
+    <!-- نافذة تعديل المنتج للأدمن -->
     <div class="modal-overlay" id="edit-price-modal" onclick="closeEditModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (الاسم، السعر، الصورة)</h3>
@@ -415,7 +409,10 @@
                     let data = doc.data();
                     categories = data.categories || [];
                     products = data.products || [];
-                    if (data.banner) document.getElementById('main-banner-img').src = data.banner;
+                    // تثبيت صورة الغلاف من السحاب وعدم ضياعها أبداً
+                    if (data.banner) {
+                        document.getElementById('main-banner-img').src = data.banner;
+                    }
                 } else {
                     categories = [
                         { name: 'بوش', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
@@ -445,7 +442,7 @@
                 categories: categories,
                 products: products,
                 banner: bannerSrc
-            }).then(() => {
+            }, { merge: true }).then(() => {
                 console.log("تم الحفظ على السحاب بنجاح!");
             }).catch((error) => {
                 console.error("خطأ في الحفظ:", error);
@@ -501,7 +498,7 @@
                 reader.onload = function(e) {
                     document.getElementById('main-banner-img').src = e.target.result;
                     saveDataToCloud();
-                    alert('تم تحديث الغلاف وحفظه على السحاب بنجاح!');
+                    alert('تم تحديث الغلاف وحفظه على السحاب نهائياً وللجميع!');
                 };
                 reader.readAsDataURL(input.files[0]);
             } else {
@@ -554,7 +551,6 @@
             const select = document.getElementById('prod-cat-select');
             
             if (grid) {
-                // يعرض فقط الأقسام التي تم تفعيل عرضها في الواجهة (بحد أقصى 4)
                 let mainCats = categories.filter(c => c.showOnMain);
                 grid.innerHTML = `<div class="cat-circle-card ${currentFilter === 'all' ? 'active' : ''}" onclick="filterCat('all')"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل"><h4>📦 الكل</h4></div>`;
                 
@@ -653,7 +649,6 @@
         function updateCategoryDataFinal(cat, oldName, newName, imgSrc) {
             cat.name = newName;
             cat.img = imgSrc;
-            // تحديث اسم القسم في المنتجات المرتبطة
             products.forEach(p => {
                 if (p.cat === oldName) p.cat = newName;
             });
@@ -1009,7 +1004,6 @@
 
             order.status = newStatus;
             
-            // إذا كان تم التأكيد، نحدث المبيعات
             if (newStatus === 'تم التأكيد ✅') {
                 order.itemsObj.forEach(orderedItem => {
                     let p = products.find(prod => prod.id === orderedItem.id);
