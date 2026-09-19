@@ -17,6 +17,7 @@
             --danger: #ef4444;
             --radius: 14px;
             --icon-size: 180px;
+            --cat-icon-size: 50px; /* تحكم في حجم أيقونات الأقسام */
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
@@ -35,20 +36,26 @@
         .sub-nav button { background: none; border: none; color: #cbd5e1; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
         .sub-nav button.active, .sub-nav button:hover { color: var(--primary); }
         
+        .hero-banner-wrap { max-width: 1280px; margin: 1rem auto 0 auto; padding: 0 1rem; }
+        .hero-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #e2e8f0; }
+        @media (min-width: 768px) { .hero-banner-card { height: 240px; } }
+        .hero-banner-card img { width: 100%; height: 100%; object-fit: cover; }
+
         .main-layout { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 992px) { .main-layout { grid-template-columns: 3fr 1fr; } }
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
 
-        /* شريط الأقسام المتحرك بالسحب اليدوي (Swipeable Categories Bar) */
+        /* شريط الأقسام المتحرك بالسحب (Swipeable Horizontal Scroll) */
         .categories-scroll-wrapper { 
             display: flex; 
-            gap: 10px; 
+            gap: 12px; 
             overflow-x: auto; 
-            padding: 5px 0 10px 0; 
+            padding: 8px 4px 12px 4px; 
             margin-bottom: 1.2rem; 
             scrollbar-width: none; 
             -ms-overflow-style: none; 
+            scroll-behavior: smooth;
         }
         .categories-scroll-wrapper::-webkit-scrollbar { display: none; }
         
@@ -56,16 +63,16 @@
             background: #fff; 
             border: 1px solid #e2e8f0; 
             border-radius: 12px; 
-            padding: 8px 12px; 
+            padding: 10px; 
             text-align: center; 
             cursor: pointer; 
             transition: all 0.2s; 
             flex-shrink: 0;
-            min-width: 90px;
+            min-width: 100px;
         }
         .cat-circle-card:hover, .cat-circle-card.active { border-color: var(--primary); background: #fffbeb; }
-        .cat-circle-card img { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; margin: 0 auto 4px auto; display: block; border: 1px solid #e2e8f0; }
-        .cat-circle-card h4 { font-size: 0.7rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cat-circle-card img { width: var(--cat-icon-size); height: var(--cat-icon-size); object-fit: cover; border-radius: 50%; margin: 0 auto 5px auto; display: block; border: 1px solid #e2e8f0; transition: width 0.3s, height 0.3s; }
+        .cat-circle-card h4 { font-size: 0.75rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .dropdown-toggle-bar {
             text-align: center;
@@ -179,6 +186,13 @@
         <button onclick="switchView('contact', this)">اتصل بنا</button>
     </div>
 
+    <!-- صورة الغلاف (Banner) -->
+    <div class="hero-banner-wrap">
+        <div class="hero-banner-card">
+            <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="غلاف المؤسسة">
+        </div>
+    </div>
+
     <div class="main-layout">
         <main>
             <div id="view-store" class="app-view active-view">
@@ -190,7 +204,7 @@
                     
                     <div style="background:#ecfdf5; padding:10px; border-radius:8px; border:1px solid #10b981; margin-bottom:1rem; text-align:center;">
                         <h4 style="color:#047857; margin-bottom:0.3rem; font-size:0.85rem;">☁️ السيرفر السحابي متصل بنجاح:</h4>
-                        <p style="font-size:0.75rem; color:#065f46;">أي منتج أو قسم تضيفه أو تعدله سيتم حفظه تلقائياً على السحاب للجميع!</p>
+                        <p style="font-size:0.75rem; color:#065f46;">أي تعديل أو منتج سيتم حفظه تلقائياً للجميع!</p>
                     </div>
 
                     <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
@@ -199,13 +213,27 @@
                     </div>
 
                     <div class="input-group">
-                        <label>📏 تحكم في حجم صور/أيقونات المنتجات:</label>
+                        <label>📏 تحكم في حجم صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
                             <option value="120px">صغير (120px)</option>
                             <option value="180px" selected>متوسط (180px)</option>
                             <option value="250px">كبير (250px)</option>
-                            <option value="320px">كبير جداً (320px)</option>
                         </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>⭕ تحكم في حجم أيقونات الأقسام:</label>
+                        <select id="cat-icon-size-select" onchange="changeCatIconSize(this.value)">
+                            <option value="35px">صغير</option>
+                            <option value="50px" selected>متوسط</option>
+                            <option value="70px">كبير</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
+                        <label>🖼️ تغيير صورة الغلاف:</label>
+                        <input type="file" id="banner-img-file" accept="image/*" style="font-size:0.75rem; margin-bottom:4px;">
+                        <button class="btn" style="padding:0.3rem; font-size:0.8rem;" onclick="updateHeroBanner()">حفظ الغلاف سحابياً</button>
                     </div>
 
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
@@ -236,10 +264,10 @@
                 </div>
 
                 <div class="section-title-bar">
-                    <h3>أقسام المنتجات (اسحب يميناً ويساراً)</h3>
+                    <h3>أقسام المنتجات (اسحب يميناً ويساراً بإيدك)</h3>
                 </div>
                 
-                <!-- شريط الأقسام المتحرك بالسحب اليدوي (Swipeable Categories Bar) -->
+                <!-- شريط الأقسام التفاعلي الجديد بالسحب (Swipeable Horizontal Scroll) -->
                 <div class="categories-scroll-wrapper" id="categories-top-grid"></div>
 
                 <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
@@ -393,11 +421,14 @@
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
+        let currentCatIconSize = localStorage.getItem('alhamd_cat_icon_size') || '50px';
 
         window.onload = function() {
             checkAdminState();
             if (document.getElementById('img-size-select')) document.getElementById('img-size-select').value = currentImgHeight;
+            if (document.getElementById('cat-icon-size-select')) document.getElementById('cat-icon-size-select').value = currentCatIconSize;
             document.documentElement.style.setProperty('--icon-size', currentImgHeight);
+            document.documentElement.style.setProperty('--cat-icon-size', currentCatIconSize);
             loadDataFromCloud();
         };
 
@@ -407,6 +438,9 @@
                     let data = doc.data();
                     categories = data.categories || [];
                     products = data.products || [];
+                    if (data.banner) {
+                        document.getElementById('main-banner-img').src = data.banner;
+                    }
                 } else {
                     categories = [
                         { name: 'بوش', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' },
@@ -431,14 +465,31 @@
         }
 
         function saveDataToCloud() {
+            let bannerSrc = document.getElementById('main-banner-img').src;
             db.collection("store_data").doc("main_config").set({
                 categories: categories,
-                products: products
+                products: products,
+                banner: bannerSrc
             }, { merge: true }).then(() => {
                 console.log("تم الحفظ على السحاب بنجاح!");
             }).catch((error) => {
                 console.error("خطأ في الحفظ:", error);
             });
+        }
+
+        function updateHeroBanner() {
+            const input = document.getElementById('banner-img-file');
+            if (input && input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('main-banner-img').src = e.target.result;
+                    saveDataToCloud();
+                    alert('تم تحديث وحفظ صورة الغلاف على السحاب بنجاح!');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                alert('اختر صورة أولاً.');
+            }
         }
 
         function checkAdminState() {
@@ -481,6 +532,12 @@
             currentImgHeight = val;
             localStorage.setItem('alhamd_img_height', val);
             document.documentElement.style.setProperty('--icon-size', val);
+        }
+
+        function changeCatIconSize(val) {
+            currentCatIconSize = val;
+            localStorage.setItem('alhamd_cat_icon_size', val);
+            document.documentElement.style.setProperty('--cat-icon-size', val);
         }
 
         function switchView(viewName, btnEl) {
