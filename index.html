@@ -16,10 +16,8 @@
             --success: #22c55e;
             --danger: #ef4444;
             --radius: 14px;
-            --icon-size: 180px;
-            --cat-icon-size: 50px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
         .top-ticker { background: var(--primary); color: #000; font-weight: 700; font-size: 0.8rem; padding: 5px 0; overflow: hidden; white-space: nowrap; }
         header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 1000; }
@@ -35,69 +33,38 @@
         .sub-nav { background: #0f172a; padding: 0.4rem 1rem; display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; }
         .sub-nav button { background: none; border: none; color: #cbd5e1; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
         .sub-nav button.active, .sub-nav button:hover { color: var(--primary); }
-        
-        /* صورة الغلاف */
         .hero-banner-wrap { max-width: 1280px; margin: 1rem auto 0 auto; padding: 0 1rem; }
-        .hero-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #e2e8f0; }
+        .hero-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         @media (min-width: 768px) { .hero-banner-card { height: 240px; } }
         .hero-banner-card img { width: 100%; height: 100%; object-fit: cover; }
-
         .main-layout { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 992px) { .main-layout { grid-template-columns: 3fr 1fr; } }
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
 
-        /* حاوية الأقسام بالأسهم (يمين ويسار) لتحكم كامل بدون تحريك الصفحة */
-        .categories-nav-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.2rem;
+        .categories-grid-top { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px; 
+            margin-bottom: 0.8rem; 
+            max-width: 100%;
         }
-        .categories-scroll-wrapper { 
-            display: flex; 
-            gap: 10px; 
-            overflow: hidden; /* منع تحريك الشاشة نهائياً */
-            scroll-behavior: smooth;
-            width: 100%;
-            padding: 5px 2px;
+        @media(max-width: 480px) {
+            .categories-grid-top { grid-template-columns: repeat(4, 1fr); gap: 5px; }
         }
-        .cat-arrow-btn {
-            background: var(--dark);
-            color: var(--primary);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            z-index: 10;
-            transition: 0.2s;
-        }
-        .cat-arrow-btn:hover { background: var(--primary); color: #000; }
-        .cat-arrow-right { margin-left: 8px; }
-        .cat-arrow-left { margin-right: 8px; }
-
         .cat-circle-card { 
             background: #fff; 
             border: 1px solid #e2e8f0; 
             border-radius: 12px; 
-            padding: 8px; 
+            padding: 6px 2px; 
             text-align: center; 
             cursor: pointer; 
             transition: all 0.2s; 
-            flex-shrink: 0;
-            min-width: 95px;
+            overflow: hidden;
         }
         .cat-circle-card:hover, .cat-circle-card.active { border-color: var(--primary); background: #fffbeb; }
-        .cat-circle-card img { width: var(--cat-icon-size); height: var(--cat-icon-size); object-fit: cover; border-radius: 50%; margin: 0 auto 4px auto; display: block; border: 1px solid #e2e8f0; transition: width 0.3s, height 0.3s; }
-        .cat-circle-card h4 { font-size: 0.7rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cat-circle-card img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin: 0 auto 3px auto; display: block; border: 1px solid #e2e8f0; }
+        .cat-circle-card h4 { font-size: 0.65rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .dropdown-toggle-bar {
             text-align: center;
@@ -143,7 +110,7 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .product-img-wrap { width: 100%; height: var(--icon-size); background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; transition: height 0.3s; }
+        .product-img-wrap { width: 100%; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         .product-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.2s; }
         .product-img:hover { transform: scale(1.05); }
         .delete-prod-badge { position: absolute; top: 6px; left: 6px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; display: none; z-index: 10; }
@@ -211,7 +178,6 @@
         <button onclick="switchView('contact', this)">اتصل بنا</button>
     </div>
 
-    <!-- صورة الغلاف (Banner) المرتبطة بالسحاب مباشرة -->
     <div class="hero-banner-wrap">
         <div class="hero-banner-card">
             <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="غلاف المؤسسة">
@@ -229,7 +195,7 @@
                     
                     <div style="background:#ecfdf5; padding:10px; border-radius:8px; border:1px solid #10b981; margin-bottom:1rem; text-align:center;">
                         <h4 style="color:#047857; margin-bottom:0.3rem; font-size:0.85rem;">☁️ السيرفر السحابي متصل بنجاح:</h4>
-                        <p style="font-size:0.75rem; color:#065f46;">أي تعديل أو منتج أو غلاف يتم حفظه سحابياً للجميع فوراً!</p>
+                        <p style="font-size:0.75rem; color:#065f46;">أي منتج أو قسم تضيفه أو تعدله سيتم حفظه تلقائياً على السحاب للجميع!</p>
                     </div>
 
                     <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
@@ -238,29 +204,19 @@
                     </div>
 
                     <div class="input-group">
-                        <label>📏 تحكم في حجم صور المنتجات:</label>
+                        <label>📏 مقاس صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
-                            <option value="120px">صغير (120px)</option>
-                            <option value="180px" selected>متوسط (180px)</option>
-                            <option value="250px">كبير (250px)</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group">
-                        <label>⭕ تحكم في حجم أيقونات الأقسام:</label>
-                        <select id="cat-icon-size-select" onchange="changeCatIconSize(this.value)">
-                            <option value="35px">صغير</option>
-                            <option value="50px" selected>متوسط</option>
-                            <option value="70px">كبير</option>
+                            <option value="140px">صغير</option>
+                            <option value="180px" selected>متوسط</option>
+                            <option value="220px">كبير</option>
                         </select>
                     </div>
 
                     <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
-                        <label>🖼️ تغيير وصيانة صورة الغلاف (تحديث فوري):</label>
+                        <label>🖼️ تغيير صورة الغلاف:</label>
                         <input type="file" id="banner-img-file" accept="image/*" style="font-size:0.75rem; margin-bottom:4px;">
-                        <button class="btn" style="padding:0.3rem; font-size:0.8rem;" onclick="updateHeroBanner()">حفظ الغلاف سحابياً</button>
+                        <button class="btn" style="padding:0.3rem; font-size:0.8rem;" onclick="updateHeroBanner()">حفظ الغلاف</button>
                     </div>
-
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
 
                     <div style="font-weight: bold; margin-bottom: 0.4rem; color: var(--dark); font-size:0.85rem;">إضافة قسم جديد:</div>
@@ -270,7 +226,7 @@
                     </div>
                     <button class="btn" style="margin-top:0.5rem; padding:0.4rem;" onclick="addNewCategory()">إضافة القسم</button>
 
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام (التعديل أو الحذف):</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام (تحديد الظهور في الـ 4 الرئيسية، التعديل أو الحذف):</div>
                     <div id="manage-tag-box" style="margin-top:6px; display:flex; flex-direction:column; gap:6px;"></div>
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
                     
@@ -289,18 +245,13 @@
                 </div>
 
                 <div class="section-title-bar">
-                    <h3>أقسام المنتجات (استخدم الأسهم للتنقل)</h3>
+                    <h3>أقسام المنتجات (الرئيسية)</h3>
                 </div>
                 
-                <!-- شريط الأقسام المحدث بالأسهم (يمين ويسار) بدون تأثير على الصفحة -->
-                <div class="categories-nav-container">
-                    <button class="cat-arrow-btn cat-arrow-right" onclick="scrollCategories('right')">◀</button>
-                    <div class="categories-scroll-wrapper" id="categories-top-grid"></div>
-                    <button class="cat-arrow-btn cat-arrow-left" onclick="scrollCategories('left')">▶</button>
-                </div>
+                <div class="categories-grid-top" id="categories-top-grid"></div>
 
                 <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
-                    📂 عرض كافة الأقسام ⬇️
+                    📂 جميع الأقسام (اضغط للسحب والفتح) ⬇️
                 </div>
 
                 <div class="all-categories-dropdown-list" id="all-cats-dropdown">
@@ -356,11 +307,6 @@
                 <div class="input-group">
                     <label>عنوان التوصيل:</label>
                     <textarea id="client-address" rows="2" placeholder="العنوان بالتفصيل"></textarea>
-                </div>
-                <!-- خانة ملاحظات العميل -->
-                <div class="input-group">
-                    <label>ملاحظات إضافية (اختياري):</label>
-                    <textarea id="client-notes" rows="2" placeholder="اكتب أي تفاصيل أو ملاحظات خاصة بطلبك..."></textarea>
                 </div>
                 <button class="btn btn-success" onclick="sendOrderWhatsApp()">💬 إرسال الطلب للواتساب</button>
             </div>
@@ -450,14 +396,10 @@
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
-        let currentCatIconSize = localStorage.getItem('alhamd_cat_icon_size') || '50px';
 
         window.onload = function() {
             checkAdminState();
             if (document.getElementById('img-size-select')) document.getElementById('img-size-select').value = currentImgHeight;
-            if (document.getElementById('cat-icon-size-select')) document.getElementById('cat-icon-size-select').value = currentCatIconSize;
-            document.documentElement.style.setProperty('--icon-size', currentImgHeight);
-            document.documentElement.style.setProperty('--cat-icon-size', currentCatIconSize);
             loadDataFromCloud();
         };
 
@@ -467,15 +409,16 @@
                     let data = doc.data();
                     categories = data.categories || [];
                     products = data.products || [];
+                    // تثبيت صورة الغلاف من السحاب وعدم ضياعها أبداً
                     if (data.banner) {
                         document.getElementById('main-banner-img').src = data.banner;
                     }
                 } else {
                     categories = [
-                        { name: 'بوش', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' },
-                        { name: 'Mm', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' },
-                        { name: 'كونتاكتور', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' },
-                        { name: 'رداي', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }
+                        { name: 'بوش', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
+                        { name: 'Mm', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
+                        { name: 'كونتاكتور', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
+                        { name: 'رداي', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true }
                     ];
                     products = [
                         { id: 1789609784133, cat: 'بوش', name: 'ب ش', price: 20, oldPrice: 19, desc: 'لا توجد تفاصيل إضافية.', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold: 0 }
@@ -504,34 +447,6 @@
             }).catch((error) => {
                 console.error("خطأ في الحفظ:", error);
             });
-        }
-
-        function updateHeroBanner() {
-            const input = document.getElementById('banner-img-file');
-            if (input && input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('main-banner-img').src = e.target.result;
-                    saveDataToCloud();
-                    alert('تم تحديث وحفظ صورة الغلاف على السحاب بنجاح وللجميع!');
-                };
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                alert('اختر صورة أولاً.');
-            }
-        }
-
-        // دالة تحريك الأقسام بالأسهم يمين ويسار بدون تحريك الصفحة
-        function scrollCategories(direction) {
-            const container = document.getElementById('categories-top-grid');
-            if (container) {
-                const scrollAmount = 200;
-                if (direction === 'right') {
-                    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-                } else {
-                    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                }
-            }
         }
 
         function checkAdminState() {
@@ -573,13 +488,22 @@
         function changeImageSize(val) {
             currentImgHeight = val;
             localStorage.setItem('alhamd_img_height', val);
-            document.documentElement.style.setProperty('--icon-size', val);
+            renderProducts();
         }
 
-        function changeCatIconSize(val) {
-            currentCatIconSize = val;
-            localStorage.setItem('alhamd_cat_icon_size', val);
-            document.documentElement.style.setProperty('--cat-icon-size', val);
+        function updateHeroBanner() {
+            const input = document.getElementById('banner-img-file');
+            if (input && input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('main-banner-img').src = e.target.result;
+                    saveDataToCloud();
+                    alert('تم تحديث الغلاف وحفظه على السحاب نهائياً وللجميع!');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                alert('اختر صورة أولاً.');
+            }
         }
 
         function switchView(viewName, btnEl) {
@@ -627,9 +551,10 @@
             const select = document.getElementById('prod-cat-select');
             
             if (grid) {
+                let mainCats = categories.filter(c => c.showOnMain);
                 grid.innerHTML = `<div class="cat-circle-card ${currentFilter === 'all' ? 'active' : ''}" onclick="filterCat('all')"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل"><h4>📦 الكل</h4></div>`;
                 
-                categories.forEach(cat => {
+                mainCats.slice(0, 3).forEach(cat => {
                     grid.innerHTML += `
                         <div class="cat-circle-card ${currentFilter === cat.name ? 'active' : ''}" onclick="filterCat('${cat.name}')">
                             <img src="${cat.img}" alt="${cat.name}">
@@ -652,6 +577,7 @@
             if (box) {
                 box.innerHTML = '';
                 categories.forEach(cat => {
+                    let isChecked = cat.showOnMain ? 'checked' : '';
                     box.innerHTML += `
                         <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
                             <div style="display:flex; align-items:center; gap:6px;">
@@ -659,12 +585,32 @@
                                 <b>${cat.name}</b>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
+                                <label style="cursor:pointer; display:flex; align-items:center; gap:2px;">
+                                    <input type="checkbox" ${isChecked} onchange="toggleCategoryMain('${cat.name}', this.checked)"> رئيسية (4)
+                                </label>
                                 <button class="btn" style="background:#3b82f6; color:#fff; padding:2px 5px; font-size:0.65rem;" onclick="openEditCategoryModal('${cat.name}')">✏️</button>
                                 <button class="btn btn-danger" style="padding:2px 5px; font-size:0.65rem;" onclick="deleteCategory('${cat.name}')">✖</button>
                             </div>
                         </div>
                     `;
                 });
+            }
+        }
+
+        function toggleCategoryMain(catName, isChecked) {
+            let cat = categories.find(c => c.name === catName);
+            if (cat) {
+                if (isChecked) {
+                    let mainCount = categories.filter(c => c.showOnMain).length;
+                    if (mainCount >= 3) {
+                        alert('يمكنك اختيار 3 أقسام رئيسية بجانب زر "الكل" ليصبح المجموع 4 أقسام في الواجهة.');
+                        renderAdminTagBox();
+                        return;
+                    }
+                }
+                cat.showOnMain = isChecked;
+                saveDataToCloud();
+                renderCategories();
             }
         }
 
@@ -727,20 +673,23 @@
             const val = input.value.trim();
             if (!val) { alert('ادخل اسم القسم.'); return; }
 
+            let mainCount = categories.filter(c => c.showOnMain).length;
+            let showDefault = mainCount < 3 ? true : false;
+
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    saveCategoryData(val, e.target.result);
+                    saveCategoryData(val, e.target.result, showDefault);
                 };
                 reader.readAsDataURL(imgFile.files[0]);
             } else {
-                saveCategoryData(val, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200');
+                saveCategoryData(val, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showDefault);
             }
         }
 
-        function saveCategoryData(name, imgSrc) {
+        function saveCategoryData(name, imgSrc, showDefault) {
             if (!categories.some(c => c.name === name)) {
-                categories.push({ name, img: imgSrc });
+                categories.push({ name, img: imgSrc, showOnMain: showDefault });
                 document.getElementById('new-cat-input').value = '';
                 if(document.getElementById('new-cat-img')) document.getElementById('new-cat-img').value = '';
                 saveDataToCloud();
@@ -889,7 +838,7 @@
                     catalog.innerHTML += `
                         <div class="product-card ${isAdmin ? 'admin-mode' : ''}">
                             <button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>
-                            <div class="product-img-wrap" onclick="openProductModal(${p.id})">
+                            <div class="product-img-wrap" style="height:${currentImgHeight};" onclick="openProductModal(${p.id})">
                                 <img src="${p.img}" class="product-img" alt="${p.name}">
                             </div>
                             <div class="product-body">
@@ -1001,7 +950,6 @@
             let name = document.getElementById('client-name').value.trim();
             let phone = document.getElementById('client-phone').value.trim();
             let address = document.getElementById('client-address').value.trim();
-            let notes = document.getElementById('client-notes').value.trim();
 
             if (!name || !phone) {
                 alert('أدخل الاسم ورقم الهاتف.');
@@ -1012,9 +960,6 @@
             msg += `👤 *العميل:* ${name}%0A`;
             msg += `📞 *الهاتف:* ${phone}%0A`;
             msg += `📍 *العنوان:* ${address || 'غير محدد'}%0A`;
-            if (notes) {
-                msg += `📝 *ملاحظات العميل:* ${notes}%0A`;
-            }
             msg += `----------------------------------%0A`;
             
             let total = 0;
