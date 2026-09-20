@@ -43,13 +43,12 @@
         .admin-box.visible { display: block; }
 
         .categories-carousel { display:flex; align-items:center; gap:6px; margin-bottom:0.8rem; width:100%; }
-        .categories-grid-top { display:flex; gap:8px; flex:1; min-width:0; overflow-x:hidden; overflow-y:hidden; scroll-behavior:smooth; scrollbar-width:none; touch-action:pan-y; -webkit-overflow-scrolling:auto; scroll-snap-type:none; user-select:none; }
-.categories-grid-top::-webkit-scrollbar { display:none; }
-.categories-grid-top .cat-circle-card { flex:0 0 calc((100% - 24px) / 4); min-width:0; scroll-snap-align:start; }
+        .categories-grid-top { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; flex:1; min-width:0; overflow:hidden; }
+.categories-grid-top .cat-circle-card { min-width:0; }
         .cat-nav-btn { flex:0 0 34px; width:34px; height:72px; border:1px solid #e2e8f0; background:#fff; color:var(--dark); border-radius:10px; cursor:pointer; font-size:1.15rem; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
         .cat-nav-btn:hover:not(:disabled) { background:#fffbeb; border-color:var(--primary); color:var(--primary-dark); }
         .cat-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
-        @media(max-width:480px) { .categories-carousel { gap:4px; } .categories-grid-top { gap:5px; } .categories-grid-top .cat-circle-card { flex-basis:calc((100% - 15px) / 4); } .cat-nav-btn { flex-basis:30px; width:30px; height:68px; } }
+        @media(max-width:480px) { .categories-carousel { gap:4px; } .categories-grid-top { gap:5px; } .cat-nav-btn { flex-basis:30px; width:30px; height:68px; } }
         .cat-circle-card { 
             background: #fff; 
             border: 1px solid #e2e8f0; 
@@ -179,6 +178,14 @@
     <div class="hero-banner-wrap">
         <div class="hero-banner-card">
             <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="غلاف المؤسسة">
+        </div>
+    </div>
+
+    <div class="main-search-wrap">
+        <div class="main-search-box">
+            <span class="main-search-icon">🔎</span>
+            <input id="main-product-search" type="search" placeholder="ابحث عن منتج بالاسم..." autocomplete="off" oninput="searchProducts(this.value)">
+            <button type="button" id="clear-product-search" onclick="clearProductSearch()" aria-label="مسح البحث">✕</button>
         </div>
     </div>
 
@@ -410,6 +417,7 @@
 
         let cart = {};
         let currentFilter = 'all';
+        let productSearchTerm = '';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
         let currentCategoryIconSize = localStorage.getItem('alhamd_category_icon_size') || '40px';
@@ -606,10 +614,15 @@
         function renderCategories() {
             const grid = document.getElementById('categories-top-grid');
             const select = document.getElementById('prod-cat-select');
+
             if (grid) {
                 const allItems = [{ name:'__all__', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }].concat(categories);
+                const maxStart = Math.max(0, allItems.length - 3);
+                categoryPage = Math.min(Math.max(0, categoryPage), maxStart);
 
-                grid.innerHTML = allItems.map(item => {
+                const visibleItems = allItems.slice(categoryPage, categoryPage + 3);
+
+                grid.innerHTML = visibleItems.map(item => {
                     const isAll = item.name === '__all__';
                     const active = isAll ? currentFilter === 'all' : currentFilter === item.name;
                     const safeName = isAll ? 'all' : item.name.replace(/'/g, "\\'");
@@ -620,51 +633,31 @@
                 }).join('');
 
                 updateCategoryArrows();
-                initCategorySwipe();
             }
+
             if(select) {
                 select.innerHTML='';
                 categories.forEach(cat => select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`);
             }
         }
 
-        function getCategoryStep() {
-            const grid = document.getElementById('categories-top-grid');
-            if (!grid) return 0;
-            const card = grid.querySelector('.cat-circle-card');
-            if (!card) return 0;
-            const styles = getComputedStyle(grid);
-            const gap = parseFloat(styles.gap) || 0;
-            return card.getBoundingClientRect().width + gap;
-        }
-
         function updateCategoryArrows() {
-            const grid = document.getElementById('categories-top-grid');
             const prev = document.getElementById('cat-prev-btn');
             const next = document.getElementById('cat-next-btn');
-            if (!grid || !prev || !next) return;
+            if (!prev || !next) return;
 
-            const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
-            prev.disabled = grid.scrollLeft <= 2;
-            next.disabled = grid.scrollLeft >= maxScroll - 2;
+            const total = categories.length + 1;
+            const maxStart = Math.max(0, total - 3);
+
+            prev.disabled = categoryPage <= 0;
+            next.disabled = categoryPage >= maxStart;
         }
 
         function moveCategoryCarousel(direction) {
-            const grid = document.getElementById('categories-top-grid');
-            if (!grid) return;
-
-            const step = getCategoryStep();
-            if (!step) return;
-
-            const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
-            const target = Math.max(0, Math.min(grid.scrollLeft + (direction * step), maxScroll));
-
-            grid.scrollTo({
-                left: target,
-                behavior: 'smooth'
-            });
-
-            setTimeout(updateCategoryArrows, 450);
+            const total = categories.length + 1;
+            const maxStart = Math.max(0, total - 3);
+            categoryPage = Math.min(Math.max(0, categoryPage + direction), maxStart);
+            renderCategories();
         }
 
         function initCategorySwipe() {
@@ -965,8 +958,30 @@
             }
         }
 
+        function searchProducts(value) {
+            productSearchTerm = String(value || '');
+            const clearBtn = document.getElementById('clear-product-search');
+            if (clearBtn) clearBtn.style.display = productSearchTerm ? 'block' : 'none';
+
+            const title = document.getElementById('current-catalog-title');
+            if (title) {
+                title.textContent = productSearchTerm
+                    ? `نتائج البحث عن: ${productSearchTerm}`
+                    : (currentFilter === 'all' ? 'قسم: الكل' : `قسم: ${currentFilter}`);
+            }
+
+            renderProducts();
+        }
+
+        function clearProductSearch() {
+            const input = document.getElementById('main-product-search');
+            if (input) input.value = '';
+            searchProducts('');
+        }
+
         function filterCat(cat) {
             currentFilter = cat;
+            categoryPage = 0;
             document.getElementById('current-catalog-title').textContent = cat === 'all' ? 'قسم: الكل' : `قسم: ${cat}`;
             renderCategories();
             renderProducts();
@@ -978,10 +993,16 @@
             catalog.innerHTML = '';
 
             const activeCats = currentFilter === 'all' ? categories.map(c => c.name) : [currentFilter];
+            const q = productSearchTerm.trim().toLowerCase();
             let hasProducts = false;
 
             activeCats.forEach(catName => {
-                const catProducts = products.filter(p => p.cat === catName);
+                const catProducts = products.filter(p => {
+                    if (p.cat !== catName) return false;
+                    if (!q) return true;
+                    return String(p.name || '').toLowerCase().includes(q) ||
+                           String(p.cat || '').toLowerCase().includes(q);
+                });
                 catProducts.forEach(p => {
                     hasProducts = true;
                     let qty = cart[p.id] ? cart[p.id].qty : 0;
