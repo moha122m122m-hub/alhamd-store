@@ -6,10 +6,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
-            --primary: #f59e0b;
-            --primary-dark: #d97706;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
             --dark: #0f172a;
-            --bg-light: #f1f5f9;
+            --bg-light: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -41,26 +41,70 @@
         @media (min-width: 992px) { .main-layout { grid-template-columns: 3fr 1fr; } }
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
-
-        .categories-carousel { display:flex; align-items:center; gap:6px; margin-bottom:0.8rem; width:100%; }
-        .categories-grid-top { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; flex:1; min-width:0; overflow:hidden; }
-        .cat-nav-btn { flex:0 0 34px; width:34px; height:72px; border:1px solid #e2e8f0; background:#fff; color:var(--dark); border-radius:10px; cursor:pointer; font-size:1.15rem; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
-        .cat-nav-btn:hover:not(:disabled) { background:#fffbeb; border-color:var(--primary); color:var(--primary-dark); }
-        .cat-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
-        @media(max-width:480px) { .categories-carousel { gap:4px; } .categories-grid-top { gap:5px; } .cat-nav-btn { flex-basis:30px; width:30px; height:68px; } }
-        .cat-circle-card { 
-            background: #fff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 6px 2px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: all 0.2s; 
+        /* أقسام أفقية: تمرير باليد فقط داخل الشريط */
+        .categories-carousel {
+            width: 100%;
+            margin-bottom: 1rem;
             overflow: hidden;
+            position: relative;
         }
-        .cat-circle-card:hover, .cat-circle-card.active { border-color: var(--primary); background: #fffbeb; }
-        .cat-circle-card img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin: 0 auto 3px auto; display: block; border: 1px solid #e2e8f0; }
-        .cat-circle-card h4 { font-size: 0.65rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .categories-grid-top {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 2px 10px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x;
+            scrollbar-width: none;
+            cursor: grab;
+        }
+        .categories-grid-top::-webkit-scrollbar { display: none; }
+        .categories-grid-top.dragging {
+            cursor: grabbing;
+            scroll-behavior: auto;
+        }
+        .cat-circle-card {
+            flex: 0 0 92px;
+            min-width: 92px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 8px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s, background .2s, transform .2s;
+            overflow: hidden;
+            user-select: none;
+        }
+        .cat-circle-card:hover,
+        .cat-circle-card.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+        .cat-circle-card img {
+            width: 46px;
+            height: 46px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 0 auto 4px;
+            display: block;
+            border: 1px solid #dbeafe;
+            pointer-events: none;
+        }
+        .cat-circle-card h4 {
+            font-size: 0.68rem;
+            color: var(--dark);
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .dropdown-toggle-bar {
             text-align: center;
@@ -222,7 +266,7 @@
                     </div>
                     <button class="btn" style="margin-top:0.5rem; padding:0.4rem;" onclick="addNewCategory()">إضافة القسم</button>
 
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام (تحديد الظهور في الـ 4 الرئيسية، التعديل أو الحذف):</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام: إضافة، تعديل أو حذف.</div>
                     <div id="manage-tag-box" style="margin-top:6px; display:flex; flex-direction:column; gap:6px;"></div>
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
                     
@@ -241,22 +285,13 @@
                 </div>
 
                 <div class="section-title-bar">
-                    <h3>أقسام المنتجات (الرئيسية)</h3>
+                    <h3>أقسام المنتجات</h3>
                 </div>
-                
                 <div class="categories-carousel">
-                    <button class="cat-nav-btn" id="cat-prev-btn" onclick="moveCategoryCarousel(-1)" aria-label="الأقسام السابقة">❮</button>
-                    <div class="categories-grid-top" id="categories-top-grid"></div>
-                    <button class="cat-nav-btn" id="cat-next-btn" onclick="moveCategoryCarousel(1)" aria-label="الأقسام التالية">❯</button>
+                    <div class="categories-grid-top" id="categories-top-grid" aria-label="أقسام المنتجات"></div>
                 </div>
-
-                <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
-                    📂 جميع الأقسام (اضغط للسحب والفتح) ⬇️
-                </div>
-
-                <div class="all-categories-dropdown-list" id="all-cats-dropdown">
-                    <div id="all-cats-dropdown-content"></div>
-                </div>
+                <div style="text-align:center; color:var(--text-muted); font-size:.7rem; margin:-.45rem 0 1rem;">← اسحب الأقسام يمينًا أو يسارًا بإيدك →</div>
+</div>
 
                 <div class="section-title-bar">
                     <h3 id="current-catalog-title">قسم: الكل</h3>
@@ -400,8 +435,7 @@
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
-        let categoryPage = 0;
-        const CATEGORIES_PER_PAGE = 4;
+        let categoryDragState = null;
 
         window.onload = function() {
             checkAdminState();
@@ -545,69 +579,87 @@
             if (viewName === 'myorders') renderMyOrders();
         }
 
-        function toggleAllCategoriesDropdown() {
-            const drop = document.getElementById('all-cats-dropdown');
-            drop.classList.toggle('show');
-            if (drop.classList.contains('show')) {
-                renderAllCategoriesDropdownContent();
-            }
-        }
-
-        function renderAllCategoriesDropdownContent() {
-            const content = document.getElementById('all-cats-dropdown-content');
-            if (!content) return;
-            content.innerHTML = `
-                <div class="dropdown-cat-row" onclick="filterCat('all'); toggleAllCategoriesDropdown();">
-                    <div class="dropdown-cat-info">
-                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل">
-                        <span>📦 الكل (عرض كافة المنتجات)</span>
-                    </div>
-                </div>
-            `;
-            categories.forEach(cat => {
-                content.innerHTML += `
-                    <div class="dropdown-cat-row" onclick="filterCat('${cat.name}'); toggleAllCategoriesDropdown();">
-                        <div class="dropdown-cat-info">
-                            <img src="${cat.img}" alt="${cat.name}">
-                            <span>⚡ ${cat.name}</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
         function renderCategories() {
             const grid = document.getElementById('categories-top-grid');
             const select = document.getElementById('prod-cat-select');
+
             if (grid) {
-                const allItems = [{ name:'__all__', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }].concat(categories);
-                const maxPage = Math.max(0, Math.ceil(allItems.length / CATEGORIES_PER_PAGE) - 1);
-                categoryPage = Math.min(Math.max(0, categoryPage), maxPage);
-                const visibleItems = allItems.slice(categoryPage * CATEGORIES_PER_PAGE, categoryPage * CATEGORIES_PER_PAGE + CATEGORIES_PER_PAGE);
-                grid.innerHTML = visibleItems.map(item => {
+                const allItems = [
+                    { name: '__all__', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }
+                ].concat(categories);
+
+                grid.innerHTML = allItems.map(item => {
                     const isAll = item.name === '__all__';
                     const active = isAll ? currentFilter === 'all' : currentFilter === item.name;
-                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\\'");
-                    return `<div class="cat-circle-card ${active?'active':''}" onclick="filterCat('${safeName}')">
-                        <img src="${item.img}" alt="${isAll?'الكل':item.name}">
-                        <h4>${isAll?'📦 الكل':'⚡ '+item.name}</h4>
+                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\'");
+                    return `<div class="cat-circle-card ${active ? 'active' : ''}" onclick="filterCat('${safeName}')">
+                        <img src="${item.img}" alt="${isAll ? 'الكل' : item.name}">
+                        <h4>${isAll ? '📦 الكل' : '⚡ ' + item.name}</h4>
                     </div>`;
                 }).join('');
-                const prev=document.getElementById('cat-prev-btn'), next=document.getElementById('cat-next-btn');
-                if(prev) prev.disabled=categoryPage<=0;
-                if(next) next.disabled=categoryPage>=maxPage;
+
+                setupCategorySwipe(grid);
             }
-            if(select) {
-                select.innerHTML='';
-                categories.forEach(cat => select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`);
+
+            if (select) {
+                select.innerHTML = '';
+                categories.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+                });
             }
         }
 
-        function moveCategoryCarousel(direction) {
-            const total = categories.length + 1;
-            const maxPage = Math.max(0, Math.ceil(total / CATEGORIES_PER_PAGE) - 1);
-            categoryPage = Math.min(Math.max(0, categoryPage + direction), maxPage);
-            renderCategories();
+        function setupCategorySwipe(grid) {
+            if (!grid || grid.dataset.swipeReady === '1') return;
+            grid.dataset.swipeReady = '1';
+
+            let startX = 0;
+            let startScroll = 0;
+            let dragging = false;
+            let moved = false;
+
+            const start = (x) => {
+                startX = x;
+                startScroll = grid.scrollLeft;
+                dragging = true;
+                moved = false;
+                grid.classList.add('dragging');
+            };
+
+            const move = (x, event) => {
+                if (!dragging) return;
+                const dx = x - startX;
+                if (Math.abs(dx) > 5) moved = true;
+                grid.scrollLeft = startScroll - dx;
+                if (event && event.cancelable) event.preventDefault();
+            };
+
+            const end = () => {
+                dragging = false;
+                grid.classList.remove('dragging');
+                setTimeout(() => { grid.dataset.justDragged = moved ? '1' : '0'; }, 0);
+            };
+
+            grid.addEventListener('touchstart', e => start(e.touches[0].clientX), {passive: true});
+            grid.addEventListener('touchmove', e => move(e.touches[0].clientX, e), {passive: false});
+            grid.addEventListener('touchend', end, {passive: true});
+
+            grid.addEventListener('mousedown', e => {
+                start(e.clientX);
+                e.preventDefault();
+            });
+            window.addEventListener('mousemove', e => {
+                if (dragging) move(e.clientX, e);
+            });
+            window.addEventListener('mouseup', end);
+
+            grid.addEventListener('click', e => {
+                if (grid.dataset.justDragged === '1') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    grid.dataset.justDragged = '0';
+                }
+            }, true);
         }
 
         function renderAdminTagBox() {
@@ -615,7 +667,6 @@
             if (box) {
                 box.innerHTML = '';
                 categories.forEach(cat => {
-                    let isChecked = cat.showOnMain ? 'checked' : '';
                     box.innerHTML += `
                         <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
                             <div style="display:flex; align-items:center; gap:6px;">
@@ -623,32 +674,13 @@
                                 <b>${cat.name}</b>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <label style="cursor:pointer; display:flex; align-items:center; gap:2px;">
-                                    <input type="checkbox" ${isChecked} onchange="toggleCategoryMain('${cat.name}', this.checked)"> رئيسية (4)
-                                </label>
+                                
                                 <button class="btn" style="background:#3b82f6; color:#fff; padding:2px 5px; font-size:0.65rem;" onclick="openEditCategoryModal('${cat.name}')">✏️</button>
                                 <button class="btn btn-danger" style="padding:2px 5px; font-size:0.65rem;" onclick="deleteCategory('${cat.name}')">✖</button>
                             </div>
                         </div>
                     `;
                 });
-            }
-        }
-
-        function toggleCategoryMain(catName, isChecked) {
-            let cat = categories.find(c => c.name === catName);
-            if (cat) {
-                if (isChecked) {
-                    let mainCount = categories.filter(c => c.showOnMain).length;
-                    if (mainCount >= 3) {
-                        alert('يمكنك اختيار 3 أقسام رئيسية بجانب زر "الكل" ليصبح المجموع 4 أقسام في الواجهة.');
-                        renderAdminTagBox();
-                        return;
-                    }
-                }
-                cat.showOnMain = isChecked;
-                saveDataToCloud();
-                renderCategories();
             }
         }
 
@@ -710,9 +742,7 @@
             if (!input) return;
             const val = input.value.trim();
             if (!val) { alert('ادخل اسم القسم.'); return; }
-
-            let mainCount = categories.filter(c => c.showOnMain).length;
-            let showDefault = mainCount < 3 ? true : false;
+            let showDefault = true;
 
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
@@ -727,7 +757,7 @@
 
         function saveCategoryData(name, imgSrc, showDefault) {
             if (!categories.some(c => c.name === name)) {
-                categories.push({ name, img: imgSrc, showOnMain: showDefault });
+                categories.push({ name, img: imgSrc });
                 document.getElementById('new-cat-input').value = '';
                 if(document.getElementById('new-cat-img')) document.getElementById('new-cat-img').value = '';
                 saveDataToCloud();
