@@ -1,7 +1,17 @@
 <html lang="ar" dir="rtl"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مؤسسة الحمد 4K للتوريدات الكهربائية</title>
+    <title>مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي</title>
+    <meta name="description" content="مؤسسة الحمد 4K للتوريدات الكهربائية وأجهزة التحكم الآلي في مصر - 26 نجيب الريحاني، متخصصون في الكونتاكتورات، البوش، التايمر، ولمبات الإشارة.">
+    <meta name="keywords" content="مؤسسة الحمد 4K, توريدات كهربائية, تحكم آلي, كونتاكتور, بوش باتن, تايمر, لمبات إشارة, لوحات كهرباء, 26 نجيب الريحاني">
+    <link rel="canonical" href="https://alhamd4k.shop/">
+    
+    <!-- Open Graph for Search & Social Sharing -->
+    <meta property="og:title" content="مؤسسة الحمد 4K للتوريدات الكهربائية">
+    <meta property="og:description" content="متخصصون في مستلزمات التحكم الآلي وتوزيع الكهرباء - 26 نجيب الريحاني مول رويال.">
+    <meta property="og:url" content="https://alhamd4k.shop/">
+    <meta property="og:type" content="website">
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
@@ -107,7 +117,10 @@
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .product-img-wrap { width: 100%; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
-        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.2s; }
+        
+        /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
+        .product-img { width: 100%; height: 100%; object-fit: cover; padding: 0px; transition: transform 0.2s; }
+        
         .product-img:hover { transform: scale(1.05); }
         .delete-prod-badge { position: absolute; top: 6px; left: 6px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; display: none; z-index: 10; }
         .product-card.admin-mode .delete-prod-badge { display: block; }
@@ -123,7 +136,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
         .modal-card { background: #fff; width: 100%; max-width: 450px; border-radius: var(--radius); padding: 1.2rem; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-close { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; }
-        .modal-img { width: 100%; height: 200px; object-fit: contain; background: #f8fafc; border-radius: 8px; margin-bottom: 0.8rem; }
+        .modal-img { width: 100%; height: 200px; object-fit: cover; background: #f8fafc; border-radius: 8px; margin-bottom: 0.8rem; }
         .sidebar-card { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 4.5rem; border-top: 4px solid var(--primary); }
         .sidebar-card h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--dark); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.4rem; }
         .cart-list { list-style: none; max-height: 160px; overflow-y: auto; margin-bottom: 0.8rem; }
@@ -415,7 +428,6 @@
                     let data = doc.data();
                     categories = data.categories || [];
                     products = data.products || [];
-                    // تثبيت صورة الغلاف من السحاب وعدم ضياعها أبداً
                     if (data.banner) {
                         document.getElementById('main-banner-img').src = data.banner;
                     }
@@ -515,11 +527,6 @@
                     ctx.fillRect(0,0,canvas.width,canvas.height);
                     ctx.drawImage(img,0,0,canvas.width,canvas.height);
                     let compressed = canvas.toDataURL('image/jpeg',0.72);
-                    let quality = 0.62;
-                    while (compressed.length > 900000 && quality >= 0.35) {
-                        compressed = canvas.toDataURL('image/jpeg',quality);
-                        quality -= 0.07;
-                    }
                     try {
                         await saveDataToCloud(compressed);
                         document.getElementById('main-banner-img').src = compressed;
@@ -527,10 +534,9 @@
                         alert('تم تغيير صورة الغلاف وحفظها بنجاح على السحاب.');
                     } catch(err) {
                         console.error(err);
-                        alert('لم يتم حفظ الغلاف. تأكد من اتصال الإنترنت وقواعد Firebase.');
+                        alert('تعذر الحفظ.');
                     }
                 };
-                img.onerror = function(){ alert('تعذر قراءة الصورة.'); };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(input.files[0]);
@@ -641,7 +647,7 @@
                 if (isChecked) {
                     let mainCount = categories.filter(c => c.showOnMain).length;
                     if (mainCount >= 3) {
-                        alert('يمكنك اختيار 3 أقسام رئيسية بجانب زر "الكل" ليصبح المجموع 4 أقسام في الواجهة.');
+                        alert('يمكنك اختيار 3 أقسام رئيسية بجانب زر "الكل" ليصبح المجموع 4 أقسام.');
                         renderAdminTagBox();
                         return;
                     }
@@ -664,20 +670,13 @@
             const oldName = document.getElementById('edit-cat-old-name').value;
             const newName = document.getElementById('edit-cat-name-val').value.trim();
             const imgFile = document.getElementById('edit-cat-img-file');
-
-            if (!newName) {
-                alert('أدخل اسم القسم.');
-                return;
-            }
-
+            if (!newName) { alert('أدخل اسم القسم.'); return; }
             const cat = categories.find(c => c.name === oldName);
             if (!cat) return;
 
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    updateCategoryDataFinal(cat, oldName, newName, e.target.result);
-                };
+                reader.onload = function(e) { updateCategoryDataFinal(cat, oldName, newName, e.target.result); };
                 reader.readAsDataURL(imgFile.files[0]);
             } else {
                 updateCategoryDataFinal(cat, oldName, newName, cat.img);
@@ -687,21 +686,17 @@
         function updateCategoryDataFinal(cat, oldName, newName, imgSrc) {
             cat.name = newName;
             cat.img = imgSrc;
-            products.forEach(p => {
-                if (p.cat === oldName) p.cat = newName;
-            });
+            products.forEach(p => { if (p.cat === oldName) p.cat = newName; });
             saveDataToCloud();
             document.getElementById('edit-cat-modal').style.display = 'none';
             renderCategories();
             renderAdminTagBox();
             renderProducts();
-            alert('تم تعديل وحفظ القسم بنجاح على السحاب!');
+            alert('تم التعديل والحفظ بنجاح!');
         }
 
         function closeEditCatModal(e) {
-            if (e.target.id === 'edit-cat-modal') {
-                document.getElementById('edit-cat-modal').style.display = 'none';
-            }
+            if (e.target.id === 'edit-cat-modal') document.getElementById('edit-cat-modal').style.display = 'none';
         }
 
         function addNewCategory() {
@@ -710,15 +705,12 @@
             if (!input) return;
             const val = input.value.trim();
             if (!val) { alert('ادخل اسم القسم.'); return; }
-
             let mainCount = categories.filter(c => c.showOnMain).length;
             let showDefault = mainCount < 3 ? true : false;
 
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    saveCategoryData(val, e.target.result, showDefault);
-                };
+                reader.onload = function(e) { saveCategoryData(val, e.target.result, showDefault); };
                 reader.readAsDataURL(imgFile.files[0]);
             } else {
                 saveCategoryData(val, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showDefault);
@@ -733,7 +725,7 @@
                 saveDataToCloud();
                 renderCategories();
                 renderAdminTagBox();
-                alert('تمت إضافة القسم وحفظه على السحاب بنجاح!');
+                alert('تمت إضافة القسم وحفظه بنجاح!');
             }
         }
 
@@ -744,7 +736,7 @@
                 renderCategories();
                 renderAdminTagBox();
                 renderProducts();
-                alert('تم الحذف والتحديث على السحاب.');
+                alert('تم الحذف.');
             }
         }
 
@@ -755,17 +747,11 @@
             const oldPrice = parseFloat(document.getElementById('prod-old-price-input').value) || 0;
             const desc = document.getElementById('prod-desc-input').value.trim();
             const imgFile = document.getElementById('prod-img-file');
-
-            if (!name || isNaN(price)) {
-                alert('أدخل اسم المنتج والسعر.');
-                return;
-            }
+            if (!name || isNaN(price)) { alert('أدخل اسم المنتج والسعر.'); return; }
 
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    saveProductData(cat, name, price, oldPrice, desc, e.target.result);
-                };
+                reader.onload = function(e) { saveProductData(cat, name, price, oldPrice, desc, e.target.result); };
                 reader.readAsDataURL(imgFile.files[0]);
             } else {
                 saveProductData(cat, name, price, oldPrice, desc, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=60');
@@ -781,7 +767,7 @@
             if(document.getElementById('prod-img-file')) document.getElementById('prod-img-file').value = '';
             saveDataToCloud();
             renderProducts();
-            alert('تمت إضافة المنتج وحفظه سحابياً للجميع بنجاح!');
+            alert('تمت إضافة المنتج وحفظه بنجاح!');
         }
 
         function deleteProduct(id) {
@@ -789,7 +775,7 @@
                 products = products.filter(p => p.id !== id);
                 saveDataToCloud();
                 renderProducts();
-                alert('تم الحذف من السحاب.');
+                alert('تم الحذف.');
             }
         }
 
@@ -809,18 +795,12 @@
             const newPrice = parseFloat(document.getElementById('edit-price-val').value);
             const newOldPrice = parseFloat(document.getElementById('edit-old-price-val').value) || 0;
             const imgFile = document.getElementById('edit-prod-img-file');
-
             const p = products.find(prod => prod.id === id);
-            if (!p || !newName || isNaN(newPrice)) {
-                alert('الرجاء إدخال اسم وسعر صحيحين.');
-                return;
-            }
+            if (!p || !newName || isNaN(newPrice)) { alert('الرجاء إدخال اسم وسعر صحيحين.'); return; }
 
             if (imgFile && imgFile.files && imgFile.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    updateProductDataFinal(p, newName, newPrice, newOldPrice, e.target.result);
-                };
+                reader.onload = function(e) { updateProductDataFinal(p, newName, newPrice, newOldPrice, e.target.result); };
                 reader.readAsDataURL(imgFile.files[0]);
             } else {
                 updateProductDataFinal(p, newName, newPrice, newOldPrice, p.img);
@@ -835,13 +815,11 @@
             saveDataToCloud();
             document.getElementById('edit-price-modal').style.display = 'none';
             renderProducts();
-            alert('تم تحديث وحفظ بيانات المنتج على السحاب بنجاح!');
+            alert('تم التحديث وحفظ البيانات بنجاح!');
         }
 
         function closeEditModal(e) {
-            if (e.target.id === 'edit-price-modal') {
-                document.getElementById('edit-price-modal').style.display = 'none';
-            }
+            if (e.target.id === 'edit-price-modal') document.getElementById('edit-price-modal').style.display = 'none';
         }
 
         function filterCat(cat) {
@@ -855,7 +833,6 @@
             const catalog = document.getElementById('store-catalog');
             if (!catalog) return;
             catalog.innerHTML = '';
-
             const activeCats = currentFilter === 'all' ? categories.map(c => c.name) : [currentFilter];
             let hasProducts = false;
 
@@ -865,12 +842,10 @@
                     hasProducts = true;
                     let qty = cart[p.id] ? cart[p.id].qty : 0;
                     let subtotal = (qty * p.price).toFixed(2);
-
                     let priceHtml = `<span class="product-price">${p.price} ج.م</span>`;
                     if (p.oldPrice && p.oldPrice > p.price) {
                         priceHtml = `<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
                     }
-
                     let adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb; color:#fff; padding:2px 6px; font-size:0.7rem; margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>` : '';
 
                     catalog.innerHTML += `
@@ -908,42 +883,28 @@
         function openProductModal(prodId) {
             const p = products.find(prod => prod.id === prodId);
             if (!p) return;
-
             document.getElementById('modal-img').src = p.img;
             document.getElementById('modal-title').textContent = p.name;
-            
             let modalPriceHtml = `${p.price} ج.م`;
             if (p.oldPrice && p.oldPrice > p.price) {
                 modalPriceHtml = `${p.price} ج.م <span class="old-price">${p.oldPrice} ج.م</span>`;
             }
             document.getElementById('modal-price').innerHTML = modalPriceHtml;
             document.getElementById('modal-desc').textContent = p.desc;
-            
             const addBtn = document.getElementById('modal-add-btn');
-            addBtn.onclick = function() {
-                changeQty(p.id, 1);
-                closeModalDirect();
-            };
-
+            addBtn.onclick = function() { changeQty(p.id, 1); closeModalDirect(); };
             document.getElementById('product-modal').style.display = 'flex';
         }
 
-        function closeModalDirect() {
-            document.getElementById('product-modal').style.display = 'none';
-        }
-
-        function closeProductModal(e) {
-            if (e.target.id === 'product-modal') closeModalDirect();
-        }
+        function closeModalDirect() { document.getElementById('product-modal').style.display = 'none'; }
+        function closeProductModal(e) { if (e.target.id === 'product-modal') closeModalDirect(); }
 
         function changeQty(prodId, delta) {
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
-
             if (!cart[prodId]) cart[prodId] = { ...prod, qty: 0 };
             cart[prodId].qty += delta;
             if (cart[prodId].qty <= 0) delete cart[prodId];
-
             renderProducts();
             updateCartUI();
         }
@@ -952,7 +913,6 @@
             const list = document.getElementById('cart-list');
             const totalEl = document.getElementById('total-amount');
             if (!list || !totalEl) return;
-            
             list.innerHTML = '';
             let total = 0;
             let keys = Object.keys(cart);
@@ -974,34 +934,19 @@
                     </li>
                 `;
             });
-
             totalEl.textContent = total.toFixed(2) + ' ج.م';
         }
 
         function sendOrderWhatsApp() {
             let keys = Object.keys(cart);
-            if (keys.length === 0) {
-                alert('السلة فارغة.');
-                return;
-            }
-
+            if (keys.length === 0) { alert('السلة فارغة.'); return; }
             let name = document.getElementById('client-name').value.trim();
             let phone = document.getElementById('client-phone').value.trim();
             let address = document.getElementById('client-address').value.trim();
             let note = document.getElementById('client-note').value.trim();
+            if (!name || !phone) { alert('أدخل الاسم ورقم الهاتف.'); return; }
 
-            if (!name || !phone) {
-                alert('أدخل الاسم ورقم الهاتف.');
-                return;
-            }
-
-            let msg = `🛒 *طلب جديد من مؤسسة الحمد 4K*%0A`;
-            msg += `👤 *العميل:* ${name}%0A`;
-            msg += `📞 *الهاتف:* ${phone}%0A`;
-            msg += `📍 *العنوان:* ${address || 'غير محدد'}%0A`;
-            msg += `📝 *ملاحظة:* ${note || 'لا توجد'}%0A`;
-            msg += `----------------------------------%0A`;
-            
+            let msg = `🛒 *طلب جديد من مؤسسة الحمد 4K*%0A👤 *العميل:* ${name}%0A📞 *الهاتف:* ${phone}%0A📍 *العنوان:* ${address || 'غير محدد'}%0A📝 *ملاحظة:* ${note || 'لا توجد'}%0A----------------------------------%0A`;
             let total = 0;
             let orderItemsList = [];
             keys.forEach(id => {
@@ -1011,31 +956,20 @@
                 orderItemsList.push({ id: item.id, name: item.name, qty: item.qty });
                 msg += `• ${item.name} (×${item.qty}) = ${sub} ج.م%0A`;
             });
-
-            msg += `----------------------------------%0A`;
-            msg += `💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
+            msg += `----------------------------------%0A💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
 
             let newOrder = {
-                id: Date.now(),
-                clientName: name,
-                phone: phone,
-                address: address,
-                note: note,
-                itemsObj: orderItemsList,
-                itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
-                total: total.toFixed(2),
-                date: new Date().toLocaleDateString('ar-EG'),
-                status: 'قيد المعالجة (في انتظار التأكيد)'
+                id: Date.now(), clientName: name, phone: phone, address: address, note: note,
+                itemsObj: orderItemsList, itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
+                total: total.toFixed(2), date: new Date().toLocaleDateString('ar-EG'), status: 'قيد المعالجة (في انتظار التأكيد)'
             };
             myOrders.unshift(newOrder);
             localStorage.setItem('alhamd_my_orders', JSON.stringify(myOrders));
-
             cart = {};
             renderProducts();
             updateCartUI();
             renderAdminOrdersInbox();
             renderMyOrders();
-
             window.open(`https://wa.me/201126758975?text=${msg}`, '_blank');
             alert('تم إرسال الطلب للواتساب وتسجيله بنجاح!');
         }
@@ -1043,39 +977,26 @@
         function adminUpdateOrderStatus(orderId, newStatus) {
             let order = myOrders.find(o => o.id === orderId);
             if (!order) return;
-
             order.status = newStatus;
-            
             if (newStatus === 'تم التأكيد ✅') {
                 order.itemsObj.forEach(orderedItem => {
                     let p = products.find(prod => prod.id === orderedItem.id);
-                    if (p) {
-                        p.sold = (p.sold || 0) + orderedItem.qty;
-                    }
+                    if (p) p.sold = (p.sold || 0) + orderedItem.qty;
                 });
                 saveDataToCloud();
             }
-
             localStorage.setItem('alhamd_my_orders', JSON.stringify(myOrders));
             renderAdminOrdersInbox();
             renderProducts();
             renderMyOrders();
-            alert('تم تحديث حالة الطلب بنجاح وحفظها سحابياً!');
+            alert('تم تحديث حالة الطلب!');
         }
 
         function renderAdminOrdersInbox() {
             const inbox = document.getElementById('admin-orders-inbox');
             if (!inbox) return;
-
-            if (!isAdmin) {
-                inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">سجل دخول الأدمن لعرض الطلبات.</p>`;
-                return;
-            }
-
-            if (myOrders.length === 0) {
-                inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات مسجلة.</p>`;
-                return;
-            }
+            if (!isAdmin) { inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">سجل دخول الأدمن لعرض الطلبات.</p>`; return; }
+            if (myOrders.length === 0) { inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات مسجلة.</p>`; return; }
 
             inbox.innerHTML = '';
             myOrders.forEach(ord => {
@@ -1099,7 +1020,6 @@
         function renderMyOrders() {
             const listDiv = document.getElementById('my-orders-list');
             if (!listDiv) return;
-
             let phoneQuery = document.getElementById('client-phone').value.trim();
             let userOrders = phoneQuery ? myOrders.filter(o => o.phone === phoneQuery) : myOrders;
 
