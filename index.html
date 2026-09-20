@@ -116,10 +116,10 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .product-img-wrap { width: 100%; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
+        .product-img-wrap { width: 100%; height: 180px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         
         /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
-        .product-img { width: 100%; height: 100%; object-fit: cover; padding: 0px; transition: transform 0.2s; }
+        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.2s; background:#fff; }
         
         .product-img:hover { transform: scale(1.05); }
         .delete-prod-badge { position: absolute; top: 6px; left: 6px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; display: none; z-index: 10; }
@@ -215,9 +215,9 @@
                     <div class="input-group">
                         <label>📏 مقاس صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
-                            <option value="140px">صغير</option>
-                            <option value="180px" selected>متوسط</option>
-                            <option value="220px">كبير</option>
+                            <option value="110px">صغير جداً</option>
+                            <option value="140px" selected>متوسط</option>
+                            <option value="180px">كبير</option>
                         </select>
                     </div>
 
@@ -412,7 +412,7 @@
         let cart = {};
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
-        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
+        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '140px';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
 
@@ -422,49 +422,112 @@
             loadDataFromCloud();
         };
 
-        function loadDataFromCloud() {
-            db.collection("store_data").doc("main_config").get().then((doc) => {
-                if (doc.exists) {
-                    let data = doc.data();
-                    categories = data.categories || [];
-                    products = data.products || [];
-                    if (data.banner) {
-                        document.getElementById('main-banner-img').src = data.banner;
-                    }
+        // تحميل البيانات من السحاب. تم فصل الأقسام والمنتجات عن بعض لتجنب حد Firestore (1MB) عند كثرة الصور.
+        async function loadDataFromCloud() {
+            try {
+                const [catSnap, prodSnap, settingsSnap] = await Promise.all([
+                    db.collection('store_categories').get(),
+                    db.collection('store_products').get(),
+                    db.collection('store_settings').doc('main').get()
+                ]);
+
+                if (!catSnap.empty || !prodSnap.empty) {
+                    categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                    products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.data().id || Date.now()) }));
+                    products.forEach(p => { p.id = p.idNum; });
+                    const settings = settingsSnap.exists ? settingsSnap.data() : {};
+                    if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
                 } else {
-                    categories = [
-                        { name: 'بوش', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
-                        { name: 'Mm', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
-                        { name: 'كونتاكتور', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true },
-                        { name: 'رداي', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain: true }
-                    ];
-                    products = [
-                        { id: 1789609784133, cat: 'بوش', name: 'ب ش', price: 20, oldPrice: 19, desc: 'لا توجد تفاصيل إضافية.', img: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold: 0 }
-                    ];
-                    saveDataToCloud();
+                    // توافق مع البيانات القديمة المخزنة داخل main_config
+                    const doc = await db.collection('store_data').doc('main_config').get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        categories = (data.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)), ...c }));
+                        products = data.products || [];
+                        if (data.banner) document.getElementById('main-banner-img').src = data.banner;
+                        await migrateOldDataToSeparateDocs(data.banner || null);
+                    } else {
+                        categories = [
+                            { id:'cat_bosh', name:'بوش', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                            { id:'cat_mm', name:'Mm', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                            { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                            { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true }
+                        ];
+                        products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
+                        await saveAllDataToCloud();
+                    }
                 }
-                renderCategories();
-                renderProducts();
-                renderAdminTagBox();
-                renderAdminOrdersInbox();
-                renderMyOrders();
-                updateCartUI();
-            }).catch((error) => {
-                console.error("خطأ في الاتصال بالسحاب:", error);
-            });
+
+                renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات من السحاب:', error);
+                alert('تعذر تحميل بيانات المتجر. تأكد من اتصال الإنترنت وصلاحيات Firebase.');
+            }
         }
 
-        function saveDataToCloud(bannerOverride = null) {
-            let bannerSrc = bannerOverride || document.getElementById('main-banner-img').src;
-            return db.collection("store_data").doc("main_config").set({
-                categories: categories,
-                products: products,
-                banner: bannerSrc
-            }, { merge: true }).then(() => {
-                console.log("تم الحفظ على السحاب بنجاح!");
-            }).catch((error) => {
-                console.error("خطأ في الحفظ:", error);
+        async function migrateOldDataToSeparateDocs(banner) {
+            try {
+                const batch = db.batch();
+                categories.forEach(c => {
+                    if (!c.id) c.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+                    batch.set(db.collection('store_categories').doc(String(c.id)), c);
+                });
+                products.forEach(p => {
+                    const pid = String(p.id);
+                    batch.set(db.collection('store_products').doc(pid), { ...p, idNum:Number(p.id) });
+                });
+                if (banner) batch.set(db.collection('store_settings').doc('main'), { banner }, { merge:true });
+                await batch.commit();
+            } catch (e) { console.error('فشل نقل البيانات القديمة:', e); }
+        }
+
+        async function saveAllDataToCloud(bannerOverride = null) {
+            const bannerSrc = bannerOverride || document.getElementById('main-banner-img').src;
+            const batch = db.batch();
+            categories.forEach(c => {
+                if (!c.id) c.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+                batch.set(db.collection('store_categories').doc(String(c.id)), c);
+            });
+            products.forEach(p => {
+                const id = String(p.id);
+                batch.set(db.collection('store_products').doc(id), { ...p, idNum:Number(p.id) });
+            });
+            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc }, { merge:true });
+            await batch.commit();
+        }
+
+        // اسم قديم للحفاظ على التوافق مع بقية الوظائف، لكن الحفظ الآن موزع على عدة مستندات.
+        async function saveDataToCloud(bannerOverride = null) {
+            try {
+                await saveAllDataToCloud(bannerOverride);
+                console.log('تم الحفظ على السحاب بنجاح!');
+                return true;
+            } catch (error) {
+                console.error('خطأ في الحفظ:', error);
+                alert('فشل الحفظ على السحاب. غالباً توجد مشكلة في صلاحيات Firebase.');
                 throw error;
+            }
+        }
+
+        // ضغط الصور قبل حفظها حتى لا تكون كبيرة على الهاتف أو السحاب.
+        function compressImage(file, maxSide = 1200, quality = 0.72) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(img.width * scale));
+                        canvas.height = Math.max(1, Math.round(img.height * scale));
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject; img.src = e.target.result;
+                };
+                reader.onerror = reject; reader.readAsDataURL(file);
             });
         }
 
@@ -699,33 +762,32 @@
             if (e.target.id === 'edit-cat-modal') document.getElementById('edit-cat-modal').style.display = 'none';
         }
 
-        function addNewCategory() {
+        async function addNewCategory() {
             const input = document.getElementById('new-cat-input');
             const imgFile = document.getElementById('new-cat-img');
             if (!input) return;
             const val = input.value.trim();
             if (!val) { alert('ادخل اسم القسم.'); return; }
-            let mainCount = categories.filter(c => c.showOnMain).length;
-            let showDefault = mainCount < 3 ? true : false;
-
-            if (imgFile && imgFile.files && imgFile.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { saveCategoryData(val, e.target.result, showDefault); };
-                reader.readAsDataURL(imgFile.files[0]);
-            } else {
-                saveCategoryData(val, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showDefault);
-            }
+            if (categories.some(c => c.name === val)) { alert('هذا القسم موجود بالفعل.'); return; }
+            const mainCount = categories.filter(c => c.showOnMain).length;
+            const showDefault = mainCount < 3;
+            try {
+                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 600, 0.7) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200';
+                await saveCategoryData(val, imgSrc, showDefault);
+            } catch (e) { console.error(e); alert('تعذر إضافة القسم.'); }
         }
 
-        function saveCategoryData(name, imgSrc, showDefault) {
-            if (!categories.some(c => c.name === name)) {
-                categories.push({ name, img: imgSrc, showOnMain: showDefault });
+        async function saveCategoryData(name, imgSrc, showDefault) {
+            const category = { id:'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), name, img:imgSrc, showOnMain:showDefault };
+            categories.push(category);
+            try {
+                await saveDataToCloud();
                 document.getElementById('new-cat-input').value = '';
                 if(document.getElementById('new-cat-img')) document.getElementById('new-cat-img').value = '';
-                saveDataToCloud();
-                renderCategories();
-                renderAdminTagBox();
+                renderCategories(); renderAdminTagBox();
                 alert('تمت إضافة القسم وحفظه بنجاح!');
+            } catch (e) {
+                categories = categories.filter(c => c.id !== category.id);
             }
         }
 
@@ -740,34 +802,37 @@
             }
         }
 
-        function addNewProduct() {
+        async function addNewProduct() {
             const cat = document.getElementById('prod-cat-select').value;
             const name = document.getElementById('prod-name-input').value.trim();
             const price = parseFloat(document.getElementById('prod-price-input').value);
             const oldPrice = parseFloat(document.getElementById('prod-old-price-input').value) || 0;
             const desc = document.getElementById('prod-desc-input').value.trim();
             const imgFile = document.getElementById('prod-img-file');
+            if (!cat) { alert('اختر القسم أولاً.'); return; }
             if (!name || isNaN(price)) { alert('أدخل اسم المنتج والسعر.'); return; }
-
-            if (imgFile && imgFile.files && imgFile.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { saveProductData(cat, name, price, oldPrice, desc, e.target.result); };
-                reader.readAsDataURL(imgFile.files[0]);
-            } else {
-                saveProductData(cat, name, price, oldPrice, desc, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=60');
-            }
+            try {
+                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=60';
+                await saveProductData(cat, name, price, oldPrice, desc, imgSrc);
+            } catch (e) { console.error(e); alert('تعذر إضافة المنتج.'); }
         }
 
-        function saveProductData(cat, name, price, oldPrice, desc, imgSrc) {
-            products.push({ id: Date.now(), cat, name, price, oldPrice, desc: desc || 'لا توجد تفاصيل إضافية.', img: imgSrc, sold: 0 });
-            document.getElementById('prod-name-input').value = '';
-            document.getElementById('prod-price-input').value = '';
-            document.getElementById('prod-old-price-input').value = '';
-            document.getElementById('prod-desc-input').value = '';
-            if(document.getElementById('prod-img-file')) document.getElementById('prod-img-file').value = '';
-            saveDataToCloud();
-            renderProducts();
-            alert('تمت إضافة المنتج وحفظه بنجاح!');
+        async function saveProductData(cat, name, price, oldPrice, desc, imgSrc) {
+            const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
+            products.push(product);
+            try {
+                await saveDataToCloud();
+                document.getElementById('prod-name-input').value = '';
+                document.getElementById('prod-price-input').value = '';
+                document.getElementById('prod-old-price-input').value = '';
+                document.getElementById('prod-desc-input').value = '';
+                if(document.getElementById('prod-img-file')) document.getElementById('prod-img-file').value = '';
+                renderProducts();
+                alert('تمت إضافة المنتج وحفظه بنجاح!');
+            } catch (e) {
+                products = products.filter(p => p.id !== product.id);
+                renderProducts();
+            }
         }
 
         function deleteProduct(id) {
