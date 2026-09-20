@@ -41,18 +41,22 @@
         @media (min-width: 992px) { .main-layout { grid-template-columns: 3fr 1fr; } }
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
-        /* أقسام أفقية: تمرير باليد فقط داخل الشريط */
+        /* أقسام أفقية ثابتة: السحب باليد/اللمس فقط */
         .categories-carousel {
             width: 100%;
+            max-width: 100%;
             margin-bottom: 1rem;
             overflow: hidden;
             position: relative;
+            direction: ltr;
         }
         .categories-grid-top {
             display: flex;
+            flex-wrap: nowrap;
             align-items: stretch;
             gap: 10px;
             width: 100%;
+            max-width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
             padding: 4px 2px 10px;
@@ -61,16 +65,16 @@
             overscroll-behavior-x: contain;
             touch-action: pan-x;
             scrollbar-width: none;
-            cursor: grab;
+            direction: rtl;
         }
         .categories-grid-top::-webkit-scrollbar { display: none; }
-        .categories-grid-top.dragging {
-            cursor: grabbing;
-            scroll-behavior: auto;
-        }
+
         .cat-circle-card {
+            direction: rtl;
             flex: 0 0 92px;
+            width: 92px;
             min-width: 92px;
+            max-width: 92px;
             background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
@@ -106,44 +110,6 @@
             text-overflow: ellipsis;
         }
 
-        .dropdown-toggle-bar {
-            text-align: center;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 8px;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: var(--dark);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            transition: background 0.2s;
-        }
-        .dropdown-toggle-bar:hover { background: #f8fafc; color: var(--primary-dark); }
-        
-        .all-categories-dropdown-list {
-            display: none;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .all-categories-dropdown-list.show { display: block; }
-        .dropdown-cat-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-        .dropdown-cat-row:hover { background: #fffbeb; }
-        .dropdown-cat-info { display: flex; align-items: center; gap: 8px; }
-        .dropdown-cat-info img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
 
         .section-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
         .section-title-bar h3 { font-size: 1rem; color: var(--dark); font-weight: 800; }
@@ -290,7 +256,7 @@
                 <div class="categories-carousel">
                     <div class="categories-grid-top" id="categories-top-grid" aria-label="أقسام المنتجات"></div>
                 </div>
-                <div style="text-align:center; color:var(--text-muted); font-size:.7rem; margin:-.45rem 0 1rem;">← اسحب الأقسام يمينًا أو يسارًا بإيدك →</div>
+                <div style="text-align:center; color:var(--text-muted); font-size:.7rem; margin:-.45rem 0 1rem;">اسحب الأقسام بإيدك يمينًا أو يسارًا</div>
 </div>
 
                 <div class="section-title-bar">
@@ -591,14 +557,12 @@
                 grid.innerHTML = allItems.map(item => {
                     const isAll = item.name === '__all__';
                     const active = isAll ? currentFilter === 'all' : currentFilter === item.name;
-                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\'");
+                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\\'");
                     return `<div class="cat-circle-card ${active ? 'active' : ''}" onclick="filterCat('${safeName}')">
                         <img src="${item.img}" alt="${isAll ? 'الكل' : item.name}">
                         <h4>${isAll ? '📦 الكل' : '⚡ ' + item.name}</h4>
                     </div>`;
                 }).join('');
-
-                setupCategorySwipe(grid);
             }
 
             if (select) {
@@ -607,59 +571,6 @@
                     select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
                 });
             }
-        }
-
-        function setupCategorySwipe(grid) {
-            if (!grid || grid.dataset.swipeReady === '1') return;
-            grid.dataset.swipeReady = '1';
-
-            let startX = 0;
-            let startScroll = 0;
-            let dragging = false;
-            let moved = false;
-
-            const start = (x) => {
-                startX = x;
-                startScroll = grid.scrollLeft;
-                dragging = true;
-                moved = false;
-                grid.classList.add('dragging');
-            };
-
-            const move = (x, event) => {
-                if (!dragging) return;
-                const dx = x - startX;
-                if (Math.abs(dx) > 5) moved = true;
-                grid.scrollLeft = startScroll - dx;
-                if (event && event.cancelable) event.preventDefault();
-            };
-
-            const end = () => {
-                dragging = false;
-                grid.classList.remove('dragging');
-                setTimeout(() => { grid.dataset.justDragged = moved ? '1' : '0'; }, 0);
-            };
-
-            grid.addEventListener('touchstart', e => start(e.touches[0].clientX), {passive: true});
-            grid.addEventListener('touchmove', e => move(e.touches[0].clientX, e), {passive: false});
-            grid.addEventListener('touchend', end, {passive: true});
-
-            grid.addEventListener('mousedown', e => {
-                start(e.clientX);
-                e.preventDefault();
-            });
-            window.addEventListener('mousemove', e => {
-                if (dragging) move(e.clientX, e);
-            });
-            window.addEventListener('mouseup', end);
-
-            grid.addEventListener('click', e => {
-                if (grid.dataset.justDragged === '1') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    grid.dataset.justDragged = '0';
-                }
-            }, true);
         }
 
         function renderAdminTagBox() {
