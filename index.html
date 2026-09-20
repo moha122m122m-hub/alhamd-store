@@ -42,16 +42,12 @@
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
 
-        .categories-grid-top { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
-            margin-bottom: 0.8rem; 
-            max-width: 100%;
-        }
-        @media(max-width: 480px) {
-            .categories-grid-top { grid-template-columns: repeat(4, 1fr); gap: 5px; }
-        }
+        .categories-carousel { display:flex; align-items:center; gap:6px; margin-bottom:0.8rem; width:100%; }
+        .categories-grid-top { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; flex:1; min-width:0; overflow:hidden; }
+        .cat-nav-btn { flex:0 0 34px; width:34px; height:72px; border:1px solid #e2e8f0; background:#fff; color:var(--dark); border-radius:10px; cursor:pointer; font-size:1.15rem; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+        .cat-nav-btn:hover:not(:disabled) { background:#fffbeb; border-color:var(--primary); color:var(--primary-dark); }
+        .cat-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
+        @media(max-width:480px) { .categories-carousel { gap:4px; } .categories-grid-top { gap:5px; } .cat-nav-btn { flex-basis:30px; width:30px; height:68px; } }
         .cat-circle-card { 
             background: #fff; 
             border: 1px solid #e2e8f0; 
@@ -248,7 +244,11 @@
                     <h3>أقسام المنتجات (الرئيسية)</h3>
                 </div>
                 
-                <div class="categories-grid-top" id="categories-top-grid"></div>
+                <div class="categories-carousel">
+                    <button class="cat-nav-btn" id="cat-prev-btn" onclick="moveCategoryCarousel(-1)" aria-label="الأقسام السابقة">❮</button>
+                    <div class="categories-grid-top" id="categories-top-grid"></div>
+                    <button class="cat-nav-btn" id="cat-next-btn" onclick="moveCategoryCarousel(1)" aria-label="الأقسام التالية">❯</button>
+                </div>
 
                 <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
                     📂 جميع الأقسام (اضغط للسحب والفتح) ⬇️
@@ -307,6 +307,10 @@
                 <div class="input-group">
                     <label>عنوان التوصيل:</label>
                     <textarea id="client-address" rows="2" placeholder="العنوان بالتفصيل"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>ملاحظة:</label>
+                    <textarea id="client-note" rows="2" placeholder="اكتب ملاحظتك للطلب (اختياري)"></textarea>
                 </div>
                 <button class="btn btn-success" onclick="sendOrderWhatsApp()">💬 إرسال الطلب للواتساب</button>
             </div>
@@ -396,6 +400,8 @@
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '180px';
+        let categoryPage = 0;
+        const CATEGORIES_PER_PAGE = 4;
 
         window.onload = function() {
             checkAdminState();
@@ -436,9 +442,9 @@
             });
         }
 
-        function saveDataToCloud() {
-            let bannerSrc = document.getElementById('main-banner-img').src;
-            db.collection("store_data").doc("main_config").set({
+        function saveDataToCloud(bannerOverride = null) {
+            let bannerSrc = bannerOverride || document.getElementById('main-banner-img').src;
+            return db.collection("store_data").doc("main_config").set({
                 categories: categories,
                 products: products,
                 banner: bannerSrc
@@ -446,6 +452,7 @@
                 console.log("تم الحفظ على السحاب بنجاح!");
             }).catch((error) => {
                 console.error("خطأ في الحفظ:", error);
+                throw error;
             });
         }
 
@@ -493,17 +500,40 @@
 
         function updateHeroBanner() {
             const input = document.getElementById('banner-img-file');
-            if (input && input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('main-banner-img').src = e.target.result;
-                    saveDataToCloud();
-                    alert('تم تحديث الغلاف وحفظه على السحاب نهائياً وللجميع!');
+            if (!input || !input.files || !input.files[0]) { alert('اختر صورة أولاً.'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const maxWidth = 1400;
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round(img.width * scale));
+                    canvas.height = Math.max(1, Math.round(img.height * scale));
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0,0,canvas.width,canvas.height);
+                    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                    let compressed = canvas.toDataURL('image/jpeg',0.72);
+                    let quality = 0.62;
+                    while (compressed.length > 900000 && quality >= 0.35) {
+                        compressed = canvas.toDataURL('image/jpeg',quality);
+                        quality -= 0.07;
+                    }
+                    try {
+                        await saveDataToCloud(compressed);
+                        document.getElementById('main-banner-img').src = compressed;
+                        input.value = '';
+                        alert('تم تغيير صورة الغلاف وحفظها بنجاح على السحاب.');
+                    } catch(err) {
+                        console.error(err);
+                        alert('لم يتم حفظ الغلاف. تأكد من اتصال الإنترنت وقواعد Firebase.');
+                    }
                 };
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                alert('اختر صورة أولاً.');
-            }
+                img.onerror = function(){ alert('تعذر قراءة الصورة.'); };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
         }
 
         function switchView(viewName, btnEl) {
@@ -549,27 +579,35 @@
         function renderCategories() {
             const grid = document.getElementById('categories-top-grid');
             const select = document.getElementById('prod-cat-select');
-            
             if (grid) {
-                let mainCats = categories.filter(c => c.showOnMain);
-                grid.innerHTML = `<div class="cat-circle-card ${currentFilter === 'all' ? 'active' : ''}" onclick="filterCat('all')"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل"><h4>📦 الكل</h4></div>`;
-                
-                mainCats.slice(0, 3).forEach(cat => {
-                    grid.innerHTML += `
-                        <div class="cat-circle-card ${currentFilter === cat.name ? 'active' : ''}" onclick="filterCat('${cat.name}')">
-                            <img src="${cat.img}" alt="${cat.name}">
-                            <h4>⚡ ${cat.name}</h4>
-                        </div>
-                    `;
-                });
+                const allItems = [{ name:'__all__', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }].concat(categories);
+                const maxPage = Math.max(0, Math.ceil(allItems.length / CATEGORIES_PER_PAGE) - 1);
+                categoryPage = Math.min(Math.max(0, categoryPage), maxPage);
+                const visibleItems = allItems.slice(categoryPage * CATEGORIES_PER_PAGE, categoryPage * CATEGORIES_PER_PAGE + CATEGORIES_PER_PAGE);
+                grid.innerHTML = visibleItems.map(item => {
+                    const isAll = item.name === '__all__';
+                    const active = isAll ? currentFilter === 'all' : currentFilter === item.name;
+                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\\'");
+                    return `<div class="cat-circle-card ${active?'active':''}" onclick="filterCat('${safeName}')">
+                        <img src="${item.img}" alt="${isAll?'الكل':item.name}">
+                        <h4>${isAll?'📦 الكل':'⚡ '+item.name}</h4>
+                    </div>`;
+                }).join('');
+                const prev=document.getElementById('cat-prev-btn'), next=document.getElementById('cat-next-btn');
+                if(prev) prev.disabled=categoryPage<=0;
+                if(next) next.disabled=categoryPage>=maxPage;
             }
+            if(select) {
+                select.innerHTML='';
+                categories.forEach(cat => select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`);
+            }
+        }
 
-            if (select) {
-                select.innerHTML = '';
-                categories.forEach(cat => {
-                    select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
-                });
-            }
+        function moveCategoryCarousel(direction) {
+            const total = categories.length + 1;
+            const maxPage = Math.max(0, Math.ceil(total / CATEGORIES_PER_PAGE) - 1);
+            categoryPage = Math.min(Math.max(0, categoryPage + direction), maxPage);
+            renderCategories();
         }
 
         function renderAdminTagBox() {
@@ -950,6 +988,7 @@
             let name = document.getElementById('client-name').value.trim();
             let phone = document.getElementById('client-phone').value.trim();
             let address = document.getElementById('client-address').value.trim();
+            let note = document.getElementById('client-note').value.trim();
 
             if (!name || !phone) {
                 alert('أدخل الاسم ورقم الهاتف.');
@@ -960,6 +999,7 @@
             msg += `👤 *العميل:* ${name}%0A`;
             msg += `📞 *الهاتف:* ${phone}%0A`;
             msg += `📍 *العنوان:* ${address || 'غير محدد'}%0A`;
+            msg += `📝 *ملاحظة:* ${note || 'لا توجد'}%0A`;
             msg += `----------------------------------%0A`;
             
             let total = 0;
@@ -979,6 +1019,8 @@
                 id: Date.now(),
                 clientName: name,
                 phone: phone,
+                address: address,
+                note: note,
                 itemsObj: orderItemsList,
                 itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
                 total: total.toFixed(2),
@@ -1040,6 +1082,8 @@
                 inbox.innerHTML += `
                     <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:6px; margin-bottom:6px; font-size:0.75rem;">
                         <div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div>
+                        <div><b>العنوان:</b> ${ord.address || 'غير محدد'}</div>
+                        <div><b>ملاحظة:</b> ${ord.note || 'لا توجد'}</div>
                         <div><b>الطلب:</b> ${ord.itemsText}</div>
                         <div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#d97706; font-weight:bold;">${ord.status}</span></div>
                         <div style="display:flex; gap:3px; margin-top:4px; flex-wrap:wrap;">
