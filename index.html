@@ -49,9 +49,10 @@
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
             --dark: #0f172a;
-            --bg-light: #f1f5f9;
+            --bg-light: #ffffff;
             --card-bg: #ffffff;
             --text-main: #1e293b;
+            --site-theme: #ffffff;
             --text-muted: #64748b;
             --success: #2563eb;
             --danger: #ef4444;
@@ -59,6 +60,12 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        body.theme-black { --bg-light:#111827; --text-main:#f8fafc; --text-muted:#cbd5e1; }
+        body.theme-blue { --bg-light:#eaf2ff; --text-main:#172554; --text-muted:#475569; }
+        body.theme-red { --bg-light:#fff1f2; --text-main:#450a0a; --text-muted:#64748b; }
+        body.theme-white { --bg-light:#ffffff; --text-main:#1e293b; --text-muted:#64748b; }
+        body.theme-black .section-title-bar h3, body.theme-black .logo-text h1 { color:#f8fafc !important; }
+        body.theme-black .section-title-bar { border-color:#374151; }
         .top-ticker { background: var(--primary); color: #000; font-weight: 700; font-size: 0.8rem; padding: 5px 0; overflow: hidden; white-space: nowrap; }
         header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 1000; }
         .header-content { max-width: 1300px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
@@ -146,7 +153,7 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .product-img-wrap { width: 100%; height: 200px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
+        .product-img-wrap { width: 100%; height: 240px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         
         /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
         .product-img { width: 100%; height: 100%; object-fit: contain; padding: 0; transition: transform 0.2s; background:#fff; }
@@ -245,10 +252,20 @@
                     <div class="input-group">
                         <label>📏 مقاس صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
-                            <option value="135px">صغير</option>
-                            <option value="165px" selected>متوسط</option>
-                            <option value="200px">كبير</option>
+                            <option value="180px">صغير</option>
+                            <option value="240px" selected>متوسط</option>
+                            <option value="300px">كبير</option>
                         </select>
+                    </div>
+
+                    <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin-top:8px;">
+                        <label>🎨 لون خلفية الموقع:</label>
+                        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+                            <button type="button" class="theme-choice" data-theme="white" onclick="changeSiteTheme('white')" style="background:#fff; color:#111827; border:2px solid #cbd5e1; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أبيض</button>
+                            <button type="button" class="theme-choice" data-theme="black" onclick="changeSiteTheme('black')" style="background:#111827; color:#fff; border:2px solid #111827; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أسود</button>
+                            <button type="button" class="theme-choice" data-theme="blue" onclick="changeSiteTheme('blue')" style="background:#2563eb; color:#fff; border:2px solid #2563eb; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أزرق</button>
+                            <button type="button" class="theme-choice" data-theme="red" onclick="changeSiteTheme('red')" style="background:#dc2626; color:#fff; border:2px solid #dc2626; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أحمر</button>
+                        </div>
                     </div>
 
                     <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
@@ -443,13 +460,15 @@
         let cart = {};
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
-        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '200px';
+        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '240px';
+        let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
 
         window.onload = function() {
             checkAdminState();
             if (document.getElementById('img-size-select')) document.getElementById('img-size-select').value = currentImgHeight;
+            applySiteTheme(currentSiteTheme);
             loadDataFromCloud();
         };
 
@@ -468,6 +487,7 @@
                     products.forEach(p => { p.id = p.idNum; });
                     const settings = settingsSnap.exists ? settingsSnap.data() : {};
                     if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
+                    if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
                 } else {
                     // توافق مع البيانات القديمة المخزنة داخل main_config
                     const doc = await db.collection('store_data').doc('main_config').get();
@@ -508,6 +528,7 @@
                     batch.set(db.collection('store_products').doc(pid), { ...p, idNum:Number(p.id) });
                 });
                 if (banner) batch.set(db.collection('store_settings').doc('main'), { banner }, { merge:true });
+                batch.set(db.collection('store_settings').doc('main'), { theme: currentSiteTheme || 'white' }, { merge:true });
                 await batch.commit();
             } catch (e) { console.error('فشل نقل البيانات القديمة:', e); }
         }
@@ -523,7 +544,7 @@
                 const id = String(p.id);
                 batch.set(db.collection('store_products').doc(id), { ...p, idNum:Number(p.id) });
             });
-            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc }, { merge:true });
+            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc, theme: currentSiteTheme || 'white' }, { merge:true });
             await batch.commit();
         }
 
@@ -602,6 +623,30 @@
             currentImgHeight = val;
             localStorage.setItem('alhamd_img_height', val);
             renderProducts();
+        }
+
+        function applySiteTheme(theme) {
+            const allowed = ['white','black','blue','red'];
+            if (!allowed.includes(theme)) theme = 'white';
+            document.body.classList.remove('theme-white','theme-black','theme-blue','theme-red');
+            document.body.classList.add('theme-' + theme);
+            document.querySelectorAll('.theme-choice').forEach(btn => {
+                const active = btn.dataset.theme === theme;
+                btn.style.outline = active ? '3px solid #f59e0b' : 'none';
+                btn.style.outlineOffset = active ? '1px' : '0';
+            });
+        }
+
+        async function changeSiteTheme(theme) {
+            currentSiteTheme = theme;
+            localStorage.setItem('alhamd_site_theme', theme);
+            applySiteTheme(theme);
+            try {
+                await db.collection('store_settings').doc('main').set({ theme }, { merge:true });
+            } catch (e) {
+                console.error('فشل حفظ لون الخلفية:', e);
+                alert('تم تغيير اللون على هذا الجهاز، لكن تعذر حفظه على السحاب.');
+            }
         }
 
         function updateHeroBanner() {
