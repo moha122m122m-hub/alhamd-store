@@ -146,10 +146,10 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .product-img-wrap { width: 100%; height: 165px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
+        .product-img-wrap { width: 100%; height: 200px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         
         /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
-        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 5px; transition: transform 0.2s; background:#fff; }
+        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 0; transition: transform 0.2s; background:#fff; }
         
         .product-img:hover { transform: scale(1.05); }
         .delete-prod-badge { position: absolute; top: 6px; left: 6px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; display: none; z-index: 10; }
@@ -443,7 +443,7 @@
         let cart = {};
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
-        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '165px';
+        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '200px';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
 
