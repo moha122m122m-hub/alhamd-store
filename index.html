@@ -11,12 +11,36 @@
     <meta property="og:description" content="متخصصون في مستلزمات التحكم الآلي وتوزيع الكهرباء - 26 نجيب الريحاني مول رويال.">
     <meta property="og:url" content="https://alhamd4k.shop/">
     <meta property="og:type" content="website">
-    <meta id="dynamic-meta-description" name="description" content="مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي في مصر.">
-    <meta id="dynamic-og-title" property="og:title" content="مؤسسة الحمد 4K للتوريدات الكهربائية">
-    <meta id="dynamic-og-description" property="og:description" content="متخصصون في مستلزمات التحكم الآلي وتوزيع الكهرباء.">
-    <meta id="dynamic-og-url" property="og:url" content="https://alhamd4k.shop/">
-    <link id="dynamic-canonical" rel="canonical" href="https://alhamd4k.shop/">
-    <script id="product-schema" type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"مؤسسة الحمد 4K","url":"https://alhamd4k.shop/"}</script>
+
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="مؤسسة الحمد 4K">
+    <meta name="geo.region" content="EG-C">
+    <meta name="geo.placename" content="Cairo, Egypt">
+    <meta property="og:locale" content="ar_EG">
+    <script type="application/ld+json">
+    {
+      "@context":"https://schema.org",
+      "@graph":[
+        {
+          "@type":"Organization",
+          "@id":"https://alhamd4k.shop/#organization",
+          "name":"مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي",
+          "url":"https://alhamd4k.shop/",
+          "telephone":"+201126758975",
+          "description":"مؤسسة متخصصة في التوريدات الكهربائية ومستلزمات التحكم الآلي وتوزيع الكهرباء في مصر.",
+          "address":{"@type":"PostalAddress","streetAddress":"26 نجيب الريحاني - مول رويال - الدور الثاني","addressLocality":"القاهرة","addressCountry":"EG"}
+        },
+        {
+          "@type":"WebSite",
+          "@id":"https://alhamd4k.shop/#website",
+          "url":"https://alhamd4k.shop/",
+          "name":"مؤسسة الحمد 4K",
+          "publisher":{"@id":"https://alhamd4k.shop/#organization"},
+          "inLanguage":"ar-EG"
+        }
+      ]
+    }
+    </script>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -25,9 +49,10 @@
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
             --dark: #0f172a;
-            --bg-light: #f1f5f9;
+            --bg-light: #ffffff;
             --card-bg: #ffffff;
             --text-main: #1e293b;
+            --site-theme: #ffffff;
             --text-muted: #64748b;
             --success: #2563eb;
             --danger: #ef4444;
@@ -35,6 +60,12 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        body.theme-black { --bg-light:#111827; --text-main:#f8fafc; --text-muted:#cbd5e1; }
+        body.theme-blue { --bg-light:#eaf2ff; --text-main:#172554; --text-muted:#475569; }
+        body.theme-red { --bg-light:#fff1f2; --text-main:#450a0a; --text-muted:#64748b; }
+        body.theme-white { --bg-light:#ffffff; --text-main:#1e293b; --text-muted:#64748b; }
+        body.theme-black .section-title-bar h3, body.theme-black .logo-text h1 { color:#f8fafc !important; }
+        body.theme-black .section-title-bar { border-color:#374151; }
         .top-ticker { background: var(--primary); color: #000; font-weight: 700; font-size: 0.8rem; padding: 5px 0; overflow: hidden; white-space: nowrap; }
         header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 1000; }
         .header-content { max-width: 1300px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
@@ -75,7 +106,7 @@
             overflow: hidden;
         }
         .cat-circle-card:hover, .cat-circle-card.active { border-color: var(--primary); background: #eff6ff; }
-        .cat-circle-card img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; margin: 0 auto 3px auto; display: block; border: 1px solid #e2e8f0; }
+        .cat-circle-card img { width: 68px; height: 68px; object-fit: contain; border-radius: 10px; margin: 0 auto 5px auto; display: block; border: 1px solid #e2e8f0; background:#fff; padding:4px; }
         .cat-circle-card h4 { font-size: 0.65rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .dropdown-toggle-bar {
@@ -115,23 +146,24 @@
         }
         .dropdown-cat-row:hover { background: #eff6ff; }
         .dropdown-cat-info { display: flex; align-items: center; gap: 8px; }
-        .dropdown-cat-info img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+        .dropdown-cat-info img { width: 46px; height: 46px; border-radius: 8px; object-fit: contain; background:#fff; padding:3px; border: 1px solid #ddd; }
 
         .section-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
         .section-title-bar h3 { font-size: 1rem; color: var(--dark); font-weight: 800; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .product-img-wrap { width: 100%; height: 180px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
+        .product-img-wrap { width: 100%; height: 240px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         
         /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
-        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; transition: transform 0.2s; background:#fff; }
+        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 0; transition: transform 0.2s; background:#fff; }
         
         .product-img:hover { transform: scale(1.05); }
         .delete-prod-badge { position: absolute; top: 6px; left: 6px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 6px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; display: none; z-index: 10; }
         .product-card.admin-mode .delete-prod-badge { display: block; }
         .product-body { padding: 0.8rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; color: var(--dark); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .product-seo-link { display:block; color:inherit; text-decoration:none; }
+        .product-name { display:block; text-decoration:none; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; color: var(--dark); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .product-name:hover { color: var(--primary-dark); }
         .product-price { color: #2563eb; font-weight: 800; font-size: 0.9rem; }
         .old-price { text-decoration: line-through; color: #94a3b8; font-size: 0.75rem; margin-left: 4px; }
@@ -142,7 +174,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
         .modal-card { background: #fff; width: 100%; max-width: 450px; border-radius: var(--radius); padding: 1.2rem; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-close { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; }
-        .modal-img { width: 100%; height: 200px; object-fit: cover; background: #f8fafc; border-radius: 8px; margin-bottom: 0.8rem; }
+        .modal-img { width: 100%; height: 240px; object-fit: contain; padding:8px; background: #f8fafc; border-radius: 8px; margin-bottom: 0.8rem; }
         .sidebar-card { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 4.5rem; border-top: 4px solid var(--primary); }
         .sidebar-card h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--dark); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.4rem; }
         .cart-list { list-style: none; max-height: 160px; overflow-y: auto; margin-bottom: 0.8rem; }
@@ -195,7 +227,7 @@
 
     <div class="hero-banner-wrap">
         <div class="hero-banner-card">
-            <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="غلاف المؤسسة">
+            <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي">
         </div>
     </div>
 
@@ -221,10 +253,20 @@
                     <div class="input-group">
                         <label>📏 مقاس صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
-                            <option value="110px">صغير جداً</option>
-                            <option value="140px" selected>متوسط</option>
-                            <option value="180px">كبير</option>
+                            <option value="180px">صغير</option>
+                            <option value="240px" selected>متوسط</option>
+                            <option value="300px">كبير</option>
                         </select>
+                    </div>
+
+                    <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin-top:8px;">
+                        <label>🎨 لون خلفية الموقع:</label>
+                        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px;">
+                            <button type="button" class="theme-choice" data-theme="white" onclick="changeSiteTheme('white')" style="background:#fff; color:#111827; border:2px solid #cbd5e1; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أبيض</button>
+                            <button type="button" class="theme-choice" data-theme="black" onclick="changeSiteTheme('black')" style="background:#111827; color:#fff; border:2px solid #111827; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أسود</button>
+                            <button type="button" class="theme-choice" data-theme="blue" onclick="changeSiteTheme('blue')" style="background:#2563eb; color:#fff; border:2px solid #2563eb; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أزرق</button>
+                            <button type="button" class="theme-choice" data-theme="red" onclick="changeSiteTheme('red')" style="background:#dc2626; color:#fff; border:2px solid #dc2626; padding:7px 3px; border-radius:7px; cursor:pointer; font-weight:bold;">أحمر</button>
+                        </div>
                     </div>
 
                     <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
@@ -396,6 +438,8 @@
         </div>
     </div>
 
+    <script type="application/ld+json" id="dynamic-product-list-schema"></script>
+    <script type="application/ld+json" id="dynamic-product-schema"></script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC0cSbJV8eju2u1D5eOI5bFu7EOg3LD31Y",
@@ -418,64 +462,84 @@
         let cart = {};
         let currentFilter = 'all';
         let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
-        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '140px';
+        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '240px';
+        let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
+        const SITE_URL = 'https://alhamd4k.shop/';
+        const DEFAULT_TITLE = document.title;
+        const DEFAULT_DESCRIPTION = document.querySelector('meta[name="description"]')?.content || '';
+        const DEFAULT_OG_TITLE = document.querySelector('meta[property="og:title"]')?.content || DEFAULT_TITLE;
+        const DEFAULT_OG_DESCRIPTION = document.querySelector('meta[property="og:description"]')?.content || DEFAULT_DESCRIPTION;
+        const DEFAULT_CANONICAL = document.querySelector('link[rel="canonical"]')?.href || SITE_URL;
 
-        function getProductUrl(prodId) {
-            return `${window.location.origin}${window.location.pathname}?product=${encodeURIComponent(String(prodId))}`;
+        function productUrl(product) {
+            return SITE_URL + '?product=' + encodeURIComponent(product.id);
         }
 
-        function updateProductSEO(product) {
-            const titleEl = document.querySelector('title');
-            const descEl = document.getElementById('dynamic-meta-description');
-            const ogTitleEl = document.getElementById('dynamic-og-title');
-            const ogDescEl = document.getElementById('dynamic-og-description');
-            const ogUrlEl = document.getElementById('dynamic-og-url');
-            const canonicalEl = document.getElementById('dynamic-canonical');
-            const schemaEl = document.getElementById('product-schema');
-            const baseTitle = 'مؤسسة الحمد 4K للتوريدات الكهربائية';
-            if (!product) {
-                titleEl.textContent = baseTitle;
-                descEl.setAttribute('content', 'مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي في مصر.');
-                ogTitleEl.setAttribute('content', baseTitle);
-                ogDescEl.setAttribute('content', 'متخصصون في مستلزمات التحكم الآلي وتوزيع الكهرباء.');
-                ogUrlEl.setAttribute('content', 'https://alhamd4k.shop/');
-                canonicalEl.setAttribute('href', 'https://alhamd4k.shop/');
-                schemaEl.textContent = JSON.stringify({ '@context':'https://schema.org', '@type':'WebSite', name:'مؤسسة الحمد 4K', url:'https://alhamd4k.shop/' });
-                return;
-            }
-            const cleanDesc = String(product.desc || `منتج ${product.name} من مؤسسة الحمد 4K.`).replace(/\s+/g, ' ').trim().slice(0, 160);
-            const url = getProductUrl(product.id);
-            const title = `${product.name} | مؤسسة الحمد 4K`;
-            titleEl.textContent = title;
-            descEl.setAttribute('content', cleanDesc);
-            ogTitleEl.setAttribute('content', title);
-            ogDescEl.setAttribute('content', cleanDesc);
-            ogUrlEl.setAttribute('content', url);
-            canonicalEl.setAttribute('href', url);
-            const schema = {
-                '@context':'https://schema.org', '@type':'Product', name:String(product.name), description:cleanDesc, url:url, image:product.img ? [product.img] : undefined,
-                offers:{ '@type':'Offer', price:String(product.price), priceCurrency:'EGP', availability:'https://schema.org/InStock', url:url }
-            };
-            Object.keys(schema).forEach(k => schema[k] === undefined && delete schema[k]);
-            schemaEl.textContent = JSON.stringify(schema);
+        function setMeta(selector, content) {
+            const el = document.querySelector(selector);
+            if (el) el.setAttribute('content', content);
         }
 
-        function syncProductFromUrl(openModal = false) {
-            const productId = new URLSearchParams(window.location.search).get('product');
-            if (!productId) { updateProductSEO(null); return; }
-            const product = products.find(p => String(p.id) === String(productId));
+        function updateProductSeo(product) {
             if (!product) return;
-            updateProductSEO(product);
-            if (openModal) openProductModal(product.id, false);
+            const description = (product.desc || ('شراء ' + product.name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.')).replace(/\s+/g, ' ').trim().slice(0, 300);
+            const url = productUrl(product);
+            document.title = product.name + ' | مؤسسة الحمد 4K';
+            setMeta('meta[name="description"]', description);
+            setMeta('meta[property="og:title"]', product.name + ' | مؤسسة الحمد 4K');
+            setMeta('meta[property="og:description"]', description);
+            setMeta('meta[property="og:url"]', url);
+            let canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) canonical.href = url;
+
+            const schema = document.getElementById('dynamic-product-schema');
+            if (schema) schema.textContent = JSON.stringify({
+                '@context':'https://schema.org',
+                '@type':'Product',
+                'name':product.name,
+                'description':description,
+                'image': product.img ? [product.img] : [],
+                'sku': String(product.id),
+                'brand': {'@type':'Brand','name':'مؤسسة الحمد 4K'},
+                'category': product.cat || 'منتجات كهربائية وتحكم آلي',
+                'offers': {
+                    '@type':'Offer',
+                    'url':url,
+                    'priceCurrency':'EGP',
+                    'price':Number(product.price) || 0,
+                    'availability':'https://schema.org/InStock',
+                    'itemCondition':'https://schema.org/NewCondition'
+                }
+            });
         }
 
-        window.addEventListener('popstate', function() { syncProductFromUrl(true); });
+        function resetProductSeo() {
+            document.title = DEFAULT_TITLE;
+            setMeta('meta[name="description"]', DEFAULT_DESCRIPTION);
+            setMeta('meta[property="og:title"]', DEFAULT_OG_TITLE);
+            setMeta('meta[property="og:description"]', DEFAULT_OG_DESCRIPTION);
+            setMeta('meta[property="og:url"]', DEFAULT_CANONICAL);
+            const canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) canonical.href = DEFAULT_CANONICAL;
+            const schema = document.getElementById('dynamic-product-schema');
+            if (schema) schema.textContent = '';
+        }
+
+        function openProductFromUrl() {
+            const id = new URLSearchParams(window.location.search).get('product');
+            if (!id) { resetProductSeo(); return; }
+            const product = products.find(p => String(p.id) === String(id));
+            if (product) openProductModal(product.id, false);
+        }
+
+        window.addEventListener('popstate', openProductFromUrl);
 
         window.onload = function() {
             checkAdminState();
             if (document.getElementById('img-size-select')) document.getElementById('img-size-select').value = currentImgHeight;
+            applySiteTheme(currentSiteTheme);
             loadDataFromCloud();
         };
 
@@ -494,6 +558,7 @@
                     products.forEach(p => { p.id = p.idNum; });
                     const settings = settingsSnap.exists ? settingsSnap.data() : {};
                     if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
+                    if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
                 } else {
                     // توافق مع البيانات القديمة المخزنة داخل main_config
                     const doc = await db.collection('store_data').doc('main_config').get();
@@ -516,7 +581,7 @@
                 }
 
                 renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
-                syncProductFromUrl(true);
+                openProductFromUrl();
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من السحاب:', error);
                 alert('تعذر تحميل بيانات المتجر. تأكد من اتصال الإنترنت وصلاحيات Firebase.');
@@ -535,6 +600,7 @@
                     batch.set(db.collection('store_products').doc(pid), { ...p, idNum:Number(p.id) });
                 });
                 if (banner) batch.set(db.collection('store_settings').doc('main'), { banner }, { merge:true });
+                batch.set(db.collection('store_settings').doc('main'), { theme: currentSiteTheme || 'white' }, { merge:true });
                 await batch.commit();
             } catch (e) { console.error('فشل نقل البيانات القديمة:', e); }
         }
@@ -550,7 +616,7 @@
                 const id = String(p.id);
                 batch.set(db.collection('store_products').doc(id), { ...p, idNum:Number(p.id) });
             });
-            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc }, { merge:true });
+            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc, theme: currentSiteTheme || 'white' }, { merge:true });
             await batch.commit();
         }
 
@@ -629,6 +695,30 @@
             currentImgHeight = val;
             localStorage.setItem('alhamd_img_height', val);
             renderProducts();
+        }
+
+        function applySiteTheme(theme) {
+            const allowed = ['white','black','blue','red'];
+            if (!allowed.includes(theme)) theme = 'white';
+            document.body.classList.remove('theme-white','theme-black','theme-blue','theme-red');
+            document.body.classList.add('theme-' + theme);
+            document.querySelectorAll('.theme-choice').forEach(btn => {
+                const active = btn.dataset.theme === theme;
+                btn.style.outline = active ? '3px solid #f59e0b' : 'none';
+                btn.style.outlineOffset = active ? '1px' : '0';
+            });
+        }
+
+        async function changeSiteTheme(theme) {
+            currentSiteTheme = theme;
+            localStorage.setItem('alhamd_site_theme', theme);
+            applySiteTheme(theme);
+            try {
+                await db.collection('store_settings').doc('main').set({ theme }, { merge:true });
+            } catch (e) {
+                console.error('فشل حفظ لون الخلفية:', e);
+                alert('تم تغيير اللون على هذا الجهاز، لكن تعذر حفظه على السحاب.');
+            }
         }
 
         function updateHeroBanner() {
@@ -746,7 +836,7 @@
                     box.innerHTML += `
                         <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;">
                             <div style="display:flex; align-items:center; gap:6px;">
-                                <img src="${cat.img}" style="width:25px; height:25px; border-radius:50%; object-fit:cover;">
+                                <img src="${cat.img}" style="width:38px; height:38px; border-radius:7px; object-fit:contain; background:#fff; padding:2px; border:1px solid #ddd;">
                                 <b>${cat.name}</b>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
@@ -787,33 +877,36 @@
             document.getElementById('edit-cat-modal').style.display = 'flex';
         }
 
-        function saveCategoryChanges() {
+        async function saveCategoryChanges() {
             const oldName = document.getElementById('edit-cat-old-name').value;
             const newName = document.getElementById('edit-cat-name-val').value.trim();
             const imgFile = document.getElementById('edit-cat-img-file');
             if (!newName) { alert('أدخل اسم القسم.'); return; }
             const cat = categories.find(c => c.name === oldName);
             if (!cat) return;
-
-            if (imgFile && imgFile.files && imgFile.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { updateCategoryDataFinal(cat, oldName, newName, e.target.result); };
-                reader.readAsDataURL(imgFile.files[0]);
-            } else {
-                updateCategoryDataFinal(cat, oldName, newName, cat.img);
-            }
+            try {
+                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 600, 0.7) : cat.img;
+                await updateCategoryDataFinal(cat, oldName, newName, imgSrc);
+            } catch(e) { console.error(e); alert('تعذر حفظ تعديل القسم.'); }
         }
 
-        function updateCategoryDataFinal(cat, oldName, newName, imgSrc) {
+        async function updateCategoryDataFinal(cat, oldName, newName, imgSrc) {
+            const oldCat = { ...cat };
+            const oldProducts = products.map(p => ({...p}));
             cat.name = newName;
             cat.img = imgSrc;
             products.forEach(p => { if (p.cat === oldName) p.cat = newName; });
-            saveDataToCloud();
-            document.getElementById('edit-cat-modal').style.display = 'none';
-            renderCategories();
-            renderAdminTagBox();
-            renderProducts();
-            alert('تم التعديل والحفظ بنجاح!');
+            try {
+                await saveDataToCloud();
+                document.getElementById('edit-cat-modal').style.display = 'none';
+                renderCategories(); renderAdminTagBox(); renderProducts();
+                alert('تم التعديل والحفظ بنجاح!');
+            } catch(e) {
+                Object.assign(cat, oldCat);
+                products = oldProducts;
+                renderCategories(); renderAdminTagBox(); renderProducts();
+                throw e;
+            }
         }
 
         function closeEditCatModal(e) {
@@ -849,14 +942,23 @@
             }
         }
 
-        function deleteCategory(catName) {
-            if (confirm(`حذف القسم "${catName}"؟`)) {
-                categories = categories.filter(c => c.name !== catName);
-                saveDataToCloud();
+        async function deleteCategory(catName) {
+            if (!confirm(`حذف القسم "${catName}"؟`)) return;
+            const cat = categories.find(c => c.name === catName);
+            if (!cat) return;
+            const oldCategories = [...categories];
+            categories = categories.filter(c => c.name !== catName);
+            try {
+                await db.collection('store_categories').doc(String(cat.id)).delete();
                 renderCategories();
                 renderAdminTagBox();
                 renderProducts();
-                alert('تم الحذف.');
+                alert('تم حذف القسم وحفظ التغيير على السحاب.');
+            } catch (e) {
+                console.error(e);
+                categories = oldCategories;
+                renderCategories(); renderAdminTagBox(); renderProducts();
+                alert('تعذر حذف القسم من السحاب.');
             }
         }
 
@@ -893,12 +995,19 @@
             }
         }
 
-        function deleteProduct(id) {
-            if (confirm('حذف المنتج؟')) {
-                products = products.filter(p => p.id !== id);
-                saveDataToCloud();
+        async function deleteProduct(id) {
+            if (!confirm('حذف المنتج؟')) return;
+            const oldProducts = [...products];
+            products = products.filter(p => p.id !== id);
+            try {
+                await db.collection('store_products').doc(String(id)).delete();
                 renderProducts();
-                alert('تم الحذف.');
+                alert('تم حذف المنتج وحفظ التغيير على السحاب.');
+            } catch (e) {
+                console.error(e);
+                products = oldProducts;
+                renderProducts();
+                alert('تعذر حذف المنتج من السحاب.');
             }
         }
 
@@ -912,7 +1021,7 @@
             document.getElementById('edit-price-modal').style.display = 'flex';
         }
 
-        function saveProductChanges() {
+        async function saveProductChanges() {
             const id = parseInt(document.getElementById('edit-prod-id').value);
             const newName = document.getElementById('edit-prod-name-val').value.trim();
             const newPrice = parseFloat(document.getElementById('edit-price-val').value);
@@ -920,25 +1029,25 @@
             const imgFile = document.getElementById('edit-prod-img-file');
             const p = products.find(prod => prod.id === id);
             if (!p || !newName || isNaN(newPrice)) { alert('الرجاء إدخال اسم وسعر صحيحين.'); return; }
-
-            if (imgFile && imgFile.files && imgFile.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { updateProductDataFinal(p, newName, newPrice, newOldPrice, e.target.result); };
-                reader.readAsDataURL(imgFile.files[0]);
-            } else {
-                updateProductDataFinal(p, newName, newPrice, newOldPrice, p.img);
-            }
+            try {
+                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : p.img;
+                await updateProductDataFinal(p, newName, newPrice, newOldPrice, imgSrc);
+            } catch(e) { console.error(e); alert('تعذر حفظ تعديل المنتج.'); }
         }
 
-        function updateProductDataFinal(p, name, price, oldPrice, imgSrc) {
-            p.name = name;
-            p.price = price;
-            p.oldPrice = oldPrice;
-            p.img = imgSrc;
-            saveDataToCloud();
-            document.getElementById('edit-price-modal').style.display = 'none';
-            renderProducts();
-            alert('تم التحديث وحفظ البيانات بنجاح!');
+        async function updateProductDataFinal(p, name, price, oldPrice, imgSrc) {
+            const old = { ...p };
+            Object.assign(p, { name, price, oldPrice, img:imgSrc });
+            try {
+                await saveDataToCloud();
+                document.getElementById('edit-price-modal').style.display = 'none';
+                renderProducts();
+                alert('تم التحديث وحفظ البيانات بنجاح!');
+            } catch(e) {
+                Object.assign(p, old);
+                renderProducts();
+                throw e;
+            }
         }
 
         function closeEditModal(e) {
@@ -956,6 +1065,13 @@
             const catalog = document.getElementById('store-catalog');
             if (!catalog) return;
             catalog.innerHTML = '';
+            const seoItems = products.slice(0, 100).map((p, i) => ({
+                '@type':'ListItem', position:i+1, name:p.name, url:productUrl(p)
+            }));
+            const seoScript = document.getElementById('dynamic-product-list-schema');
+            if (seoScript) seoScript.textContent = JSON.stringify({
+                '@context':'https://schema.org', '@type':'ItemList', name:'منتجات مؤسسة الحمد 4K', itemListElement:seoItems
+            });
             const activeCats = currentFilter === 'all' ? categories.map(c => c.name) : [currentFilter];
             let hasProducts = false;
 
@@ -974,12 +1090,14 @@
                     catalog.innerHTML += `
                         <div class="product-card ${isAdmin ? 'admin-mode' : ''}" id="product-${p.id}">
                             <button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>
-                            <a href="${getProductUrl(p.id)}" class="product-img-wrap" style="height:${currentImgHeight}; text-decoration:none; color:inherit; display:block;" onclick="openProductModal(${p.id}, true); return false;">
-                                <img src="${p.img}" class="product-img" alt="${p.name}">
+                            <a href="${productUrl(p)}" class="product-seo-link" aria-label="عرض ${p.name}" onclick="openProductModal(${p.id}); return false;">
+                                <div class="product-img-wrap" style="height:${currentImgHeight};">
+                                    <img src="${p.img}" class="product-img" alt="${p.name}">
+                                </div>
                             </a>
                             <div class="product-body">
                                 <div>
-                                    <a class="product-name" href="${getProductUrl(p.id)}" onclick="openProductModal(${p.id}, true); return false;" title="${p.name}" style="text-decoration:none; color:inherit;">${p.name}</a>
+                                    <a href="${productUrl(p)}" class="product-name" onclick="openProductModal(${p.id}); return false;" title="${p.name}">${p.name}</a>
                                     <div>${priceHtml}</div>
                                     ${adminEditBtn}
                                     <div class="sold-counter">🔥 مبيعات: ${p.sold || 0} قطعة</div>
@@ -1006,6 +1124,11 @@
         function openProductModal(prodId, updateUrl = true) {
             const p = products.find(prod => prod.id === prodId);
             if (!p) return;
+            updateProductSeo(p);
+            if (updateUrl) {
+                const target = productUrl(p);
+                if (window.location.href !== target) history.pushState({productId:p.id}, '', target);
+            }
             document.getElementById('modal-img').src = p.img;
             document.getElementById('modal-title').textContent = p.name;
             let modalPriceHtml = `${p.price} ج.م`;
@@ -1016,20 +1139,15 @@
             document.getElementById('modal-desc').textContent = p.desc;
             const addBtn = document.getElementById('modal-add-btn');
             addBtn.onclick = function() { changeQty(p.id, 1); closeModalDirect(); };
-            if (updateUrl) {
-                const newUrl = getProductUrl(p.id);
-                if (window.location.href !== newUrl) window.history.pushState({productId:p.id}, '', newUrl);
-            }
-            updateProductSEO(p);
             document.getElementById('product-modal').style.display = 'flex';
         }
 
         function closeModalDirect() {
             document.getElementById('product-modal').style.display = 'none';
             if (new URLSearchParams(window.location.search).has('product')) {
-                window.history.pushState({}, '', window.location.pathname);
-                updateProductSEO(null);
+                history.pushState({}, '', SITE_URL);
             }
+            resetProductSeo();
         }
         function closeProductModal(e) { if (e.target.id === 'product-modal') closeModalDirect(); }
 
