@@ -556,6 +556,35 @@
             else { adminOrders = []; renderAdminOrdersInbox(); }
         });
 
+        async function loadAdminOrdersCloud() {
+            if (!isAdmin) {
+                adminOrders = [];
+                renderAdminOrdersInbox();
+                return;
+            }
+            try {
+                const snap = await db.collection('store_orders').get();
+                adminOrders = snap.docs.map(doc => {
+                    const data = doc.data() || {};
+                    return {
+                        ...data,
+                        id: data.id || doc.id,
+                        itemsObj: Array.isArray(data.itemsObj) ? data.itemsObj : [],
+                        itemsText: data.itemsText || '',
+                        total: data.total || '0.00',
+                        status: data.status || 'قيد المعالجة (في انتظار التأكيد)'
+                    };
+                });
+                adminOrders.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+                renderAdminOrdersInbox();
+            } catch (e) {
+                console.error('Admin orders load failed:', e);
+                adminOrders = [];
+                renderAdminOrdersInbox();
+                alert('تعذر تحميل الطلبات للأدمن: ' + (e.code || '') + '\n' + (e.message || ''));
+            }
+        }
+
         // تحميل البيانات من السحاب. تم فصل الأقسام والمنتجات عن بعض لتجنب حد Firestore (1MB) عند كثرة الصور.
         async function loadDataFromCloud() {
             try {
@@ -1266,11 +1295,13 @@
                 await db.collection('store_orders').doc(String(order.id)).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
 
                 if (newStatus === 'تم التأكيد ✅') {
-                    (order.itemsObj || []).forEach(orderedItem => {
-                        let p = products.find(prod => String(prod.id) === String(orderedItem.id));
-                        if (p) p.sold = (p.sold || 0) + Number(orderedItem.qty || 0);
-                    });
-                    await saveDataToCloud();
+                    if (order.status !== 'تم التأكيد ✅') {
+                        (order.itemsObj || []).forEach(orderedItem => {
+                            let p = products.find(prod => String(prod.id) === String(orderedItem.id));
+                            if (p) p.sold = Number(p.sold || 0) + Number(orderedItem.qty || 0);
+                        });
+                        await saveDataToCloud();
+                    }
                 }
 
                 order.status = newStatus;
@@ -1300,6 +1331,7 @@
                         <div><b>العنوان:</b> ${ord.address || 'غير محدد'}</div>
                         <div><b>ملاحظة:</b> ${ord.note || 'لا توجد'}</div>
                         <div><b>الطلب:</b> ${ord.itemsText || ''}</div>
+                        <div><b>عدد القطع:</b> ${(ord.itemsObj || []).reduce((sum, item) => sum + Number(item.qty || 0), 0)} قطعة</div>
                         <div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8; font-weight:bold;">${ord.status}</span></div>
                         <div style="display:flex; gap:3px; margin-top:4px; flex-wrap:wrap;">
                             <button class="btn btn-success" style="padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم التأكيد ✅')">تأكيد</button>
