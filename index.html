@@ -137,41 +137,29 @@
         .dropdown-cat-info { display: flex; align-items: center; gap: 8px; }
         .dropdown-cat-info img { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background:#fff; padding:3px; border: 1px solid #ddd; }
 
-        /* الشريط المتحرك (للمنتجات المميزة 10 منتجات) */
-        .marquee-products-container {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: var(--radius);
-            padding: 10px;
+        /* صندوق البحث الذكي */
+        .search-bar-container {
             margin-bottom: 1.5rem;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        .marquee-title { font-size: 0.85rem; font-weight: 800; color: var(--dark); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-        .marquee-track {
-            display: inline-flex;
-            gap: 12px;
-            animation: scrollProducts 25s linear infinite;
-        }
-        .marquee-track:hover { animation-play-state: paused; }
-        @keyframes scrollProducts {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .marquee-item {
+            display: flex;
+            align-items: center;
             background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            width: 140px;
-            padding: 8px;
-            text-align: center;
-            flex-shrink: 0;
-            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 6px 12px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+            gap: 8px;
         }
-        .marquee-item img { width: 100%; height: 100px; object-fit: contain; border-radius: 6px; background: #fff; margin-bottom: 4px; }
-        .marquee-item h5 { font-size: 0.75rem; color: var(--dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
-        .marquee-item span { font-size: 0.75rem; color: var(--primary); font-weight: bold; }
+        .search-bar-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--text-main);
+        }
+        .search-bar-container span {
+            font-size: 1rem;
+        }
 
         .section-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
         .section-title-bar h3 { font-size: 1rem; color: var(--dark); font-weight: 800; }
@@ -325,14 +313,10 @@
                     <input type="file" id="prod-img-file" accept="image/*" style="font-size:0.75rem; margin-bottom:0.5rem; display:block;">
                     <textarea id="prod-desc-input" rows="3" placeholder="وصف تفصيلي للمنتج..." style="width:100%; padding:0.4rem; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:0.5rem;"></textarea>
                     
-                    <div class="input-group" style="background:#eff6ff; padding:8px; border-radius:8px; border:1px solid #2563eb;">
-                        <label style="color:#2563eb; font-weight:bold;"><input type="checkbox" id="prod-marquee-check"> عرض في الشريط المتحرك (حتى 10 منتجات كحد أقصى)</label>
-                    </div>
-
                     <button class="btn" onclick="addNewProduct()">➕ إضافة المنتج للسحاب</button>
                 </div>
 
-                <!-- شريط الأقسام المنسدل الجديد -->
+                <!-- شريط الأقسام المنسدل -->
                 <div class="categories-dropdown-container">
                     <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
                         <span>📂 الأقسام (اضغط لعرض جميع الأقسام)</span>
@@ -343,12 +327,10 @@
                     </div>
                 </div>
 
-                <!-- شريط المنتجات المتحرك في الصفحة الرئيسية -->
-                <div class="marquee-products-container">
-                    <div class="marquee-title">⚡ منتجات مميزة متحركة</div>
-                    <div style="overflow:hidden; width:100%;">
-                        <div class="marquee-track" id="home-marquee-track"></div>
-                    </div>
+                <!-- صندوق البحث السريع -->
+                <div class="search-bar-container">
+                    <span>🔍</span>
+                    <input type="text" id="main-search-input" placeholder="ابحث عن أي منتج بالاسم..." oninput="filterBySearchQuery(this.value)">
                 </div>
 
                 <div class="section-title-bar">
@@ -357,13 +339,11 @@
                 <div class="products-grid" id="store-catalog"></div>
             </div>
 
-            <!-- صفحة المنتجات المستقلة مع شريط متحرك إضافي -->
+            <!-- صفحة المنتجات المستقلة مع شريط البحث -->
             <div id="view-store-products" class="app-view">
-                <div class="marquee-products-container">
-                    <div class="marquee-title">🔥 شريط المنتجات المتحرك السريع</div>
-                    <div style="overflow:hidden; width:100%;">
-                        <div class="marquee-track" id="products-page-marquee-track"></div>
-                    </div>
+                <div class="search-bar-container">
+                    <span>🔍</span>
+                    <input type="text" id="products-page-search-input" placeholder="ابحث في جميع المنتجات..." oninput="filterBySearchQueryProductsPage(this.value)">
                 </div>
                 <div class="section-title-bar">
                     <h3>جميع المنتجات المتاحة</h3>
@@ -447,7 +427,7 @@
     <!-- نافذة تعديل المنتج للأدمن (مع الوصف والمقاسات) -->
     <div class="modal-overlay" id="edit-price-modal" onclick="closeEditModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (الاسم، السعر، الوصف، الصورة والشريط)</h3>
+            <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (الاسم، السعر، الوصف والصورة)</h3>
             <input type="hidden" id="edit-prod-id">
             <div class="input-group">
                 <label>اسم المنتج:</label>
@@ -468,9 +448,6 @@
             <div class="input-group">
                 <label>صورة المنتج الجديدة (اختياري):</label>
                 <input type="file" id="edit-prod-img-file" accept="image/*">
-            </div>
-            <div class="input-group" style="background:#eff6ff; padding:8px; border-radius:8px; border:1px solid #2563eb;">
-                <label style="color:#2563eb; font-weight:bold;"><input type="checkbox" id="edit-prod-marquee-check"> عرض في الشريط المتحرك</label>
             </div>
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
                 <button class="btn btn-success" onclick="saveProductChanges()">حفظ في السحاب</button>
@@ -515,6 +492,8 @@
 
         let cart = {};
         let currentFilter = 'all';
+        let currentSearchQuery = '';
+        let currentSearchQueryProductsPage = '';
         let isAdmin = false;
         let adminOrders = [];
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '220px';
@@ -657,11 +636,11 @@
                         { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' },
                         { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }
                     ];
-                    products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0, showInMarquee:true }];
+                    products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
                     await saveAllDataToCloud();
                 }
 
-                renderCategoriesDropdown(); renderProducts(); renderAllProductsPage(); renderMarqueeTracks(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+                renderCategoriesDropdown(); renderProducts(); renderAllProductsPage(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
                 if (isAdmin) loadAdminOrdersCloud();
                 openProductFromUrl();
             } catch (error) {
@@ -851,33 +830,6 @@
             }
         }
 
-        function renderMarqueeTracks() {
-            const marqueeProducts = products.filter(p => p.showInMarquee).slice(0, 10);
-            const tracks = [document.getElementById('home-marquee-track'), document.getElementById('products-page-marquee-track')];
-            
-            tracks.forEach(track => {
-                if (!track) return;
-                if (marqueeProducts.length === 0) {
-                    track.innerHTML = `<span style="padding:10px; font-size:0.75rem; color:var(--text-muted);">لا توجد منتجات مضافة للشريط المتحرك حالياً. (يمكنك تفعيلها من لوحة الأدمن)</span>`;
-                    return;
-                }
-                let html = '';
-                // تكرار العناصر مرتين لضمان استمرارية الحركة بسلاسة
-                for (let i = 0; i < 2; i++) {
-                    marqueeProducts.forEach(p => {
-                        html += `
-                            <div class="marquee-item" onclick="openProductModal(${p.id})">
-                                <img src="${p.img}" alt="${p.name}">
-                                <h5>${p.name}</h5>
-                                <span>${p.price} ج.م</span>
-                            </div>
-                        `;
-                    });
-                }
-                track.innerHTML = html;
-            });
-        }
-
         function renderAdminTagBox() {
             const box = document.getElementById('manage-tag-box');
             if (box) {
@@ -967,28 +919,21 @@
             const price = parseFloat(document.getElementById('prod-price-input').value);
             const oldPrice = parseFloat(document.getElementById('prod-old-price-input').value) || 0;
             const desc = document.getElementById('prod-desc-input').value.trim();
-            const showInMarquee = document.getElementById('prod-marquee-check').checked;
             const imgFile = document.getElementById('prod-img-file');
             if (!cat) { alert('اختر القسم أولاً.'); return; }
             if (!name || isNaN(price)) { alert('أدخل اسم المنتج والسعر.'); return; }
 
-            if (showInMarquee && products.filter(p => p.showInMarquee).length >= 10) {
-                alert('عذراً، الحد الأقصى للمنتجات المتحركة هو 10 منتجات فقط.');
-                return;
-            }
-
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=60';
-                const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0, showInMarquee };
+                const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
                 products.push(product);
                 await saveDataToCloud();
                 document.getElementById('prod-name-input').value = '';
                 document.getElementById('prod-price-input').value = '';
                 document.getElementById('prod-old-price-input').value = '';
                 document.getElementById('prod-desc-input').value = '';
-                document.getElementById('prod-marquee-check').checked = false;
                 if(document.getElementById('prod-img-file')) document.getElementById('prod-img-file').value = '';
-                renderProducts(); renderAllProductsPage(); renderMarqueeTracks();
+                renderProducts(); renderAllProductsPage();
                 alert('تمت إضافة المنتج بنجاح!');
             } catch (e) { alert('تعذر إضافة المنتج.'); }
         }
@@ -998,7 +943,7 @@
             products = products.filter(p => p.id !== id);
             try {
                 await db.collection('store_products').doc(String(id)).delete();
-                renderProducts(); renderAllProductsPage(); renderMarqueeTracks();
+                renderProducts(); renderAllProductsPage();
                 alert('تم حذف المنتج بنجاح.');
             } catch (e) { alert('تعذر حذف المنتج.'); }
         }
@@ -1011,7 +956,6 @@
             document.getElementById('edit-price-val').value = p.price;
             document.getElementById('edit-old-price-val').value = p.oldPrice || '';
             document.getElementById('edit-prod-desc-val').value = p.desc || '';
-            document.getElementById('edit-prod-marquee-check').checked = !!p.showInMarquee;
             document.getElementById('edit-price-modal').style.display = 'flex';
         }
 
@@ -1021,22 +965,16 @@
             const newPrice = parseFloat(document.getElementById('edit-price-val').value);
             const newOldPrice = parseFloat(document.getElementById('edit-old-price-val').value) || 0;
             const newDesc = document.getElementById('edit-prod-desc-val').value.trim();
-            const showInMarquee = document.getElementById('edit-prod-marquee-check').checked;
             const imgFile = document.getElementById('edit-prod-img-file');
             const p = products.find(prod => prod.id === id);
             if (!p || !newName || isNaN(newPrice)) { alert('الرجاء إدخال اسم وسعر صحيحين.'); return; }
 
-            if (showInMarquee && !p.showInMarquee && products.filter(prod => prod.showInMarquee).length >= 10) {
-                alert('عذراً، الحد الأقصى للمنتجات المتحركة هو 10 منتجات فقط.');
-                return;
-            }
-
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : p.img;
-                Object.assign(p, { name: newName, price: newPrice, oldPrice: newOldPrice, desc: newDesc || 'لا توجد تفاصيل إضافية.', img: imgSrc, showInMarquee });
+                Object.assign(p, { name: newName, price: newPrice, oldPrice: newOldPrice, desc: newDesc || 'لا توجد تفاصيل إضافية.', img: imgSrc });
                 await saveDataToCloud();
                 document.getElementById('edit-price-modal').style.display = 'none';
-                renderProducts(); renderAllProductsPage(); renderMarqueeTracks();
+                renderProducts(); renderAllProductsPage();
                 alert('تم التحديث بنجاح!');
             } catch(e) { alert('تعذر حفظ التعديل.'); }
         }
@@ -1049,6 +987,16 @@
             currentFilter = cat;
             document.getElementById('current-catalog-title').textContent = cat === 'all' ? 'قسم: الكل' : `قسم: ${cat}`;
             renderProducts();
+        }
+
+        function filterBySearchQuery(query) {
+            currentSearchQuery = query.trim().toLowerCase();
+            renderProducts();
+        }
+
+        function filterBySearchQueryProductsPage(query) {
+            currentSearchQueryProductsPage = query.trim().toLowerCase();
+            renderAllProductsPage();
         }
 
         function renderProductCardHtml(p) {
@@ -1092,31 +1040,40 @@
             const catalog = document.getElementById('store-catalog');
             if (!catalog) return;
             catalog.innerHTML = '';
-            const activeCats = currentFilter === 'all' ? categories.map(c => c.name) : [currentFilter];
-            let hasProducts = false;
-
-            activeCats.forEach(catName => {
-                const catProducts = products.filter(p => p.cat === catName);
-                catProducts.forEach(p => {
-                    hasProducts = true;
-                    catalog.innerHTML += renderProductCardHtml(p);
-                });
-            });
-
-            if (!hasProducts) {
-                catalog.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:1.5rem; font-size:0.85rem;">لا توجد منتجات مضافة حالياً في هذا القسم.</p>`;
+            
+            let filtered = products;
+            if (currentSearchQuery) {
+                filtered = products.filter(p => p.name.toLowerCase().includes(currentSearchQuery) || (p.desc && p.desc.toLowerCase().includes(currentSearchQuery)));
+            } else if (currentFilter !== 'all') {
+                filtered = products.filter(p => p.cat === currentFilter);
             }
+
+            if (filtered.length === 0) {
+                catalog.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:1.5rem; font-size:0.85rem;">لا توجد منتجات مطابقة للبحث أو القسم الحالي.</p>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                catalog.innerHTML += renderProductCardHtml(p);
+            });
         }
 
         function renderAllProductsPage() {
             const grid = document.getElementById('store-all-products-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            if (products.length === 0) {
-                grid.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:1.5rem; font-size:0.85rem;">لا توجد منتجات مضافة حالياً.</p>`;
+            
+            let filtered = products;
+            if (currentSearchQueryProductsPage) {
+                filtered = products.filter(p => p.name.toLowerCase().includes(currentSearchQueryProductsPage) || (p.desc && p.desc.toLowerCase().includes(currentSearchQueryProductsPage)));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:1.5rem; font-size:0.85rem;">لا توجد منتجات مطابقة لبحثك.</p>`;
                 return;
             }
-            products.forEach(p => {
+
+            filtered.forEach(p => {
                 grid.innerHTML += renderProductCardHtml(p);
             });
         }
