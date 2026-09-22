@@ -44,6 +44,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -453,6 +454,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
         let categories = [];
         let products = [];
@@ -461,7 +463,8 @@
 
         let cart = {};
         let currentFilter = 'all';
-        let isAdmin = localStorage.getItem('alhamd_is_admin') === 'true';
+        let isAdmin = false;
+        let adminOrders = [];
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '240px';
         let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let categoryPage = 0;
@@ -543,6 +546,16 @@
             loadDataFromCloud();
         };
 
+        auth.onAuthStateChanged(async function(user) {
+            isAdmin = !!user;
+            checkAdminState();
+            renderProducts();
+            renderAdminTagBox();
+            renderAdminOrdersInbox();
+            if (isAdmin) await loadAdminOrdersCloud();
+            else { adminOrders = []; renderAdminOrdersInbox(); }
+        });
+
         // تحميل البيانات من السحاب. تم فصل الأقسام والمنتجات عن بعض لتجنب حد Firestore (1MB) عند كثرة الصور.
         async function loadDataFromCloud() {
             try {
@@ -581,6 +594,7 @@
                 }
 
                 renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+                if (isAdmin) loadAdminOrdersCloud();
                 openProductFromUrl();
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من السحاب:', error);
@@ -663,32 +677,27 @@
             }
         }
 
-        function adminLoginPrompt() {
-            if (isAdmin) {
+        async function adminLoginPrompt() {
+            if (auth.currentUser) {
                 alert('أنت مسجل دخول بالفعل كأدمن!');
                 return;
             }
-            let pass = prompt('الرمز السري للأدمن:');
-            if (pass === '258974mm') {
-                isAdmin = true;
-                localStorage.setItem('alhamd_is_admin', 'true');
-                checkAdminState();
-                renderProducts();
-                renderAdminTagBox();
-                renderAdminOrdersInbox();
-                alert('تم تفعيل لوحة التحكم السحابية بنجاح.');
-            } else if (pass !== null) {
-                alert('الرمز السري غير صحيح!');
+            const email = prompt('إيميل الأدمن:');
+            if (email === null) return;
+            const pass = prompt('كلمة مرور الأدمن:');
+            if (pass === null) return;
+            try {
+                await auth.signInWithEmailAndPassword(email.trim(), pass);
+                alert('تم تسجيل دخول الأدمن بنجاح ✅');
+            } catch (e) {
+                console.error('Firebase Auth error:', e);
+                alert('فشل تسجيل الدخول: ' + (e.code || 'unknown') + '\n' + (e.message || ''));
             }
         }
 
-        function adminLogout() {
-            isAdmin = false;
-            localStorage.setItem('alhamd_is_admin', 'false');
-            checkAdminState();
-            renderProducts();
-            renderAdminTagBox();
-            alert('تم تسجيل خروج الأدمن.');
+        async function adminLogout() {
+            try { await auth.signOut(); }
+            catch(e) { alert('تعذر تسجيل الخروج: ' + (e.message || '')); }
         }
 
         function changeImageSize(val) {
@@ -1104,7 +1113,7 @@
                                 </div>
                                 <div class="card-cart-control">
                                     <button class="qty-btn" onclick="changeQty(${p.id}, -1)">-</button>
-                                    <span style="font-weight:700; font-size:0.85rem;">${qty}</span>
+                                    <input type="number" min="0" inputmode="numeric" value="${qty}" onchange="setQty(${p.id}, this.value)" style="width:58px; text-align:center; font-weight:700; font-size:0.85rem; padding:4px 2px; border:1px solid #cbd5e1; border-radius:6px;">
                                     <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
                                 </div>
                                 <div style="text-align: center; margin-top: 4px;">
@@ -1161,6 +1170,17 @@
             updateCartUI();
         }
 
+        function setQty(prodId, value) {
+            const prod = products.find(p => p.id === prodId);
+            if (!prod) return;
+            let qty = Math.floor(Number(value));
+            if (!Number.isFinite(qty) || qty < 0) qty = 0;
+            if (qty === 0) delete cart[prodId];
+            else cart[prodId] = { ...prod, qty };
+            renderProducts();
+            updateCartUI();
+        }
+
         function updateCartUI() {
             const list = document.getElementById('cart-list');
             const totalEl = document.getElementById('total-amount');
@@ -1189,7 +1209,7 @@
             totalEl.textContent = total.toFixed(2) + ' ج.م';
         }
 
-        function sendOrderWhatsApp() {
+        async function sendOrderWhatsApp() {
             let keys = Object.keys(cart);
             if (keys.length === 0) { alert('السلة فارغة.'); return; }
             let name = document.getElementById('client-name').value.trim();
@@ -1205,7 +1225,7 @@
                 let item = cart[id];
                 let sub = item.qty * item.price;
                 total += sub;
-                orderItemsList.push({ id: item.id, name: item.name, qty: item.qty });
+                orderItemsList.push({ id: item.id, name: item.name, qty: item.qty, price: item.price });
                 msg += `• ${item.name} (×${item.qty}) = ${sub} ج.م%0A`;
             });
             msg += `----------------------------------%0A💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
@@ -1215,8 +1235,20 @@
                 itemsObj: orderItemsList, itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
                 total: total.toFixed(2), date: new Date().toLocaleDateString('ar-EG'), status: 'قيد المعالجة (في انتظار التأكيد)'
             };
+
             myOrders.unshift(newOrder);
             localStorage.setItem('alhamd_my_orders', JSON.stringify(myOrders));
+
+            try {
+                await db.collection('store_orders').doc(String(newOrder.id)).set({
+                    ...newOrder,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (e) {
+                console.error('Cloud order save failed:', e);
+                alert('تم تجهيز الطلب، لكن تعذر تسجيله على السحاب: ' + (e.code || ''));
+            }
+
             cart = {};
             renderProducts();
             updateCartUI();
@@ -1226,43 +1258,53 @@
             alert('تم إرسال الطلب للواتساب وتسجيله بنجاح!');
         }
 
-        function adminUpdateOrderStatus(orderId, newStatus) {
-            let order = myOrders.find(o => o.id === orderId);
+        async function adminUpdateOrderStatus(orderId, newStatus) {
+            if (!isAdmin) return;
+            const order = adminOrders.find(o => String(o.id) === String(orderId));
             if (!order) return;
-            order.status = newStatus;
-            if (newStatus === 'تم التأكيد ✅') {
-                order.itemsObj.forEach(orderedItem => {
-                    let p = products.find(prod => prod.id === orderedItem.id);
-                    if (p) p.sold = (p.sold || 0) + orderedItem.qty;
-                });
-                saveDataToCloud();
+            try {
+                await db.collection('store_orders').doc(String(order.id)).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+                if (newStatus === 'تم التأكيد ✅') {
+                    (order.itemsObj || []).forEach(orderedItem => {
+                        let p = products.find(prod => String(prod.id) === String(orderedItem.id));
+                        if (p) p.sold = (p.sold || 0) + Number(orderedItem.qty || 0);
+                    });
+                    await saveDataToCloud();
+                }
+
+                order.status = newStatus;
+                if (newStatus === 'تم الاستلام 🎉') {
+                    adminOrders = adminOrders.filter(o => String(o.id) !== String(orderId));
+                }
+                renderAdminOrdersInbox();
+                renderProducts();
+            } catch (e) {
+                console.error('Order status update failed:', e);
+                alert('تعذر تحديث الطلب: ' + (e.code || '') + '\n' + (e.message || ''));
             }
-            localStorage.setItem('alhamd_my_orders', JSON.stringify(myOrders));
-            renderAdminOrdersInbox();
-            renderProducts();
-            renderMyOrders();
-            alert('تم تحديث حالة الطلب!');
         }
 
         function renderAdminOrdersInbox() {
             const inbox = document.getElementById('admin-orders-inbox');
             if (!inbox) return;
             if (!isAdmin) { inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">سجل دخول الأدمن لعرض الطلبات.</p>`; return; }
-            if (myOrders.length === 0) { inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات مسجلة.</p>`; return; }
+            const visibleOrders = adminOrders.filter(o => o.status !== 'تم الاستلام 🎉');
+            if (visibleOrders.length === 0) { inbox.innerHTML = `<p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات جديدة.</p>`; return; }
 
             inbox.innerHTML = '';
-            myOrders.forEach(ord => {
+            visibleOrders.forEach(ord => {
                 inbox.innerHTML += `
                     <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:6px; margin-bottom:6px; font-size:0.75rem;">
                         <div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div>
                         <div><b>العنوان:</b> ${ord.address || 'غير محدد'}</div>
                         <div><b>ملاحظة:</b> ${ord.note || 'لا توجد'}</div>
-                        <div><b>الطلب:</b> ${ord.itemsText}</div>
+                        <div><b>الطلب:</b> ${ord.itemsText || ''}</div>
                         <div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8; font-weight:bold;">${ord.status}</span></div>
                         <div style="display:flex; gap:3px; margin-top:4px; flex-wrap:wrap;">
-                            <button class="btn btn-success" style="padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus(${ord.id}, 'تم التأكيد ✅')">تأكيد</button>
-                            <button class="btn" style="background:#2563eb; color:#fff; padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus(${ord.id}, 'تم الشحن 🚚')">شحن</button>
-                            <button class="btn" style="background:#8b5cf6; color:#fff; padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus(${ord.id}, 'تم الاستلام 🎉')">استلام</button>
+                            <button class="btn btn-success" style="padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم التأكيد ✅')">تأكيد</button>
+                            <button class="btn" style="background:#2563eb; color:#fff; padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم الشحن 🚚')">شحن</button>
+                            <button class="btn" style="background:#8b5cf6; color:#fff; padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم الاستلام 🎉')">العميل استلم الأوردر</button>
                         </div>
                     </div>
                 `;
