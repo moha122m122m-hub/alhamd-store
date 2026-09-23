@@ -90,64 +90,66 @@
         .admin-box { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 2px dashed var(--primary); display: none; }
         .admin-box.visible { display: block; }
 
-        .categories-carousel { display:flex; align-items:center; gap:6px; margin-bottom:0.8rem; width:100%; }
-        .categories-grid-top { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; flex:1; min-width:0; overflow:hidden; }
-        .cat-nav-btn { flex:0 0 34px; width:34px; height:72px; border:1px solid #e2e8f0; background:#fff; color:var(--dark); border-radius:10px; cursor:pointer; font-size:1.15rem; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
-        .cat-nav-btn:hover:not(:disabled) { background:#eff6ff; border-color:var(--primary); color:var(--primary-dark); }
-        .cat-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
-        @media(max-width:480px) { .categories-carousel { gap:4px; } .categories-grid-top { gap:5px; } .cat-nav-btn { flex-basis:30px; width:30px; height:68px; } }
-        .cat-circle-card { 
-            background: #fff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 6px 2px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            overflow: hidden;
+        .categories-menu-btn {
+            width:100%;
+            text-align:center;
+            background:#ffffff;
+            border:1px solid #e2e8f0;
+            border-radius:10px;
+            padding:10px;
+            margin-bottom:0.7rem;
+            cursor:pointer;
+            font-weight:800;
+            font-size:0.85rem;
+            color:var(--dark);
+            box-shadow:0 1px 3px rgba(0,0,0,0.03);
+            transition:background 0.2s, border-color 0.2s;
         }
-        .cat-circle-card:hover, .cat-circle-card.active { border-color: var(--primary); background: #eff6ff; }
-        .cat-circle-card img { width: 68px; height: 68px; object-fit: contain; border-radius: 10px; margin: 0 auto 5px auto; display: block; border: 1px solid #e2e8f0; background:#fff; padding:4px; }
-        .cat-circle-card h4 { font-size: 0.65rem; color: var(--dark); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .categories-menu-btn:hover {
+            background:#f8fafc;
+            border-color:var(--primary);
+            color:var(--primary-dark);
+        }
 
-        .dropdown-toggle-bar {
-            text-align: center;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 8px;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: var(--dark);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            transition: background 0.2s;
-        }
-        .dropdown-toggle-bar:hover { background: #f8fafc; color: var(--primary-dark); }
-        
         .all-categories-dropdown-list {
-            display: none;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display:none;
+            background:#ffffff;
+            border:1px solid #e2e8f0;
+            border-radius:12px;
+            padding:10px;
+            margin-bottom:1.5rem;
+            box-shadow:0 4px 12px rgba(0,0,0,0.05);
         }
-        .all-categories-dropdown-list.show { display: block; }
+        .all-categories-dropdown-list.show { display:block; }
         .dropdown-cat-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            border-radius: 6px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:8px;
+            border-bottom:1px solid #f1f5f9;
+            cursor:pointer;
+            border-radius:6px;
         }
-        .dropdown-cat-row:hover { background: #eff6ff; }
-        .dropdown-cat-info { display: flex; align-items: center; gap: 8px; }
-        .dropdown-cat-info img { width: 46px; height: 46px; border-radius: 8px; object-fit: contain; background:#fff; padding:3px; border: 1px solid #ddd; }
+        .dropdown-cat-row:last-child { border-bottom:none; }
+        .dropdown-cat-row:hover { background:#eff6ff; }
+        .dropdown-cat-info { display:flex; align-items:center; gap:8px; min-width:0; }
+        .dropdown-cat-info img {
+            width:46px;
+            height:46px;
+            border-radius:8px;
+            object-fit:contain;
+            background:#fff;
+            padding:3px;
+            border:1px solid #ddd;
+            flex:0 0 46px;
+        }
+        .dropdown-cat-info span {
+            font-weight:700;
+            font-size:0.82rem;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
 
         .section-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
         .section-title-bar h3 { font-size: 1rem; color: var(--dark); font-weight: 800; }
@@ -252,12 +254,15 @@
                     </div>
 
                     <div class="input-group">
-                        <label>📏 مقاس صور المنتجات:</label>
+                        <label>📏 حجم صور المنتجات:</label>
                         <select id="img-size-select" onchange="changeImageSize(this.value)">
-                            <option value="180px">صغير</option>
-                            <option value="240px" selected>متوسط</option>
-                            <option value="300px">كبير</option>
+                            <option value="180px">1 - صغير</option>
+                            <option value="360px">2 - متوسط</option>
+                            <option value="540px" selected>3 - كبير</option>
+                            <option value="720px">4 - كبير جدًا</option>
+                            <option value="900px">5 - أكبر حجم</option>
                         </select>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">اختار مستوى حجم صورة المنتج من 1 إلى 5.</div>
                     </div>
 
                     <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin-top:8px;">
@@ -284,7 +289,7 @@
                     </div>
                     <button class="btn" style="margin-top:0.5rem; padding:0.4rem;" onclick="addNewCategory()">إضافة القسم</button>
 
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام (تحديد الظهور في الـ 4 الرئيسية، التعديل أو الحذف):</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top:8px;">إدارة الأقسام (التعديل أو الحذف):</div>
                     <div id="manage-tag-box" style="margin-top:6px; display:flex; flex-direction:column; gap:6px;"></div>
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
                     
@@ -306,15 +311,9 @@
                     <h3>أقسام المنتجات (الرئيسية)</h3>
                 </div>
                 
-                <div class="categories-carousel">
-                    <button class="cat-nav-btn" id="cat-prev-btn" onclick="moveCategoryCarousel(-1)" aria-label="الأقسام السابقة">❮</button>
-                    <div class="categories-grid-top" id="categories-top-grid"></div>
-                    <button class="cat-nav-btn" id="cat-next-btn" onclick="moveCategoryCarousel(1)" aria-label="الأقسام التالية">❯</button>
-                </div>
-
-                <div class="dropdown-toggle-bar" onclick="toggleAllCategoriesDropdown()">
-                    📂 جميع الأقسام (اضغط للسحب والفتح) ⬇️
-                </div>
+                <button type="button" class="categories-menu-btn" onclick="toggleAllCategoriesDropdown()" aria-expanded="false">
+                    📂 عرض الأقسام <span id="categories-menu-arrow">▼</span>
+                </button>
 
                 <div class="all-categories-dropdown-list" id="all-cats-dropdown">
                     <div id="all-cats-dropdown-content"></div>
@@ -417,6 +416,10 @@
                 <input type="number" id="edit-old-price-val" placeholder="السعر قبل الخصم">
             </div>
             <div class="input-group">
+                <label>وصف / تفاصيل المنتج:</label>
+                <textarea id="edit-prod-desc-val" rows="4" placeholder="اكتب وصف المنتج وتفاصيله..." style="width:100%; padding:0.5rem; font-size:0.85rem; border:1px solid #cbd5e1; border-radius:6px; resize:vertical;"></textarea>
+            </div>
+            <div class="input-group">
                 <label>صورة المنتج الجديدة (اختياري):</label>
                 <input type="file" id="edit-prod-img-file" accept="image/*">
             </div>
@@ -465,7 +468,8 @@
         let currentFilter = 'all';
         let isAdmin = false;
         let adminOrders = [];
-        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '240px';
+        let currentImgHeight = localStorage.getItem('alhamd_img_height') || '540px';
+        if (currentImgHeight === '240px') currentImgHeight = '540px';
         let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
@@ -802,9 +806,17 @@
 
         function toggleAllCategoriesDropdown() {
             const drop = document.getElementById('all-cats-dropdown');
-            drop.classList.toggle('show');
-            if (drop.classList.contains('show')) {
+            const btn = document.querySelector('.categories-menu-btn');
+            const arrow = document.getElementById('categories-menu-arrow');
+            if (!drop) return;
+            const isOpen = drop.classList.toggle('show');
+            if (isOpen) {
                 renderAllCategoriesDropdownContent();
+                if (btn) btn.setAttribute('aria-expanded', 'true');
+                if (arrow) arrow.textContent = '▲';
+            } else {
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+                if (arrow) arrow.textContent = '▼';
             }
         }
 
@@ -814,7 +826,7 @@
             content.innerHTML = `
                 <div class="dropdown-cat-row" onclick="filterCat('all'); toggleAllCategoriesDropdown();">
                     <div class="dropdown-cat-info">
-                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل">
+                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200" alt="الكل" loading="lazy" decoding="async">
                         <span>📦 الكل (عرض كافة المنتجات)</span>
                     </div>
                 </div>
@@ -823,7 +835,7 @@
                 content.innerHTML += `
                     <div class="dropdown-cat-row" onclick="filterCat('${cat.name}'); toggleAllCategoriesDropdown();">
                         <div class="dropdown-cat-info">
-                            <img src="${cat.img}" alt="${cat.name}">
+                            <img src="${cat.img}" alt="${cat.name}" loading="lazy" decoding="async">
                             <span>⚡ ${cat.name}</span>
                         </div>
                     </div>
@@ -832,37 +844,23 @@
         }
 
         function renderCategories() {
-            const grid = document.getElementById('categories-top-grid');
             const select = document.getElementById('prod-cat-select');
-            if (grid) {
-                const allItems = [{ name:'__all__', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200' }].concat(categories);
-                const maxPage = Math.max(0, Math.ceil(allItems.length / CATEGORIES_PER_PAGE) - 1);
-                categoryPage = Math.min(Math.max(0, categoryPage), maxPage);
-                const visibleItems = allItems.slice(categoryPage * CATEGORIES_PER_PAGE, categoryPage * CATEGORIES_PER_PAGE + CATEGORIES_PER_PAGE);
-                grid.innerHTML = visibleItems.map(item => {
-                    const isAll = item.name === '__all__';
-                    const active = isAll ? currentFilter === 'all' : currentFilter === item.name;
-                    const safeName = isAll ? 'all' : item.name.replace(/'/g, "\\'");
-                    return `<div class="cat-circle-card ${active?'active':''}" onclick="filterCat('${safeName}')">
-                        <img src="${item.img}" alt="${isAll?'الكل':item.name}">
-                        <h4>${isAll?'📦 الكل':'⚡ '+item.name}</h4>
-                    </div>`;
-                }).join('');
-                const prev=document.getElementById('cat-prev-btn'), next=document.getElementById('cat-next-btn');
-                if(prev) prev.disabled=categoryPage<=0;
-                if(next) next.disabled=categoryPage>=maxPage;
+            if (select) {
+                const currentValue = select.value;
+                select.innerHTML = '';
+                categories.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+                });
+                if (currentValue && categories.some(c => c.name === currentValue)) {
+                    select.value = currentValue;
+                }
             }
-            if(select) {
-                select.innerHTML='';
-                categories.forEach(cat => select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`);
-            }
+            renderAllCategoriesDropdownContent();
         }
 
         function moveCategoryCarousel(direction) {
-            const total = categories.length + 1;
-            const maxPage = Math.max(0, Math.ceil(total / CATEGORIES_PER_PAGE) - 1);
-            categoryPage = Math.min(Math.max(0, categoryPage + direction), maxPage);
-            renderCategories();
+            // تم استبدال شريط الأقسام بقائمة منسدلة، والإبقاء على الدالة للتوافق مع أي استدعاء قديم.
+            return;
         }
 
         function renderAdminTagBox() {
@@ -1056,6 +1054,9 @@
             document.getElementById('edit-prod-name-val').value = p.name;
             document.getElementById('edit-price-val').value = p.price;
             document.getElementById('edit-old-price-val').value = p.oldPrice || '';
+            document.getElementById('edit-prod-desc-val').value = p.desc || '';
+            const editImg = document.getElementById('edit-prod-img-file');
+            if (editImg) editImg.value = '';
             document.getElementById('edit-price-modal').style.display = 'flex';
         }
 
@@ -1073,9 +1074,9 @@
             } catch(e) { console.error(e); alert('تعذر حفظ تعديل المنتج.'); }
         }
 
-        async function updateProductDataFinal(p, name, price, oldPrice, imgSrc) {
+        async function updateProductDataFinal(p, name, price, oldPrice, desc, imgSrc) {
             const old = { ...p };
-            Object.assign(p, { name, price, oldPrice, img:imgSrc });
+            Object.assign(p, { name, price, oldPrice, desc: desc || 'لا توجد تفاصيل إضافية.', img:imgSrc });
             try {
                 await saveDataToCloud();
                 document.getElementById('edit-price-modal').style.display = 'none';
@@ -1130,7 +1131,7 @@
                             <button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>
                             <a href="${productUrl(p)}" class="product-seo-link" aria-label="عرض ${p.name}" onclick="openProductModal(${p.id}); return false;">
                                 <div class="product-img-wrap" style="height:${currentImgHeight};">
-                                    <img src="${p.img}" class="product-img" alt="${p.name}">
+                                    <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
                                 </div>
                             </a>
                             <div class="product-body">
