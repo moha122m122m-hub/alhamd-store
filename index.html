@@ -42,9 +42,9 @@
     }
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -192,7 +192,24 @@
         .btn-success { background-color: var(--success); color: #fff; }
         .app-view { display: none; }
         .app-view.active-view { display: block; }
-        .about-card { background: #fff; border-radius: var(--radius); padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .about-card { background: #fff; border-radius: var(--radius); padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }        .home-welcome { background:linear-gradient(135deg,#eff6ff,#ffffff); border:1px solid #dbeafe; border-radius:18px; padding:1.2rem; margin-bottom:1.2rem; }
+        .home-welcome h2 { font-size:1.25rem; color:var(--dark); margin-bottom:.3rem; }
+        .home-welcome p { color:var(--text-muted); font-size:.82rem; }
+        .home-categories { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:.7rem; margin-bottom:1.4rem; }
+        .home-category-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:.65rem; cursor:pointer; text-align:center; transition:.2s; }
+        .home-category-card:hover { transform:translateY(-2px); border-color:var(--primary); box-shadow:0 5px 15px rgba(37,99,235,.10); }
+        .home-category-card img { width:58px; height:58px; object-fit:contain; border-radius:10px; background:#f8fafc; margin-bottom:.35rem; }
+        .home-category-card b { display:block; font-size:.75rem; color:var(--dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .products-page-head { background:#0f172a; color:#fff; border-radius:18px; padding:1.1rem; margin-bottom:1rem; }
+        .products-page-head h2 { font-size:1.25rem; margin-bottom:.2rem; }
+        .products-page-head p { color:#cbd5e1; font-size:.78rem; }
+        .products-toolbar { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+        .products-toolbar select,.products-toolbar input { flex:1; min-width:150px; padding:.55rem .7rem; border:1px solid #cbd5e1; border-radius:9px; background:#fff; }
+        .products-page-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:1rem; }
+        .products-page-grid .product-card { box-shadow:0 5px 18px rgba(15,23,42,.07); border-radius:16px; }
+        .load-more-wrap { text-align:center; margin:1rem 0 2rem; }
+        .loading-box { text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:.85rem; }
+
     </style>
 </head>
 <body>
@@ -222,15 +239,15 @@
 
     <div class="sub-nav">
         <button class="active" onclick="switchView('store', this)">الرئيسية</button>
-        <button onclick="switchView('store', this)">المنتجات</button>
+        <button onclick="switchView('products', this)">🛍️ المنتجات</button>
         <button onclick="switchView('myorders', this)">📦 طلباتي</button>
         <button onclick="switchView('about', this)">من نحن</button>
         <button onclick="switchView('contact', this)">اتصل بنا</button>
     </div>
 
-    <div class="hero-banner-wrap">
+    <div class="hero-banner-wrap" id="home-hero">
         <div class="hero-banner-card">
-            <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي">
+            <img id="main-banner-img" loading="eager" fetchpriority="high" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي">
         </div>
     </div>
 
@@ -307,22 +324,36 @@
                     <button class="btn" onclick="addNewProduct()">➕ إضافة المنتج للسحاب</button>
                 </div>
 
-                <div class="section-title-bar">
-                    <h3>أقسام المنتجات (الرئيسية)</h3>
-                </div>
-                
-                <button type="button" class="categories-menu-btn" onclick="toggleAllCategoriesDropdown()" aria-expanded="false">
-                    📂 عرض الأقسام <span id="categories-menu-arrow">▼</span>
-                </button>
-
-                <div class="all-categories-dropdown-list" id="all-cats-dropdown">
-                    <div id="all-cats-dropdown-content"></div>
+                <div class="home-welcome">
+                    <h2>⚡ أهلاً بك في متجر الحمد 4K</h2>
+                    <p>توريدات كهربائية ومستلزمات التحكم الآلي — تصفح الأقسام أو انتقل لصفحة المنتجات.</p>
                 </div>
 
                 <div class="section-title-bar">
-                    <h3 id="current-catalog-title">قسم: الكل</h3>
+                    <h3>📂 الأقسام</h3>
+                    <button class="btn" style="width:auto;padding:5px 10px;font-size:.72rem;" onclick="switchView('products')">كل المنتجات</button>
                 </div>
-                <div class="products-grid" id="store-catalog"></div>
+                <div class="home-categories" id="home-categories"></div>
+
+                <div class="section-title-bar">
+                    <h3>🔥 منتجات مختارة</h3>
+                </div>
+                <div class="products-grid" id="home-featured-catalog"></div>
+            </div>
+
+            <div id="view-products" class="app-view">
+                <div class="products-page-head">
+                    <h2>🛍️ كل المنتجات</h2>
+                    <p>صفحة مستقلة لتصفح المنتجات والبحث والشراء.</p>
+                </div>
+                <div class="products-toolbar">
+                    <input id="product-search" type="search" placeholder="🔎 ابحث باسم المنتج..." oninput="renderProductsPage()">
+                    <select id="product-category-filter" onchange="productPageCategoryChanged(this.value)">
+                        <option value="all">كل الأقسام</option>
+                    </select>
+                </div>
+                <div class="products-page-grid" id="store-catalog"></div>
+                <div class="load-more-wrap" id="load-more-wrap"></div>
             </div>
 
             <div id="view-myorders" class="app-view">
@@ -401,7 +432,7 @@
     <!-- نافذة تعديل المنتج للأدمن -->
     <div class="modal-overlay" id="edit-price-modal" onclick="closeEditModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (الاسم، السعر، الصورة)</h3>
+            <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (الاسم، السعر، الوصف، الصورة)</h3>
             <input type="hidden" id="edit-prod-id">
             <div class="input-group">
                 <label>اسم المنتج:</label>
@@ -445,6 +476,7 @@
     <script type="application/ld+json" id="dynamic-product-list-schema"></script>
     <script type="application/ld+json" id="dynamic-product-schema"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
         const firebaseConfig = {
             apiKey: "AIzaSyC0cSbJV8eju2u1D5eOI5bFu7EOg3LD31Y",
             authDomain: "alhamd-store.firebaseapp.com",
@@ -473,6 +505,11 @@
         let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let categoryPage = 0;
         const CATEGORIES_PER_PAGE = 4;
+        const PUBLIC_PRODUCTS_PAGE_SIZE = 18;
+        let publicProductCursor = null;
+        let publicProductsLoadedAll = false;
+        let publicLoadingProducts = false;
+        let productPageCategory = 'all';
         const SITE_URL = 'https://alhamd4k.shop/';
         const DEFAULT_TITLE = document.title;
         const DEFAULT_DESCRIPTION = document.querySelector('meta[name="description"]')?.content || '';
@@ -554,9 +591,10 @@
             isAdmin = !!user;
             checkAdminState();
             renderProducts();
+            renderHomeCategories(); renderHomeFeatured(); renderProductCategorySelect();
             renderAdminTagBox();
             renderAdminOrdersInbox();
-            if (isAdmin) await loadAdminOrdersCloud();
+            if (isAdmin) { await loadAllProductsForAdmin(); await loadAdminOrdersCloud(); }
             else { adminOrders = []; renderAdminOrdersInbox(); }
         });
 
@@ -592,46 +630,115 @@
         // تحميل البيانات من السحاب. تم فصل الأقسام والمنتجات عن بعض لتجنب حد Firestore (1MB) عند كثرة الصور.
         async function loadDataFromCloud() {
             try {
-                const [catSnap, prodSnap, settingsSnap] = await Promise.all([
+                // نعرض نسخة مخزنة فوراً إن وجدت، ثم نحدثها من السحاب.
+                try {
+                    const cached = JSON.parse(localStorage.getItem('alhamd_public_cache') || 'null');
+                    if (cached && Array.isArray(cached.categories) && Array.isArray(cached.products)) {
+                        categories = cached.categories;
+                        products = cached.products;
+                        if (cached.banner) document.getElementById('main-banner-img').src = cached.banner;
+                        renderCategories(); renderProducts(); renderHomeCategories(); renderHomeFeatured(); renderProductCategorySelect();
+                    }
+                } catch(e) {}
+
+                const [catSnap, settingsSnap] = await Promise.all([
                     db.collection('store_categories').get(),
-                    db.collection('store_products').get(),
                     db.collection('store_settings').doc('main').get()
                 ]);
 
-                if (!catSnap.empty || !prodSnap.empty) {
-                    categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
-                    products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.data().id || Date.now()) }));
-                    products.forEach(p => { p.id = p.idNum; });
-                    const settings = settingsSnap.exists ? settingsSnap.data() : {};
-                    if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
-                    if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
-                } else {
-                    // توافق مع البيانات القديمة المخزنة داخل main_config
-                    const doc = await db.collection('store_data').doc('main_config').get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        categories = (data.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)), ...c }));
-                        products = data.products || [];
-                        if (data.banner) document.getElementById('main-banner-img').src = data.banner;
-                        await migrateOldDataToSeparateDocs(data.banner || null);
-                    } else {
-                        categories = [
-                            { id:'cat_bosh', name:'بوش', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_mm', name:'Mm', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true }
-                        ];
-                        products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
-                        await saveAllDataToCloud();
-                    }
+                categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                const settings = settingsSnap.exists ? settingsSnap.data() : {};
+                if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
+                if (settings.theme) {
+                    currentSiteTheme = settings.theme;
+                    localStorage.setItem('alhamd_site_theme', currentSiteTheme);
+                    applySiteTheme(currentSiteTheme);
                 }
 
-                renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+                // للأدمن: تحميل كل المنتجات. للزائر: تحميل أول دفعة فقط لتسريع فتح الموقع.
+                if (isAdmin) {
+                    await loadAllProductsForAdmin();
+                } else {
+                    await loadPublicProducts(true);
+                }
+
+                localStorage.setItem('alhamd_public_cache', JSON.stringify({
+                    categories,
+                    products: products.slice(0, PUBLIC_PRODUCTS_PAGE_SIZE),
+                    banner: document.getElementById('main-banner-img')?.src || ''
+                }));
+
+                renderCategories(); renderProducts(); renderHomeCategories(); renderHomeFeatured(); renderProductCategorySelect();
+                renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
                 if (isAdmin) loadAdminOrdersCloud();
                 openProductFromUrl();
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من السحاب:', error);
-                alert('تعذر تحميل بيانات المتجر. تأكد من اتصال الإنترنت وصلاحيات Firebase.');
+                // لا نوقف الصفحة بالكامل إذا كان الاتصال بطيئاً/مؤقتاً.
+                if (!products.length) {
+                    alert('تعذر تحميل بيانات المتجر. تأكد من اتصال الإنترنت وصلاحيات Firebase.');
+                }
+            }
+        }
+
+        async function loadPublicProducts(reset = false) {
+            if (publicLoadingProducts || publicProductsLoadedAll) return;
+            publicLoadingProducts = true;
+            try {
+                let q = db.collection('store_products').limit(PUBLIC_PRODUCTS_PAGE_SIZE);
+                if (!reset && publicProductCursor) q = db.collection('store_products').startAfter(publicProductCursor).limit(PUBLIC_PRODUCTS_PAGE_SIZE);
+                const snap = await q.get();
+                if (reset) {
+                    products = [];
+                    publicProductCursor = null;
+                    publicProductsLoadedAll = false;
+                }
+                const incoming = snap.docs.map(d => {
+                    const data = d.data() || {};
+                    return {...data, id:Number(data.idNum || data.id || d.id)};
+                });
+                const seen = new Set(products.map(p => String(p.id)));
+                incoming.forEach(p => { if (!seen.has(String(p.id))) products.push(p); });
+                publicProductCursor = snap.docs[snap.docs.length - 1] || null;
+                if (snap.size < PUBLIC_PRODUCTS_PAGE_SIZE) publicProductsLoadedAll = true;
+                renderProducts();
+                renderHomeFeatured();
+                renderProductsPage();
+            } catch(e) {
+                console.error('Public products load failed:', e);
+            } finally {
+                publicLoadingProducts = false;
+            }
+        }
+
+        async function loadAllProductsForAdmin() {
+            const prodSnap = await db.collection('store_products').get();
+            products = prodSnap.docs.map(d => {
+                const data = d.data() || {};
+                return {...data, id:Number(data.idNum || data.id || d.id)};
+            });
+            publicProductsLoadedAll = true;
+            publicProductCursor = null;
+            renderProducts();
+            renderHomeFeatured();
+            renderProductsPage();
+        }
+
+        async function loadCategoryProducts(catName) {
+            if (publicLoadingProducts || isAdmin) return;
+            publicLoadingProducts = true;
+            try {
+                const snap = await db.collection('store_products').where('cat','==',catName).limit(100).get();
+                const incoming = snap.docs.map(d => {
+                    const data = d.data() || {};
+                    return {...data, id:Number(data.idNum || data.id || d.id)};
+                });
+                products = products.filter(p => p.cat !== catName).concat(incoming);
+                renderProductsPage();
+            } catch(e) {
+                console.error('Category products load failed:', e);
+            } finally {
+                publicLoadingProducts = false;
             }
         }
 
@@ -801,7 +908,21 @@
             const target = document.getElementById('view-' + viewName);
             if (target) target.classList.add('active-view');
             if (btnEl) btnEl.classList.add('active');
+
+            const hero = document.getElementById('home-hero');
+            if (hero) hero.style.display = viewName === 'store' ? '' : 'none';
+
             if (viewName === 'myorders') renderMyOrders();
+            if (viewName === 'products') {
+                renderProductCategorySelect();
+                renderProductsPage();
+                window.scrollTo({top:0, behavior:'smooth'});
+            }
+            if (viewName === 'store') {
+                renderHomeCategories();
+                renderHomeFeatured();
+                window.scrollTo({top:0, behavior:'smooth'});
+            }
         }
 
         function toggleAllCategoriesDropdown() {
@@ -1070,7 +1191,8 @@
             if (!p || !newName || isNaN(newPrice)) { alert('الرجاء إدخال اسم وسعر صحيحين.'); return; }
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : p.img;
-                await updateProductDataFinal(p, newName, newPrice, newOldPrice, imgSrc);
+                const newDesc = document.getElementById('edit-prod-desc-val').value.trim();
+                await updateProductDataFinal(p, newName, newPrice, newOldPrice, newDesc, imgSrc);
             } catch(e) { console.error(e); alert('تعذر حفظ تعديل المنتج.'); }
         }
 
@@ -1094,70 +1216,116 @@
         }
 
         function filterCat(cat) {
+            productPageCategory = cat;
             currentFilter = cat;
-            document.getElementById('current-catalog-title').textContent = cat === 'all' ? 'قسم: الكل' : `قسم: ${cat}`;
-            renderCategories();
-            renderProducts();
+            const sel = document.getElementById('product-category-filter');
+            if (sel) sel.value = cat;
+            switchView('products');
+            renderProductsPage();
+            if (cat !== 'all' && !isAdmin) loadCategoryProducts(cat);
+        }
+
+        function productCardHtml(p, compact=false) {
+            let qty = cart[p.id] ? cart[p.id].qty : 0;
+            let subtotal = (qty * Number(p.price || 0)).toFixed(2);
+            let priceHtml = `<span class="product-price">${p.price} ج.م</span>`;
+            if (p.oldPrice && p.oldPrice > p.price) priceHtml = `<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
+            let adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل</button>` : '';
+            return `
+                <div class="product-card ${isAdmin ? 'admin-mode' : ''}" id="product-${p.id}">
+                    <button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>
+                    <a href="${productUrl(p)}" class="product-seo-link" aria-label="عرض ${p.name}" onclick="openProductModal(${p.id}); return false;">
+                        <div class="product-img-wrap" style="height:${compact ? '190px' : currentImgHeight};">
+                            <img src="${p.img || ''}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
+                        </div>
+                    </a>
+                    <div class="product-body">
+                        <div>
+                            <a href="${productUrl(p)}" class="product-name" onclick="openProductModal(${p.id}); return false;" title="${p.name}">${p.name}</a>
+                            <div>${priceHtml}</div>
+                            ${adminEditBtn}
+                            <div class="sold-counter">🔥 مبيعات مؤكدة: ${p.sold || 0} قطعة</div>
+                        </div>
+                        <div class="card-cart-control">
+                            <button class="qty-btn" onclick="changeQty(${p.id}, -1)">-</button>
+                            <input type="number" min="0" inputmode="numeric" value="${qty}" onchange="setQty(${p.id}, this.value)" style="width:58px;text-align:center;font-weight:700;font-size:.85rem;padding:4px 2px;border:1px solid #cbd5e1;border-radius:6px;">
+                            <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+                        </div>
+                        <div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${subtotal} ج.م</span></div>
+                    </div>
+                </div>`;
         }
 
         function renderProducts() {
-            const catalog = document.getElementById('store-catalog');
-            if (!catalog) return;
-            catalog.innerHTML = '';
-            const seoItems = products.slice(0, 100).map((p, i) => ({
-                '@type':'ListItem', position:i+1, name:p.name, url:productUrl(p)
-            }));
-            const seoScript = document.getElementById('dynamic-product-list-schema');
-            if (seoScript) seoScript.textContent = JSON.stringify({
-                '@context':'https://schema.org', '@type':'ItemList', name:'منتجات مؤسسة الحمد 4K', itemListElement:seoItems
-            });
-            const activeCats = currentFilter === 'all' ? categories.map(c => c.name) : [currentFilter];
-            let hasProducts = false;
-
-            activeCats.forEach(catName => {
-                const catProducts = products.filter(p => p.cat === catName);
-                catProducts.forEach(p => {
-                    hasProducts = true;
-                    let qty = cart[p.id] ? cart[p.id].qty : 0;
-                    let subtotal = (qty * p.price).toFixed(2);
-                    let priceHtml = `<span class="product-price">${p.price} ج.م</span>`;
-                    if (p.oldPrice && p.oldPrice > p.price) {
-                        priceHtml = `<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
-                    }
-                    let adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb; color:#fff; padding:2px 6px; font-size:0.7rem; margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>` : '';
-
-                    catalog.innerHTML += `
-                        <div class="product-card ${isAdmin ? 'admin-mode' : ''}" id="product-${p.id}">
-                            <button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>
-                            <a href="${productUrl(p)}" class="product-seo-link" aria-label="عرض ${p.name}" onclick="openProductModal(${p.id}); return false;">
-                                <div class="product-img-wrap" style="height:${currentImgHeight};">
-                                    <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
-                                </div>
-                            </a>
-                            <div class="product-body">
-                                <div>
-                                    <a href="${productUrl(p)}" class="product-name" onclick="openProductModal(${p.id}); return false;" title="${p.name}">${p.name}</a>
-                                    <div>${priceHtml}</div>
-                                    ${adminEditBtn}
-                                    <div class="sold-counter">🔥 مبيعات: ${p.sold || 0} قطعة</div>
-                                </div>
-                                <div class="card-cart-control">
-                                    <button class="qty-btn" onclick="changeQty(${p.id}, -1)">-</button>
-                                    <input type="number" min="0" inputmode="numeric" value="${qty}" onchange="setQty(${p.id}, this.value)" style="width:58px; text-align:center; font-weight:700; font-size:0.85rem; padding:4px 2px; border:1px solid #cbd5e1; border-radius:6px;">
-                                    <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
-                                </div>
-                                <div style="text-align: center; margin-top: 4px;">
-                                    <span class="card-subtotal">المجموع: ${subtotal} ج.م</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-
-            if (!hasProducts) {
-                catalog.innerHTML = `<p style="color:var(--text-muted); grid-column: 1/-1; text-align:center; padding:1.5rem; font-size:0.85rem;">لا توجد منتجات مضافة حالياً في هذا القسم.</p>`;
+            renderHomeFeatured();
+            if (document.getElementById('view-products')?.classList.contains('active-view')) {
+                renderProductsPage();
             }
+        }
+
+        function renderHomeCategories() {
+            const box = document.getElementById('home-categories');
+            if (!box) return;
+            if (!categories.length) { box.innerHTML = '<div class="loading-box">جاري تحميل الأقسام...</div>'; return; }
+            box.innerHTML = categories.map(c => `
+                <div class="home-category-card" onclick="openCategoryFromHome('${String(c.name).replace(/'/g,"\'")}')">
+                    <img src="${c.img || ''}" alt="${c.name}" loading="lazy" decoding="async">
+                    <b>${c.name}</b>
+                </div>`).join('');
+        }
+
+        function renderHomeFeatured() {
+            const box = document.getElementById('home-featured-catalog');
+            if (!box) return;
+            const list = products.slice(0, 8);
+            box.innerHTML = list.length ? list.map(p => productCardHtml(p, true)).join('') :
+                '<div class="loading-box">جاري تحميل المنتجات...</div>';
+        }
+
+        function openCategoryFromHome(cat) {
+            productPageCategory = cat;
+            currentFilter = cat;
+            const sel = document.getElementById('product-category-filter');
+            if (sel) sel.value = cat;
+            switchView('products');
+            if (!isAdmin) loadCategoryProducts(cat);
+        }
+
+        function renderProductCategorySelect() {
+            const sel = document.getElementById('product-category-filter');
+            if (!sel) return;
+            const old = sel.value || productPageCategory || 'all';
+            sel.innerHTML = '<option value="all">كل الأقسام</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            sel.value = categories.some(c => c.name === old) ? old : 'all';
+        }
+
+        function productPageCategoryChanged(cat) {
+            productPageCategory = cat || 'all';
+            currentFilter = productPageCategory;
+            renderProductsPage();
+            if (productPageCategory !== 'all' && !isAdmin) loadCategoryProducts(productPageCategory);
+        }
+
+        function renderProductsPage() {
+            const catalog = document.getElementById('store-catalog');
+            if (!catalog || !document.getElementById('view-products')?.classList.contains('active-view')) return;
+            const q = (document.getElementById('product-search')?.value || '').trim().toLowerCase();
+            let list = productPageCategory === 'all' ? products : products.filter(p => p.cat === productPageCategory);
+            if (q) list = list.filter(p => String(p.name || '').toLowerCase().includes(q));
+            catalog.className = 'products-page-grid';
+            catalog.innerHTML = list.length ? list.map(p => productCardHtml(p, true)).join('') :
+                '<div class="loading-box" style="grid-column:1/-1;">لا توجد نتائج محملة حالياً.</div>';
+            const wrap = document.getElementById('load-more-wrap');
+            if (wrap) {
+                wrap.innerHTML = (!publicProductsLoadedAll && productPageCategory === 'all')
+                    ? '<button class="btn" style="max-width:220px;" onclick="loadMoreProducts()">تحميل منتجات أكثر</button>'
+                    : '';
+            }
+        }
+
+        async function loadMoreProducts() {
+            if (isAdmin) return;
+            await loadPublicProducts(false);
         }
 
         function openProductModal(prodId, updateUrl = true) {
@@ -1263,7 +1431,7 @@
             let newOrder = {
                 id: Date.now(), clientName: name, phone: phone, address: address, note: note,
                 itemsObj: orderItemsList, itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
-                total: total.toFixed(2), date: new Date().toLocaleDateString('ar-EG'), status: 'قيد المعالجة (في انتظار التأكيد)'
+                total: total.toFixed(2), date: new Date().toLocaleDateString('ar-EG'), status: 'قيد المعالجة (في انتظار التأكيد)', salesCounted: false
             };
 
             myOrders.unshift(newOrder);
@@ -1293,27 +1461,36 @@
             const order = adminOrders.find(o => String(o.id) === String(orderId));
             if (!order) return;
             try {
-                await db.collection('store_orders').doc(String(order.id)).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-
-                if (newStatus === 'تم التأكيد ✅') {
-                    if (order.status !== 'تم التأكيد ✅') {
-                        (order.itemsObj || []).forEach(orderedItem => {
-                            let p = products.find(prod => String(prod.id) === String(orderedItem.id));
-                            if (p) p.sold = Number(p.sold || 0) + Number(orderedItem.qty || 0);
-                        });
-                        await saveDataToCloud();
-                    }
+                // يتم احتساب المبيعات مرة واحدة فقط لكل طلب، حتى لو تم تغيير الحالة ثم إعادتها.
+                if (newStatus === 'تم التأكيد ✅' && !order.salesCounted) {
+                    const batch = db.batch();
+                    (order.itemsObj || []).forEach(orderedItem => {
+                        const ref = db.collection('store_products').doc(String(orderedItem.id));
+                        batch.set(ref, { sold: firebase.firestore.FieldValue.increment(Number(orderedItem.qty || 0)) }, { merge:true });
+                        const p = products.find(prod => String(prod.id) === String(orderedItem.id));
+                        if (p) p.sold = Number(p.sold || 0) + Number(orderedItem.qty || 0);
+                    });
+                    batch.update(db.collection('store_orders').doc(String(order.id)), {
+                        status: newStatus,
+                        salesCounted: true,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    await batch.commit();
+                    order.salesCounted = true;
+                } else {
+                    await db.collection('store_orders').doc(String(order.id)).update({
+                        status: newStatus,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 }
-
                 order.status = newStatus;
-                if (newStatus === 'تم الاستلام 🎉') {
-                    adminOrders = adminOrders.filter(o => String(o.id) !== String(orderId));
-                }
                 renderAdminOrdersInbox();
                 renderProducts();
+                renderHomeFeatured();
+                renderProductsPage();
             } catch (e) {
                 console.error('Order status update failed:', e);
-                alert('تعذر تحديث الطلب: ' + (e.code || '') + '\n' + (e.message || ''));
+                alert('تعذر تحديث الطلب: ' + (e.code || '') + '\\n' + (e.message || ''));
             }
         }
 
@@ -1333,7 +1510,7 @@
                         <div><b>ملاحظة:</b> ${ord.note || 'لا توجد'}</div>
                         <div><b>الطلب:</b> ${ord.itemsText || ''}</div>
                         <div><b>عدد القطع:</b> ${(ord.itemsObj || []).reduce((sum, item) => sum + Number(item.qty || 0), 0)} قطعة</div>
-                        <div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8; font-weight:bold;">${ord.status}</span></div>
+                        <div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${ord.status}</span>${ord.salesCounted ? '<span style="color:#16a34a;font-weight:bold;"> | تم احتساب المبيعات ✅</span>' : ''} </div>
                         <div style="display:flex; gap:3px; margin-top:4px; flex-wrap:wrap;">
                             <button class="btn btn-success" style="padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم التأكيد ✅')">تأكيد</button>
                             <button class="btn" style="background:#2563eb; color:#fff; padding:2px 4px; font-size:0.65rem;" onclick="adminUpdateOrderStatus('${ord.id}', 'تم الشحن 🚚')">شحن</button>
@@ -1372,5 +1549,6 @@
                 `;
             });
         }
+        });
     </script>
 </body></html>
