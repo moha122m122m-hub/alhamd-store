@@ -331,9 +331,14 @@
 
                 <div class="section-title-bar">
                     <h3>📂 الأقسام</h3>
-                    <button class="btn" style="width:auto;padding:5px 10px;font-size:.72rem;" onclick="switchView('products')">كل المنتجات</button>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button type="button" class="btn" style="width:auto;padding:6px 12px;font-size:.72rem;" onclick="toggleHomeCategories()" id="home-categories-btn">📂 عرض الأقسام ▼</button>
+                        <button type="button" class="btn" style="width:auto;padding:6px 12px;font-size:.72rem;background:#0f172a;color:#fff;" onclick="switchView('products', this)">🛍️ المنتجات</button>
+                    </div>
                 </div>
-                <div class="home-categories" id="home-categories"></div>
+                <div class="all-categories-dropdown-list" id="home-cats-dropdown">
+                    <div id="home-cats-dropdown-content"></div>
+                </div>
 
                 <div class="section-title-bar">
                     <h3>🔥 منتجات مختارة</h3>
@@ -476,7 +481,6 @@
     <script type="application/ld+json" id="dynamic-product-list-schema"></script>
     <script type="application/ld+json" id="dynamic-product-schema"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
         const firebaseConfig = {
             apiKey: "AIzaSyC0cSbJV8eju2u1D5eOI5bFu7EOg3LD31Y",
             authDomain: "alhamd-store.firebaseapp.com",
@@ -1263,15 +1267,42 @@
             }
         }
 
+        function toggleHomeCategories() {
+            const drop = document.getElementById('home-cats-dropdown');
+            const btn = document.getElementById('home-categories-btn');
+            if (!drop) return;
+            const open = drop.classList.toggle('show');
+            if (open) {
+                renderHomeCategories();
+                if (btn) btn.textContent = '📂 إخفاء الأقسام ▲';
+            } else {
+                if (btn) btn.textContent = '📂 عرض الأقسام ▼';
+            }
+        }
+
         function renderHomeCategories() {
-            const box = document.getElementById('home-categories');
+            const box = document.getElementById('home-cats-dropdown-content');
             if (!box) return;
-            if (!categories.length) { box.innerHTML = '<div class="loading-box">جاري تحميل الأقسام...</div>'; return; }
-            box.innerHTML = categories.map(c => `
-                <div class="home-category-card" onclick="openCategoryFromHome('${String(c.name).replace(/'/g,"\'")}')">
-                    <img src="${c.img || ''}" alt="${c.name}" loading="lazy" decoding="async">
-                    <b>${c.name}</b>
-                </div>`).join('');
+            box.innerHTML = '';
+            const visible = categories.filter(c => c.showOnMain !== false);
+            const list = visible.length ? visible : categories;
+            if (!list.length) {
+                box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:12px;">لا توجد أقسام حالياً.</p>';
+                return;
+            }
+            list.forEach(cat => {
+                const row = document.createElement('div');
+                row.className = 'dropdown-cat-row';
+                row.onclick = function(){ openCategoryFromHome(cat.name); };
+                row.innerHTML = `
+                    <div class="dropdown-cat-info">
+                        <img src="${cat.img || 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200'}" alt="${cat.name}" loading="lazy" decoding="async">
+                        <span>⚡ ${cat.name}</span>
+                    </div>
+                    <span style="font-size:.75rem;color:#64748b;">عرض المنتجات ←</span>
+                `;
+                box.appendChild(row);
+            });
         }
 
         function renderHomeFeatured() {
@@ -1549,6 +1580,5 @@
                 `;
             });
         }
-        });
     </script>
 </body></html>
