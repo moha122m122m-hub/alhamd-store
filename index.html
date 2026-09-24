@@ -650,7 +650,27 @@
                     db.collection('store_settings').doc('main').get()
                 ]);
 
-                categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                // لو البيانات القديمة ما زالت في store_data/main_config، نستخدمها كما هي ولا نعتبرها محذوفة.
+                let loadedFromSeparateCollections = catSnap.size > 0;
+                if (loadedFromSeparateCollections) {
+                    categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                } else {
+                    try {
+                        const legacySnap = await db.collection('store_data').doc('main_config').get();
+                        if (legacySnap.exists) {
+                            const legacy = legacySnap.data() || {};
+                            categories = Array.isArray(legacy.categories) ? legacy.categories.map(c => ({
+                                id: c.id || ('cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)), ...c
+                            })) : [];
+                            products = Array.isArray(legacy.products) ? legacy.products.map(p => ({
+                                ...p, id: Number(p.id || p.idNum || Date.now()), sold: Number(p.sold || 0)
+                            })) : [];
+                            if (legacy.banner) document.getElementById('main-banner-img').src = legacy.banner;
+                        }
+                    } catch (legacyError) {
+                        console.error('Legacy data load failed:', legacyError);
+                    }
+                }
                 const settings = settingsSnap.exists ? settingsSnap.data() : {};
                 if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
                 if (settings.theme) {
@@ -659,11 +679,17 @@
                     applySiteTheme(currentSiteTheme);
                 }
 
-                // للأدمن: تحميل كل المنتجات. للزائر: تحميل أول دفعة فقط لتسريع فتح الموقع.
-                if (isAdmin) {
-                    await loadAllProductsForAdmin();
-                } else {
-                    await loadPublicProducts(true);
+                // للأدمن: تحميل كل المنتجات. للزائر: تحميل أول دفعة فقط.
+                // إذا كانت البيانات القديمة موجودة فقط في store_data، نعرضها ولا نستبدلها ببيانات فارغة.
+                if (loadedFromSeparateCollections) {
+                    if (isAdmin) {
+                        await loadAllProductsForAdmin();
+                    } else {
+                        await loadPublicProducts(true);
+                    }
+                } else if (!products.length) {
+                    // لا توجد منتجات في البيانات القديمة أيضاً؛ اترك المتجر فارغاً بدلاً من إنشاء بيانات تجريبية.
+                    products = [];
                 }
 
                 localStorage.setItem('alhamd_public_cache', JSON.stringify({
