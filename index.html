@@ -344,7 +344,7 @@
                     </div>
                     <div class="input-group">
                         <label>رقم الهاتف:</label>
-                        <input type="tel" id="client-phone" placeholder="رقم الموبايل (مهم لمتابعة الطلبات)" oninput="renderMyOrders()">
+                        <input type="tel" id="client-phone" placeholder="رقم الموبايل">
                     </div>
                     <div class="input-group">
                         <label>عنوان التوصيل:</label>
@@ -358,14 +358,10 @@
                 </div>
             </div>
 
-            <!-- صفحة طلباتي المحدثة لتتحدث تلقائياً -->
+            <!-- صفحة طلباتي المحفوظة تلقائياً للمستخدم -->
             <div id="view-myorders" class="app-view">
                 <div class="about-card">
-                    <h2 style="color:var(--dark); margin-bottom:0.6rem; text-align: center; font-size: 1.2rem;">📦 طلباتي ومتابعة حالتها الفورية</h2>
-                    <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1.2rem;">أدخل رقم هاتفك الذي قمت به بالطلب لعرض أحدث حالات الأوردرات المحدثة من الإدارة:</p>
-                    <div class="input-group" style="max-width: 350px; margin: 0 auto 1.2rem auto;">
-                        <input type="tel" id="lookup-phone" placeholder="أدخل رقم الهاتف للبحث عن الطلبات..." oninput="renderMyOrders()" style="text-align: center; font-weight: bold;">
-                    </div>
+                    <h2 style="color:var(--dark); margin-bottom:1rem; text-align: center; font-size: 1.2rem;">📦 طلباتي ومتابعة حالتها الفورية</h2>
                     <div id="my-orders-list"></div>
                 </div>
             </div>
@@ -486,7 +482,9 @@
 
         let categories = [];
         let products = [];
-        let cloudOrders = []; // طلبات السحاب لمتابعة الحالات الفورية
+        let cloudOrders = []; 
+        let myLocalOrderIds = [];
+        try { myLocalOrderIds = JSON.parse(localStorage.getItem('alhamd_my_order_ids')) || []; } catch(e) { myLocalOrderIds = []; }
 
         let cart = {};
         let currentFilter = 'all';
@@ -541,7 +539,7 @@
             if (document.getElementById('img-size-select')) document.getElementById('img-size-select').value = currentImgHeight;
             applySiteTheme(currentSiteTheme);
             loadDataFromCloud();
-            startOrdersRealtimeListener(); // بدء الاستماع الفوري لتحديثات الطلبات
+            startOrdersRealtimeListener();
         };
 
         auth.onAuthStateChanged(async function(user) {
@@ -552,7 +550,6 @@
             renderAdminOrdersInbox();
         });
 
-        // الاستماع الفوري لتغييرات الطلبات من السحاب لتحديث حالة العميل فوراً
         function startOrdersRealtimeListener() {
             db.collection('store_orders').onSnapshot(snapshot => {
                 cloudOrders = snapshot.docs.map(doc => {
@@ -974,14 +971,19 @@
             });
             msg += `----------------------------------%0A💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
 
+            let orderId = Date.now();
             let newOrder = {
-                id: Date.now(), clientName: name, phone: phone, address: address, note: note,
+                id: orderId, clientName: name, phone: phone, address: address, note: note,
                 itemsObj: orderItemsList, itemsText: orderItemsList.map(i => `${i.name} (×${i.qty})`).join(', '),
                 total: total.toFixed(2), date: new Date().toLocaleDateString('ar-EG'), status: 'قيد المعالجة (في انتظار التأكيد)'
             };
 
+            // حفظ معرف الطلب في متصفح العميل ليظهر تلقائياً في صفحة طلباته
+            myLocalOrderIds.unshift(orderId);
+            localStorage.setItem('alhamd_my_order_ids', JSON.stringify(myLocalOrderIds));
+
             try {
-                await db.collection('store_orders').doc(String(newOrder.id)).set({ ...newOrder, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await db.collection('store_orders').doc(String(orderId)).set({ ...newOrder, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             } catch (e) {
                 alert('تعذر حفظ الطلب على السحاب.');
             }
@@ -990,8 +992,6 @@
             renderProducts();
             updateCartUI();
             
-            // تعيين رقم الهاتف تلقائياً في صفحة طلباتي وتوجيه العميل لها لمتابعة طلبه
-            document.getElementById('lookup-phone').value = phone;
             switchView('myorders', document.querySelectorAll('.sub-nav button')[1]);
             window.open(`https://wa.me/201126758975?text=${msg}`, '_blank');
         }
@@ -1034,17 +1034,16 @@
         function renderMyOrders() {
             const listDiv = document.getElementById('my-orders-list');
             if (!listDiv) return;
-            let lookupPhone = document.getElementById('lookup-phone').value.trim();
 
-            if (!lookupPhone) {
-                listDiv.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem; font-size:0.85rem;">الرجاء إدخال رقم الهاتف بالأعلى لعرض الطلبات الخاصة بك ومتابعة حالتها.</p>`;
+            if (myLocalOrderIds.length === 0) {
+                listDiv.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem; font-size:0.85rem;">ليس لديك أي طلبات مسجلة على هذا الجهاز حتى الآن.</p>`;
                 return;
             }
 
-            let userOrders = cloudOrders.filter(o => String(o.phone).trim() === lookupPhone);
+            let userOrders = cloudOrders.filter(o => myLocalOrderIds.map(String).includes(String(o.id)));
 
             if (userOrders.length === 0) {
-                listDiv.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem; font-size:0.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>`;
+                listDiv.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem; font-size:0.85rem;">جاري جلب طلباتك...</p>`;
                 return;
             }
 
