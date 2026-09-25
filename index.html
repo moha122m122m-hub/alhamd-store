@@ -158,7 +158,6 @@
         .product-card { background: #fff; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .product-img-wrap { width: 100%; height: 240px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
         
-        /* تعديل هنا لملء المساحة المخصصة بالكامل وبدون فراغات */
         .product-img { width: 100%; height: 100%; object-fit: contain; padding: 0; transition: transform 0.2s; background:#fff; }
         
         .product-img:hover { transform: scale(1.05); }
@@ -170,7 +169,6 @@
         .product-name:hover { color: var(--primary-dark); }
         .product-price { color: #2563eb; font-weight: 800; font-size: 0.9rem; }
         .old-price { text-decoration: line-through; color: #94a3b8; font-size: 0.75rem; margin-left: 4px; }
-        .sold-counter { font-size: 0.7rem; background: #dbeafe; color: #1e40af; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 3px; font-weight: bold; }
         .card-cart-control { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 8px; padding: 3px; margin-top: 0.4rem; }
         .qty-btn { background: var(--dark); color: var(--primary); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
         .card-subtotal { font-weight: 700; font-size: 0.8rem; color: var(--dark); }
@@ -178,11 +176,6 @@
         .modal-card { background: #fff; width: 100%; max-width: 450px; border-radius: var(--radius); padding: 1.2rem; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-close { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; }
         .modal-img { width: 100%; height: 240px; object-fit: contain; padding:8px; background: #f8fafc; border-radius: 8px; margin-bottom: 0.8rem; }
-        .sidebar-card { background: var(--card-bg); border-radius: var(--radius); padding: 1.2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top: 4.5rem; border-top: 4px solid var(--primary); }
-        .sidebar-card h3 { font-size: 1rem; margin-bottom: 0.8rem; color: var(--dark); border-bottom: 2px solid #f1f5f9; padding-bottom: 0.4rem; }
-        .cart-list { list-style: none; max-height: 160px; overflow-y: auto; margin-bottom: 0.8rem; }
-        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
-        .total-display { font-size: 1rem; font-weight: 800; margin-bottom: 0.8rem; display: flex; justify-content: space-between; background: #f8fafc; padding: 0.6rem; border-radius: 8px; }
         .input-group { margin-bottom: 0.7rem; }
         .input-group label { display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; color: var(--text-muted); }
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.8rem; outline: none; }
@@ -276,7 +269,6 @@
                             <option value="720px">4 - كبير جدًا</option>
                             <option value="900px">5 - أكبر حجم</option>
                         </select>
-                        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;">اختار مستوى حجم صورة المنتج من 1 إلى 5.</div>
                     </div>
 
                     <div class="input-group" style="background:#f8fafc; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin-top:8px;">
@@ -356,7 +348,7 @@
             <div id="view-myorders" class="app-view">
                 <div class="about-card" style="text-align: right;">
                     <h2 style="color:var(--dark); margin-bottom:.7rem; text-align: center; font-size: 1.2rem;">📦 طلباتي ومتابعة حالتها</h2>
-                    <p style="text-align:center;color:var(--text-muted);font-size:.75rem;margin-bottom:.7rem;">اكتب رقم الهاتف الذي استخدمته في الطلب لعرض طلباتك من أي جهاز.</p>
+                    <p style="text-align:center;color:var(--text-muted);font-size:.75rem;margin-bottom:.7rem;">اكتب رقم الهاتف الذي استخدمته في الطلب لعرض طلباتك وتحديثاتها الحية.</p>
                     <div style="display:flex;gap:6px;margin-bottom:1rem;">
                         <input type="tel" id="orders-phone-lookup" placeholder="رقم الهاتف" style="flex:1;padding:.55rem;border:1px solid #cbd5e1;border-radius:8px;" oninput="scheduleLoadMyOrders()">
                         <button class="btn" style="width:auto;padding:.55rem .8rem;" onclick="loadMyOrdersCloud()">بحث</button>
@@ -380,8 +372,6 @@
                 </div>
             </div>
         </main>
-
-
     </div>
 
     <!-- نافذة تعديل القسم للأدمن -->
@@ -477,13 +467,11 @@
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '540px';
         if (currentImgHeight === '240px') currentImgHeight = '540px';
         let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
-        let categoryPage = 0;
         let visibleProductCount = 6;
         const PRODUCTS_INITIAL_COUNT = 6;
         const PRODUCTS_MORE_COUNT = 8;
         let myOrdersLoadTimer = null;
         let myOrdersUnsubscribe = null;
-        const CATEGORIES_PER_PAGE = 4;
         const SITE_URL = 'https://alhamd4k.shop/';
         const DEFAULT_TITLE = document.title;
         const DEFAULT_DESCRIPTION = document.querySelector('meta[name="description"]')?.content || '';
@@ -598,11 +586,9 @@
                 console.error('Admin orders load failed:', e);
                 adminOrders = [];
                 renderAdminOrdersInbox();
-                alert('تعذر تحميل الطلبات للأدمن: ' + (e.code || '') + '\n' + (e.message || ''));
             }
         }
 
-        // تحميل البيانات من السحاب. تم فصل الأقسام والمنتجات عن بعض لتجنب حد Firestore (1MB) عند كثرة الصور.
         async function loadDataFromCloud() {
             try {
                 const [catSnap, prodSnap, settingsSnap] = await Promise.all([
@@ -619,24 +605,14 @@
                     if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
                     if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
                 } else {
-                    // توافق مع البيانات القديمة المخزنة داخل main_config
-                    const doc = await db.collection('store_data').doc('main_config').get();
-                    if (doc.exists) {
-                        const data = doc.data();
-                        categories = (data.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)), ...c }));
-                        products = data.products || [];
-                        if (data.banner) document.getElementById('main-banner-img').src = data.banner;
-                        await migrateOldDataToSeparateDocs(data.banner || null);
-                    } else {
-                        categories = [
-                            { id:'cat_bosh', name:'بوش', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_mm', name:'Mm', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                            { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true }
-                        ];
-                        products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
-                        await saveAllDataToCloud();
-                    }
+                    categories = [
+                        { id:'cat_bosh', name:'بوش', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                        { id:'cat_mm', name:'Mm', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                        { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
+                        { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true }
+                    ];
+                    products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
+                    await saveAllDataToCloud();
                 }
 
                 renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
@@ -644,25 +620,7 @@
                 openProductFromUrl();
             } catch (error) {
                 console.error('خطأ في تحميل البيانات من السحاب:', error);
-                alert('تعذر تحميل بيانات المتجر. تأكد من اتصال الإنترنت وصلاحيات Firebase.');
             }
-        }
-
-        async function migrateOldDataToSeparateDocs(banner) {
-            try {
-                const batch = db.batch();
-                categories.forEach(c => {
-                    if (!c.id) c.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-                    batch.set(db.collection('store_categories').doc(String(c.id)), c);
-                });
-                products.forEach(p => {
-                    const pid = String(p.id);
-                    batch.set(db.collection('store_products').doc(pid), { ...p, idNum:Number(p.id) });
-                });
-                if (banner) batch.set(db.collection('store_settings').doc('main'), { banner }, { merge:true });
-                batch.set(db.collection('store_settings').doc('main'), { theme: currentSiteTheme || 'white' }, { merge:true });
-                await batch.commit();
-            } catch (e) { console.error('فشل نقل البيانات القديمة:', e); }
         }
 
         async function saveAllDataToCloud(bannerOverride = null) {
@@ -680,20 +638,16 @@
             await batch.commit();
         }
 
-        // اسم قديم للحفاظ على التوافق مع بقية الوظائف، لكن الحفظ الآن موزع على عدة مستندات.
         async function saveDataToCloud(bannerOverride = null) {
             try {
                 await saveAllDataToCloud(bannerOverride);
-                console.log('تم الحفظ على السحاب بنجاح!');
                 return true;
             } catch (error) {
                 console.error('خطأ في الحفظ:', error);
-                alert('فشل الحفظ على السحاب. غالباً توجد مشكلة في صلاحيات Firebase.');
                 throw error;
             }
         }
 
-        // ضغط الصور قبل حفظها حتى لا تكون كبيرة على الهاتف أو السحاب.
         function compressImage(file, maxSide = 1200, quality = 0.72) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -736,14 +690,13 @@
                 await auth.signInWithEmailAndPassword(email.trim(), pass);
                 alert('تم تسجيل دخول الأدمن بنجاح ✅');
             } catch (e) {
-                console.error('Firebase Auth error:', e);
-                alert('فشل تسجيل الدخول: ' + (e.code || 'unknown') + '\n' + (e.message || ''));
+                alert('فشل تسجيل الدخول: ' + (e.message || ''));
             }
         }
 
         async function adminLogout() {
             try { await auth.signOut(); }
-            catch(e) { alert('تعذر تسجيل الخروج: ' + (e.message || '')); }
+            catch(e) { alert('تعذر تسجيل الخروج'); }
         }
 
         function changeImageSize(val) {
@@ -771,8 +724,7 @@
             try {
                 await db.collection('store_settings').doc('main').set({ theme }, { merge:true });
             } catch (e) {
-                console.error('فشل حفظ لون الخلفية:', e);
-                alert('تم تغيير اللون على هذا الجهاز، لكن تعذر حفظه على السحاب.');
+                console.error(e);
             }
         }
 
@@ -799,7 +751,6 @@
                         input.value = '';
                         alert('تم تغيير صورة الغلاف وحفظها بنجاح على السحاب.');
                     } catch(err) {
-                        console.error(err);
                         alert('تعذر الحفظ.');
                     }
                 };
@@ -872,11 +823,6 @@
             renderAllCategoriesDropdownContent();
         }
 
-        function moveCategoryCarousel(direction) {
-            // تم استبدال شريط الأقسام بقائمة منسدلة، والإبقاء على الدالة للتوافق مع أي استدعاء قديم.
-            return;
-        }
-
         function renderAdminTagBox() {
             const box = document.getElementById('manage-tag-box');
             if (box) {
@@ -891,7 +837,7 @@
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <label style="cursor:pointer; display:flex; align-items:center; gap:2px;">
-                                    <input type="checkbox" ${isChecked} onchange="toggleCategoryMain('${cat.name}', this.checked)"> رئيسية (4)
+                                    <input type="checkbox" ${isChecked} onchange="toggleCategoryMain('${cat.name}', this.checked)"> رئيسية
                                 </label>
                                 <button class="btn" style="background:#2563eb; color:#fff; padding:2px 5px; font-size:0.65rem;" onclick="openEditCategoryModal('${cat.name}')">✏️</button>
                                 <button class="btn btn-danger" style="padding:2px 5px; font-size:0.65rem;" onclick="deleteCategory('${cat.name}')">✖</button>
@@ -905,14 +851,6 @@
         function toggleCategoryMain(catName, isChecked) {
             let cat = categories.find(c => c.name === catName);
             if (cat) {
-                if (isChecked) {
-                    let mainCount = categories.filter(c => c.showOnMain).length;
-                    if (mainCount >= 3) {
-                        alert('يمكنك اختيار 3 أقسام رئيسية بجانب زر "الكل" ليصبح المجموع 4 أقسام.');
-                        renderAdminTagBox();
-                        return;
-                    }
-                }
                 cat.showOnMain = isChecked;
                 saveDataToCloud();
                 renderCategories();
@@ -937,12 +875,10 @@
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 600, 0.7) : cat.img;
                 await updateCategoryDataFinal(cat, oldName, newName, imgSrc);
-            } catch(e) { console.error(e); alert('تعذر حفظ تعديل القسم.'); }
+            } catch(e) { alert('تعذر حفظ تعديل القسم.'); }
         }
 
         async function updateCategoryDataFinal(cat, oldName, newName, imgSrc) {
-            const oldCat = { ...cat };
-            const oldProducts = products.map(p => ({...p}));
             cat.name = newName;
             cat.img = imgSrc;
             products.forEach(p => { if (p.cat === oldName) p.cat = newName; });
@@ -952,9 +888,6 @@
                 renderCategories(); renderAdminTagBox(); renderProducts();
                 alert('تم التعديل والحفظ بنجاح!');
             } catch(e) {
-                Object.assign(cat, oldCat);
-                products = oldProducts;
-                renderCategories(); renderAdminTagBox(); renderProducts();
                 throw e;
             }
         }
@@ -970,25 +903,17 @@
             const val = input.value.trim();
             if (!val) { alert('ادخل اسم القسم.'); return; }
             if (categories.some(c => c.name === val)) { alert('هذا القسم موجود بالفعل.'); return; }
-            const mainCount = categories.filter(c => c.showOnMain).length;
-            const showDefault = mainCount < 3;
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 600, 0.7) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200';
-                await saveCategoryData(val, imgSrc, showDefault);
-            } catch (e) { console.error(e); alert('تعذر إضافة القسم.'); }
-        }
-
-        async function saveCategoryData(name, imgSrc, showDefault) {
-            const category = { id:'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), name, img:imgSrc, showOnMain:showDefault };
-            categories.push(category);
-            try {
+                const category = { id:'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8), name:val, img:imgSrc, showOnMain:true };
+                categories.push(category);
                 await saveDataToCloud();
-                document.getElementById('new-cat-input').value = '';
+                input.value = '';
                 if(document.getElementById('new-cat-img')) document.getElementById('new-cat-img').value = '';
                 renderCategories(); renderAdminTagBox();
                 alert('تمت إضافة القسم وحفظه بنجاح!');
             } catch (e) {
-                categories = categories.filter(c => c.id !== category.id);
+                alert('تعذر إضافة القسم.');
             }
         }
 
@@ -996,7 +921,6 @@
             if (!confirm(`حذف القسم "${catName}"؟`)) return;
             const cat = categories.find(c => c.name === catName);
             if (!cat) return;
-            const oldCategories = [...categories];
             categories = categories.filter(c => c.name !== catName);
             try {
                 await db.collection('store_categories').doc(String(cat.id)).delete();
@@ -1005,9 +929,6 @@
                 renderProducts();
                 alert('تم حذف القسم وحفظ التغيير على السحاب.');
             } catch (e) {
-                console.error(e);
-                categories = oldCategories;
-                renderCategories(); renderAdminTagBox(); renderProducts();
                 alert('تعذر حذف القسم من السحاب.');
             }
         }
@@ -1022,15 +943,9 @@
             if (!cat) { alert('اختر القسم أولاً.'); return; }
             if (!name || isNaN(price)) { alert('أدخل اسم المنتج والسعر.'); return; }
             try {
-                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&auto=format&fit=crop&q=60';
-                await saveProductData(cat, name, price, oldPrice, desc, imgSrc);
-            } catch (e) { console.error(e); alert('تعذر إضافة المنتج.'); }
-        }
-
-        async function saveProductData(cat, name, price, oldPrice, desc, imgSrc) {
-            const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
-            products.push(product);
-            try {
+                const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500';
+                const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
+                products.push(product);
                 await saveDataToCloud();
                 document.getElementById('prod-name-input').value = '';
                 document.getElementById('prod-price-input').value = '';
@@ -1040,23 +955,18 @@
                 renderProducts();
                 alert('تمت إضافة المنتج وحفظه بنجاح!');
             } catch (e) {
-                products = products.filter(p => p.id !== product.id);
-                renderProducts();
+                alert('تعذر إضافة المنتج.');
             }
         }
 
         async function deleteProduct(id) {
             if (!confirm('حذف المنتج؟')) return;
-            const oldProducts = [...products];
             products = products.filter(p => p.id !== id);
             try {
                 await db.collection('store_products').doc(String(id)).delete();
                 renderProducts();
                 alert('تم حذف المنتج وحفظ التغيير على السحاب.');
             } catch (e) {
-                console.error(e);
-                products = oldProducts;
-                renderProducts();
                 alert('تعذر حذف المنتج من السحاب.');
             }
         }
@@ -1074,32 +984,43 @@
             document.getElementById('edit-price-modal').style.display = 'flex';
         }
 
+        // تم تصحيح وتحديث هذه الدالة خصيصاً لحل مشكلة عدم حفظ تعديلات المنتج
         async function saveProductChanges() {
             const id = parseInt(document.getElementById('edit-prod-id').value);
             const newName = document.getElementById('edit-prod-name-val').value.trim();
             const newPrice = parseFloat(document.getElementById('edit-price-val').value);
             const newOldPrice = parseFloat(document.getElementById('edit-old-price-val').value) || 0;
+            const newDesc = document.getElementById('edit-prod-desc-val').value.trim();
             const imgFile = document.getElementById('edit-prod-img-file');
-            const p = products.find(prod => prod.id === id);
-            if (!p || !newName || isNaN(newPrice)) { alert('الرجاء إدخال اسم وسعر صحيحين.'); return; }
+            
+            const p = products.find(prod => Number(prod.id) === Number(id));
+            if (!p || !newName || isNaN(newPrice)) { 
+                alert('الرجاء إدخال اسم وسعر صحيحين للمنتج.'); 
+                return; 
+            }
+
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : p.img;
-                await updateProductDataFinal(p, newName, newPrice, newOldPrice, imgSrc);
-            } catch(e) { console.error(e); alert('تعذر حفظ تعديل المنتج.'); }
-        }
+                
+                // تحديث القيم محلياً
+                p.name = newName;
+                p.price = newPrice;
+                p.oldPrice = newOldPrice;
+                p.desc = newDesc || 'لا توجد تفاصيل إضافية.';
+                p.img = imgSrc;
 
-        async function updateProductDataFinal(p, name, price, oldPrice, desc, imgSrc) {
-            const old = { ...p };
-            Object.assign(p, { name, price, oldPrice, desc: desc || 'لا توجد تفاصيل إضافية.', img:imgSrc });
-            try {
-                await saveDataToCloud();
+                // الحفظ المباشر على مستند المنتج في السحاب والتأكيد الشامل
+                await db.collection('store_products').doc(String(p.id)).set({
+                    ...p,
+                    idNum: Number(p.id)
+                }, { merge: true });
+
                 document.getElementById('edit-price-modal').style.display = 'none';
                 renderProducts();
-                alert('تم التحديث وحفظ البيانات بنجاح!');
+                alert('تم تعديل وحفظ المنتج بنجاح على السحاب ✅');
             } catch(e) {
-                Object.assign(p, old);
-                renderProducts();
-                throw e;
+                console.error(e);
+                alert('تعذر حفظ تعديل المنتج: ' + (e.message || ''));
             }
         }
 
@@ -1117,11 +1038,9 @@
 
         function renderProducts() {
             const catalog=document.getElementById('store-catalog'); if(!catalog)return; catalog.innerHTML='';
-            const seoItems=products.slice(0,100).map((p,i)=>({'@type':'ListItem',position:i+1,name:p.name,url:productUrl(p)}));
-            const seoScript=document.getElementById('dynamic-product-list-schema'); if(seoScript)seoScript.textContent=JSON.stringify({'@context':'https://schema.org','@type':'ItemList',name:'منتجات مؤسسة الحمد 4K',itemListElement:seoItems});
             const activeCats=currentFilter==='all'?categories.map(c=>c.name):[currentFilter]; let filtered=[]; activeCats.forEach(cat=>filtered.push(...products.filter(p=>p.cat===cat))); if(currentFilter==='all'&&categories.length===0)filtered=[...products];
             const visible=filtered.slice(0,visibleProductCount);
-            visible.forEach(p=>{const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;if(p.oldPrice&&p.oldPrice>p.price)priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;const adminEditBtn=isAdmin?`<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>`:'';catalog.innerHTML+=`<div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}"><button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button><a href="${productUrl(p)}" class="product-seo-link" aria-label="عرض ${p.name}" onclick="openProductModal(${p.id});return false;"><div class="product-img-wrap" style="height:${currentImgHeight};"><img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async"></div></a><div class="product-body"><div><a href="${productUrl(p)}" class="product-name" onclick="openProductModal(${p.id});return false;" title="${p.name}">${p.name}</a><div>${priceHtml}</div>${adminEditBtn}</div><div class="card-cart-control"><button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button><span style="min-width:34px;text-align:center;font-weight:800;">${qty}</span><button class="qty-btn" onclick="changeQty(${p.id},1)">+</button></div><div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${sub} ج.م</span></div></div></div>`;});
+            visible.forEach(p=>{const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;if(p.oldPrice&&p.oldPrice>p.price)priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;const adminEditBtn=isAdmin?`<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>`:'';catalog.innerHTML+=`<div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}"><button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button><a href="${productUrl(p)}" class="product-seo-link" onclick="openProductModal(${p.id});return false;"><div class="product-img-wrap" style="height:${currentImgHeight};"><img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async"></div></a><div class="product-body"><div><a href="${productUrl(p)}" class="product-name" onclick="openProductModal(${p.id});return false;" title="${p.name}">${p.name}</a><div>${priceHtml}</div>${adminEditBtn}</div><div class="card-cart-control"><button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button><span style="min-width:34px;text-align:center;font-weight:800;">${qty}</span><button class="qty-btn" onclick="changeQty(${p.id},1)">+</button></div><div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${sub} ج.م</span></div></div></div>`;});
             if(!visible.length)catalog.innerHTML='<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:1.5rem;font-size:.85rem;">لا توجد منتجات مضافة حالياً في هذا القسم.</p>';
             const oldMore=document.getElementById('more-products-wrap');if(oldMore)oldMore.remove();if(visible.length<filtered.length){const wrap=document.createElement('div');wrap.id='more-products-wrap';wrap.className='more-products-wrap';wrap.innerHTML=`<button class="btn more-products-btn" onclick="showMoreProducts()">عرض المزيد (${Math.min(PRODUCTS_MORE_COUNT,filtered.length-visible.length)} منتج)</button>`;catalog.parentNode.insertBefore(wrap,catalog.nextSibling);}
             const title=document.getElementById('current-catalog-title');if(title)title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`;
@@ -1162,18 +1081,20 @@
             const prod=products.find(p=>String(p.id)===String(prodId)); if(!prod)return;
             if(!cart[prodId])cart[prodId]={...prod,qty:0}; cart[prodId].qty+=delta; if(cart[prodId].qty<=0)delete cart[prodId]; renderProducts(); updateCartUI();
         }
-        function setQty(prodId,value){const prod=products.find(p=>String(p.id)===String(prodId));if(!prod)return;let qty=Math.floor(Number(value));if(!Number.isFinite(qty)||qty<0)qty=0;if(qty===0)delete cart[prodId];else cart[prodId]={...prod,qty};renderProducts();updateCartUI();}
+        
         function updateCartUI(){const list=document.getElementById('cart-page-list'),totalEl=document.getElementById('cart-page-total'),badge=document.getElementById('cart-count-badge');let total=0,count=0;if(list){list.innerHTML='';Object.keys(cart).forEach(id=>{const item=cart[id],sub=Number(item.qty||0)*Number(item.price||0);total+=sub;count+=Number(item.qty||0);list.innerHTML+=`<div class="cart-page-item"><img src="${item.img||''}" alt="${item.name}" loading="lazy"><div><div class="cart-page-item-name">${item.name}</div><div class="cart-page-item-price">${item.price} ج.م للقطعة</div><div class="cart-page-qty"><button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button><span class="qty-number">${item.qty}</span><button class="qty-btn" onclick="changeQty(${item.id},1)">+</button></div></div><div class="cart-page-subtotal">${sub.toFixed(2)} ج.م</div></div>`;});if(!Object.keys(cart).length)list.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;">السلة فارغة حالياً. أضف منتجات من الرئيسية.</p>';}if(totalEl)totalEl.textContent=total.toFixed(2)+' ج.م';if(badge)badge.textContent=count;}
         function saveCustomerInfo(){['client-name','client-phone','client-address','client-note'].forEach(id=>{const el=document.getElementById(id);if(el)localStorage.setItem('alhamd_'+id,el.value);});}
         function loadCustomerInfo(){['client-name','client-phone','client-address','client-note'].forEach(id=>{const el=document.getElementById(id),v=localStorage.getItem('alhamd_'+id);if(el&&v)el.value=v;});const lookup=document.getElementById('orders-phone-lookup');if(lookup)lookup.value=localStorage.getItem('alhamd_client-phone')||'';}
         function getOrdersPhone(){return(document.getElementById('orders-phone-lookup')?.value||document.getElementById('client-phone')?.value||localStorage.getItem('alhamd_client-phone')||'').trim();}
         function scheduleLoadMyOrders(){clearTimeout(myOrdersLoadTimer);myOrdersLoadTimer=setTimeout(()=>loadMyOrdersCloud(),500);}
+        
         async function sendOrderWhatsApp(){
             const keys=Object.keys(cart);if(!keys.length){alert('السلة فارغة.');return;}saveCustomerInfo();const name=document.getElementById('client-name').value.trim(),phone=document.getElementById('client-phone').value.trim(),address=document.getElementById('client-address').value.trim(),note=document.getElementById('client-note').value.trim();if(!name||!phone){alert('أدخل الاسم ورقم الهاتف.');return;}
             let msg=`🛒 *طلب جديد من مؤسسة الحمد 4K*%0A👤 *العميل:* ${encodeURIComponent(name)}%0A📞 *الهاتف:* ${encodeURIComponent(phone)}%0A📍 *العنوان:* ${encodeURIComponent(address||'غير محدد')}%0A📝 *ملاحظة:* ${encodeURIComponent(note||'لا توجد')}%0A----------------------------------%0A`,total=0,items=[];keys.forEach(id=>{const item=cart[id],sub=Number(item.qty)*Number(item.price);total+=sub;items.push({id:item.id,name:item.name,qty:Number(item.qty),price:Number(item.price)});msg+=`• ${encodeURIComponent(item.name)} (×${item.qty}) = ${sub} ج.م%0A`;});msg+=`----------------------------------%0A💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
-            const newOrder={id:Date.now(),clientName:name,phone,address,note,itemsObj:items,itemsText:items.map(i=>`${i.name} (×${i.qty})`).join(', '),total:total.toFixed(2),date:new Date().toLocaleDateString('ar-EG'),status:'تم استلام الطلب 🟡',statusHistory:[{status:'تم استلام الطلب 🟡',date:new Date().toLocaleString('ar-EG')}]};myOrders.unshift(newOrder);localStorage.setItem('alhamd_my_orders',JSON.stringify(myOrders));
-            try{await db.collection('store_orders').doc(String(newOrder.id)).set({...newOrder,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){console.error(e);alert('تم تجهيز الطلب، لكن تعذر تسجيله على السحاب: '+(e.code||''));}
-            cart={};renderProducts();updateCartUI();renderAdminOrdersInbox();await loadMyOrdersCloud(phone);window.open(`https://wa.me/201126758975?text=${msg}`,'_blank');alert('تم إرسال الطلب وتسجيله. يمكنك متابعة حالته من «طلباتي».');switchView('myorders',document.querySelector('.sub-nav button:nth-child(3)'));
+            const newOrder={id:Date.now(),clientName:name,phone,address,note,itemsObj:items,itemsText:items.map(i=>`${i.name} (×${i.qty})`).join(', '),total:total.toFixed(2),date:new Date().toLocaleDateString('ar-EG'),status:'قيد المعالجة (في انتظار التأكيد) 🟡',statusHistory:[{status:'قيد المعالجة (في انتظار التأكيد) 🟡',date:new Date().toLocaleString('ar-EG')}]};
+            myOrders.unshift(newOrder);localStorage.setItem('alhamd_my_orders',JSON.stringify(myOrders));
+            try{await db.collection('store_orders').doc(String(newOrder.id)).set({...newOrder,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){console.error(e);}
+            cart={};renderProducts();updateCartUI();renderAdminOrdersInbox();await loadMyOrdersCloud(phone);window.open(`https://wa.me/201126758975?text=${msg}`,'_blank');alert('تم إرسال الطلب وتسجيله. يمكنك متابعة حالته لحظياً من «طلباتي».');switchView('myorders',document.querySelector('.sub-nav button:nth-child(3)'));
         }
 
         async function adminUpdateOrderStatus(orderId,newStatus){
@@ -1182,24 +1103,42 @@
                 await db.collection('store_orders').doc(String(order.id)).update({status:newStatus,statusHistory:history,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
                 if(newStatus==='تم التأكيد ✅'&&order.status!=='تم التأكيد ✅'){(order.itemsObj||[]).forEach(i=>{const p=products.find(x=>String(x.id)===String(i.id));if(p)p.sold=Number(p.sold||0)+Number(i.qty||0);});await saveDataToCloud();}
                 order.status=newStatus;order.statusHistory=history;renderAdminOrdersInbox();renderProducts();
-            }catch(e){console.error(e);alert('تعذر تحديث الطلب: '+(e.code||'')+'\n'+(e.message||''));}
+            }catch(e){alert('تعذر تحديث الطلب: '+(e.message||''));}
         }
+        
         function renderAdminOrdersInbox(){
             const inbox=document.getElementById('admin-orders-inbox');if(!inbox)return;if(!isAdmin){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">سجل دخول الأدمن لعرض الطلبات.</p>';return;}
             if(!adminOrders.length){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">لا توجد طلبات جديدة.</p>';return;}inbox.innerHTML='';
             adminOrders.forEach(ord=>{inbox.innerHTML+=`<div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px;margin-bottom:6px;font-size:.75rem;"><div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div><div><b>العنوان:</b> ${ord.address||'غير محدد'}</div><div><b>الطلب:</b> ${ord.itemsText||''}</div><div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${ord.status}</span></div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;"><button class="btn btn-success" style="padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم التأكيد ✅')">تأكيد</button><button class="btn" style="background:#2563eb;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الشحن 🚚')">شحن</button><button class="btn" style="background:#8b5cf6;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الاستلام 🎉')">تم الاستلام</button><button class="btn" style="background:#dc2626;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الإلغاء ❌')">إلغاء</button></div></div>`;});
         }
+
+        // تم ربط التحديث الحي (Real-time listener) لحالة الطلبات عند العميل
         async function loadMyOrdersCloud(phoneOverride=''){
-            const phone=(phoneOverride||getOrdersPhone()).trim(),listDiv=document.getElementById('my-orders-list');if(!listDiv)return;if(!phone){if(myOrdersUnsubscribe){myOrdersUnsubscribe();myOrdersUnsubscribe=null;}renderMyOrders();return;}
-            localStorage.setItem('alhamd_client-phone',phone);const lookup=document.getElementById('orders-phone-lookup');if(lookup)lookup.value=phone;
+            const phone=(phoneOverride||getOrdersPhone()).trim();
+            const listDiv=document.getElementById('my-orders-list');
+            if(!listDiv)return;
+            
+            if(!phone){
+                if(myOrdersUnsubscribe){myOrdersUnsubscribe();myOrdersUnsubscribe=null;}
+                renderMyOrders();
+                return;
+            }
+            
+            localStorage.setItem('alhamd_client-phone',phone);
+            const lookup=document.getElementById('orders-phone-lookup');
+            if(lookup)lookup.value=phone;
+            
             if(myOrdersUnsubscribe){myOrdersUnsubscribe();myOrdersUnsubscribe=null;}
             try{
                 myOrdersUnsubscribe=db.collection('store_orders').where('phone','==',phone).onSnapshot(snap=>{
                     myOrders=snap.docs.map(d=>{const x=d.data()||{};return {...x,id:x.id||d.id,itemsObj:Array.isArray(x.itemsObj)?x.itemsObj:[],status:x.status||'قيد المعالجة (في انتظار التأكيد)',statusHistory:Array.isArray(x.statusHistory)?x.statusHistory:[]};});
-                    myOrders.sort((a,b)=>Number(b.id||0)-Number(a.id||0));localStorage.setItem('alhamd_my_orders',JSON.stringify(myOrders));renderMyOrders();
-                },e=>{console.error('Client orders listener failed:',e);renderMyOrders();});
-            }catch(e){console.error('Client orders load failed:',e);renderMyOrders();}
+                    myOrders.sort((a,b)=>Number(b.id||0)-Number(a.id||0));
+                    localStorage.setItem('alhamd_my_orders',JSON.stringify(myOrders));
+                    renderMyOrders();
+                },e=>{console.error(e);renderMyOrders();});
+            }catch(e){console.error(e);renderMyOrders();}
         }
+
         function renderMyOrders(){
             const listDiv=document.getElementById('my-orders-list');if(!listDiv)return;const phone=getOrdersPhone(),orders=phone?myOrders.filter(o=>String(o.phone)===String(phone)):myOrders;if(!orders.length){listDiv.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>';return;}listDiv.innerHTML='';
             orders.forEach(ord=>{const history=(ord.statusHistory||[]).map(h=>`• ${h.status} — ${h.date}`).join('<br>');listDiv.innerHTML+=`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.8rem;margin-bottom:.6rem;"><div style="display:flex;justify-content:space-between;font-weight:bold;font-size:.8rem;color:var(--dark);margin-bottom:3px;"><span>📦 طلب #${String(ord.id).slice(-5)}</span><span style="color:#2563eb;">${ord.status}</span></div><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:3px;">المنتجات: ${ord.itemsText||''}</div><div style="display:flex;justify-content:space-between;font-size:.7rem;color:#94a3b8;"><span>الإجمالي: ${ord.total} ج.م</span><span>التاريخ: ${ord.date||''}</span></div><div class="order-status-box"><b>📢 آخر تحديث:</b> ${ord.status}</div><div class="order-status-history"><b>سجل الحالة:</b><br>${history||'لا يوجد تحديثات إضافية.'}</div></div>`;});
