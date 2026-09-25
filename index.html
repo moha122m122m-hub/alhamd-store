@@ -173,7 +173,6 @@
         .qty-btn { background: var(--dark); color: var(--primary); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
         .card-subtotal { font-weight: 700; font-size: 0.8rem; color: var(--dark); }
         
-        /* تنسيق صفحة المنتج المستقلة */
         .single-product-page { background: #fff; border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .single-product-container { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 768px) { .single-product-container { grid-template-columns: 1fr 1fr; align-items: start; } }
@@ -335,7 +334,7 @@
                 <div class="products-grid" id="store-catalog"></div>
             </div>
 
-            <!-- صفحة المنتج المستقلة (تقوم مقام صفحة خاصة بالمنتج عند فتحه أو الرابط المباشر) -->
+            <!-- صفحة المنتج المستقلة -->
             <div id="view-single-product" class="app-view">
                 <div class="single-product-page">
                     <button class="btn" style="width:auto; padding:5px 12px; margin-bottom:1rem; font-size:0.75rem;" onclick="goBackToStore()">← العودة للمتجر</button>
@@ -417,7 +416,7 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل المنتج للأدمن (مع خيار تغيير القسم) -->
+    <!-- نافذة تعديل المنتج للأدمن -->
     <div class="modal-overlay" id="edit-price-modal" onclick="closeEditModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">✏️ تعديل المنتج (القسم، الاسم، السعر)</h3>
@@ -870,6 +869,7 @@
         }
 
         function toggleCategoryMain(catName, isChecked) {
+            if (!isAdmin) return;
             let cat = categories.find(c => c.name === catName);
             if (cat) {
                 cat.showOnMain = isChecked;
@@ -879,6 +879,7 @@
         }
 
         function openEditCategoryModal(catName) {
+            if (!isAdmin) return;
             const cat = categories.find(c => c.name === catName);
             if (!cat) return;
             document.getElementById('edit-cat-old-name').value = cat.name;
@@ -887,6 +888,7 @@
         }
 
         async function saveCategoryChanges() {
+            if (!isAdmin) return;
             const oldName = document.getElementById('edit-cat-old-name').value;
             const newName = document.getElementById('edit-cat-name-val').value.trim();
             const imgFile = document.getElementById('edit-cat-img-file');
@@ -918,6 +920,7 @@
         }
 
         async function addNewCategory() {
+            if (!isAdmin) return;
             const input = document.getElementById('new-cat-input');
             const imgFile = document.getElementById('new-cat-img');
             if (!input) return;
@@ -939,6 +942,7 @@
         }
 
         async function deleteCategory(catName) {
+            if (!isAdmin) return;
             if (!confirm(`حذف القسم "${catName}"؟`)) return;
             const cat = categories.find(c => c.name === catName);
             if (!cat) return;
@@ -955,6 +959,7 @@
         }
 
         async function addNewProduct() {
+            if (!isAdmin) return;
             const cat = document.getElementById('prod-cat-select').value;
             const name = document.getElementById('prod-name-input').value.trim();
             const price = parseFloat(document.getElementById('prod-price-input').value);
@@ -981,6 +986,7 @@
         }
 
         async function deleteProduct(id) {
+            if (!isAdmin) return;
             if (!confirm('حذف المنتج؟')) return;
             products = products.filter(p => p.id !== id);
             try {
@@ -993,6 +999,7 @@
         }
 
         function openEditPriceModal(id) {
+            if (!isAdmin) return;
             const p = products.find(prod => prod.id === id);
             if (!p) return;
             document.getElementById('edit-prod-id').value = p.id;
@@ -1011,6 +1018,7 @@
         }
 
         async function saveProductChanges() {
+            if (!isAdmin) return;
             const id = parseInt(document.getElementById('edit-prod-id').value);
             const newCat = document.getElementById('edit-prod-cat-select').value;
             const newName = document.getElementById('edit-prod-name-val').value.trim();
@@ -1065,14 +1073,45 @@
             const catalog=document.getElementById('store-catalog'); if(!catalog)return; catalog.innerHTML='';
             const activeCats=currentFilter==='all'?categories.map(c=>c.name):[currentFilter]; let filtered=[]; activeCats.forEach(cat=>filtered.push(...products.filter(p=>p.cat===cat))); if(currentFilter==='all'&&categories.length===0)filtered=[...products];
             const visible=filtered.slice(0,visibleProductCount);
-            visible.forEach(p=>{const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;if(p.oldPrice&&p.oldPrice>p.price)priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;const adminEditBtn=isAdmin?`<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>`:'';catalog.innerHTML+=`<div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}"><button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button><a href="${productUrl(p)}" class="product-seo-link" onclick="openProductPage(${p.id});return false;"><div class="product-img-wrap" style="height:${currentImgHeight};"><img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async"></div></a><div class="product-body"><div><a href="${productUrl(p)}" class="product-name" onclick="openProductPage(${p.id});return false;" title="${p.name}">${p.name}</a><div>${priceHtml}</div>${adminEditBtn}</div><div class="card-cart-control"><button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button><span style="min-width:34px;text-align:center;font-weight:800;">${qty}</span><button class="qty-btn" onclick="changeQty(${p.id},1)">+</button></div><div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${sub} ج.م</span></div></div></div>`;});
+            
+            visible.forEach(p=>{
+                const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);
+                let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;
+                if(p.oldPrice&&p.oldPrice>p.price)priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
+                
+                // زر التعديل وحذف المنتج يظهر فقط إذا كان المستخدم مسجل دخول كأدمن (isAdmin)
+                const adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>` : '';
+                
+                catalog.innerHTML+=`
+                    <div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}">
+                        ${isAdmin ? `<button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>` : ''}
+                        <a href="${productUrl(p)}" class="product-seo-link" onclick="openProductPage(${p.id});return false;">
+                            <div class="product-img-wrap" style="height:${currentImgHeight};">
+                                <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
+                            </div>
+                        </a>
+                        <div class="product-body">
+                            <div>
+                                <a href="${productUrl(p)}" class="product-name" onclick="openProductPage(${p.id});return false;" title="${p.name}">${p.name}</a>
+                                <div>${priceHtml}</div>
+                                ${adminEditBtn}
+                            </div>
+                            <div class="card-cart-control">
+                                <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+                                <span style="min-width:34px;text-align:center;font-weight:800;">${qty}</span>
+                                <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+                            </div>
+                            <div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${sub} ج.م</span></div>
+                        </div>
+                    </div>`;
+            });
+
             if(!visible.length)catalog.innerHTML='<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:1.5rem;font-size:.85rem;">لا توجد منتجات مضافة حالياً في هذا القسم.</p>';
             const oldMore=document.getElementById('more-products-wrap');if(oldMore)oldMore.remove();if(visible.length<filtered.length){const wrap=document.createElement('div');wrap.id='more-products-wrap';wrap.className='more-products-wrap';wrap.innerHTML=`<button class="btn more-products-btn" onclick="showMoreProducts()">عرض المزيد (${Math.min(PRODUCTS_MORE_COUNT,filtered.length-visible.length)} منتج)</button>`;catalog.parentNode.insertBefore(wrap,catalog.nextSibling);}
             const title=document.getElementById('current-catalog-title');if(title)title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`;
         }
         function showMoreProducts(){visibleProductCount+=PRODUCTS_MORE_COUNT;renderProducts();}
 
-        // دالة فتح صفحة المنتج المستقلة
         function openProductPage(prodId, updateUrl = true) {
             const p = products.find(prod => Number(prod.id) === Number(prodId));
             if (!p) return;
