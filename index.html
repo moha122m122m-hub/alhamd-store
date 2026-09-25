@@ -984,7 +984,6 @@
             document.getElementById('edit-price-modal').style.display = 'flex';
         }
 
-        // تم تصحيح وتحديث هذه الدالة خصيصاً لحل مشكلة عدم حفظ تعديلات المنتج
         async function saveProductChanges() {
             const id = parseInt(document.getElementById('edit-prod-id').value);
             const newName = document.getElementById('edit-prod-name-val').value.trim();
@@ -1002,14 +1001,12 @@
             try {
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : p.img;
                 
-                // تحديث القيم محلياً
                 p.name = newName;
                 p.price = newPrice;
                 p.oldPrice = newOldPrice;
                 p.desc = newDesc || 'لا توجد تفاصيل إضافية.';
                 p.img = imgSrc;
 
-                // الحفظ المباشر على مستند المنتج في السحاب والتأكيد الشامل
                 await db.collection('store_products').doc(String(p.id)).set({
                     ...p,
                     idNum: Number(p.id)
@@ -1108,11 +1105,16 @@
         
         function renderAdminOrdersInbox(){
             const inbox=document.getElementById('admin-orders-inbox');if(!inbox)return;if(!isAdmin){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">سجل دخول الأدمن لعرض الطلبات.</p>';return;}
-            if(!adminOrders.length){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">لا توجد طلبات جديدة.</p>';return;}inbox.innerHTML='';
-            adminOrders.forEach(ord=>{inbox.innerHTML+=`<div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px;margin-bottom:6px;font-size:.75rem;"><div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div><div><b>العنوان:</b> ${ord.address||'غير محدد'}</div><div><b>الطلب:</b> ${ord.itemsText||''}</div><div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${ord.status}</span></div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;"><button class="btn btn-success" style="padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم التأكيد ✅')">تأكيد</button><button class="btn" style="background:#2563eb;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الشحن 🚚')">شحن</button><button class="btn" style="background:#8b5cf6;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الاستلام 🎉')">تم الاستلام</button><button class="btn" style="background:#dc2626;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الإلغاء ❌')">إلغاء</button></div></div>`;});
+            
+            // استبعاد الطلبات التي تم استلامها أو إلغاؤها من لوحة التحكم لتفريغها
+            const activeOrders = adminOrders.filter(ord => ord.status !== 'تم الاستلام 🎉' && ord.status !== 'تم الإلغاء ❌');
+            
+            if(!activeOrders.length){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">لا توجد طلبات جديدة معلقة.</p>';return;}
+            inbox.innerHTML='';
+            
+            activeOrders.forEach(ord=>{inbox.innerHTML+=`<div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px;margin-bottom:6px;font-size:.75rem;"><div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div><div><b>العنوان:</b> ${ord.address||'غير محدد'}</div><div><b>الطلب:</b> ${ord.itemsText||''}</div><div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${ord.status}</span></div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;"><button class="btn btn-success" style="padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم التأكيد ✅')">تأكيد</button><button class="btn" style="background:#2563eb;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الشحن 🚚')">شحن</button><button class="btn" style="background:#8b5cf6;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الاستلام 🎉')">تم الاستلام</button><button class="btn" style="background:#dc2626;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الإلغاء ❌')">إلغاء</button></div></div>`;});
         }
 
-        // تم ربط التحديث الحي (Real-time listener) لحالة الطلبات عند العميل
         async function loadMyOrdersCloud(phoneOverride=''){
             const phone=(phoneOverride||getOrdersPhone()).trim();
             const listDiv=document.getElementById('my-orders-list');
