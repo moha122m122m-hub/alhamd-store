@@ -167,23 +167,9 @@
         .product-seo-link { display:block; color:inherit; text-decoration:none; }
         .product-name { display:block; text-decoration:none; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; color: var(--dark); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .product-name:hover { color: var(--primary-dark); }
-        .product-price { color: #2563eb; font-weight: 800; font-size: 0.9rem; white-space: nowrap; }
-        .old-price { text-decoration: line-through; color: #94a3b8; font-size: 0.75rem; margin-right: 5px; white-space: nowrap; }
-        .discount-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            z-index: 8;
-            background: #dc2626;
-            color: #fff;
-            border-radius: 999px;
-            padding: 4px 8px;
-            font-size: 0.72rem;
-            font-weight: 900;
-            line-height: 1;
-            box-shadow: 0 2px 6px rgba(0,0,0,.18);
-            direction: ltr;
-        }
+        .product-price { color: #2563eb; font-weight: 800; font-size: 0.9rem; }
+        .old-price { text-decoration: line-through; color: #94a3b8; font-size: 0.75rem; margin-left: 4px; white-space: nowrap; }
+        .discount-badge { position:absolute; top:10px; right:10px; z-index:5; background:#dc2626; color:#fff; padding:5px 9px; border-radius:999px; font-weight:800; font-size:.75rem; box-shadow:0 2px 8px rgba(0,0,0,.18); }
         .card-cart-control { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 8px; padding: 3px; margin-top: 0.4rem; }
         .qty-btn { background: var(--dark); color: var(--primary); border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; }
         .card-subtotal { font-weight: 700; font-size: 0.8rem; color: var(--dark); }
@@ -471,9 +457,6 @@
         </div>
     </div>
 
-    <!-- Product structured data is refreshed after Firebase data loads.
-     Product pages use a single canonical URL per product: ?product=PRODUCT_ID.
-     Keep this markup synchronized with the visible product data. -->
     <script type="application/ld+json" id="dynamic-product-list-schema"></script>
     <script type="application/ld+json" id="dynamic-product-schema"></script>
     <script>
@@ -519,13 +502,8 @@
             return SITE_URL + '?product=' + encodeURIComponent(product.id);
         }
 
-        function setMeta(selector, content) {
-            const el = document.querySelector(selector);
-            if (el) el.setAttribute('content', content);
-        }
-
-        function cleanSeoText(value, fallback) {
-            return String(value || fallback || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+        function cleanSeoText(value, fallback='') {
+            return String(value ?? fallback).replace(/\s+/g,' ').trim().slice(0,5000);
         }
 
         function numericPrice(value) {
@@ -533,166 +511,89 @@
             return Number.isFinite(n) && n > 0 ? Number(n.toFixed(2)) : 0;
         }
 
+        function getDiscountPercent(product) {
+            const oldPrice = numericPrice(product?.oldPrice);
+            const price = numericPrice(product?.price);
+            if (!oldPrice || !price || oldPrice <= price) return 0;
+            return Math.round(((oldPrice - price) / oldPrice) * 100);
+        }
+
         function buildProductSchema(product) {
-            if (!product || !product.name) return null;
-
-            const price = numericPrice(product.price);
-            if (price <= 0) return null;
-
-            const oldPrice = numericPrice(product.oldPrice);
-            const description = cleanSeoText(
-                product.desc,
-                'شراء ' + product.name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.'
-            );
-
+            const price = numericPrice(product?.price);
+            const oldPrice = numericPrice(product?.oldPrice);
             const url = productUrl(product);
-            const image = product.img ? [String(product.img)] : [];
-            const schema = {
-                '@type': 'Product',
-                '@id': url + '#product',
-                'name': cleanSeoText(product.name, 'منتج'),
-                'description': description,
-                'url': url,
-                'image': image,
-                'sku': String(product.id),
-                'category': cleanSeoText(product.cat, 'منتجات كهربائية وتحكم آلي'),
-                'offers': {
-                    '@type': 'Offer',
-                    'url': url,
-                    'priceCurrency': 'EGP',
-                    'price': price,
-                    'availability': product.availability || 'https://schema.org/InStock',
-                    'itemCondition': 'https://schema.org/NewCondition',
-                    'seller': {
-                        '@type': 'Organization',
-                        'name': 'مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي',
-                        'url': SITE_URL
-                    }
-                }
+            const name = cleanSeoText(product?.name, 'منتج كهربائي');
+            const description = cleanSeoText(product?.desc, 'شراء ' + name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.');
+            const offer = {
+                '@type':'Offer', 'url':url, 'priceCurrency':'EGP', 'price':price,
+                'availability': product?.availability || 'https://schema.org/InStock',
+                'itemCondition':'https://schema.org/NewCondition',
+                'seller':{'@type':'Organization','name':'مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي','url':SITE_URL}
             };
-
-            // إذا كان هناك سعر قديم أعلى من السعر الحالي، يتم ترميزه كسعر مشطوب
-            // بالطريقة الموصى بها من Google لبيانات Merchant Listings.
-            if (oldPrice > price) {
-                schema.offers.priceSpecification = [
-                    {
-                        '@type': 'UnitPriceSpecification',
-                        'price': price,
-                        'priceCurrency': 'EGP'
-                    },
-                    {
-                        '@type': 'UnitPriceSpecification',
-                        'price': oldPrice,
-                        'priceCurrency': 'EGP',
-                        'priceType': 'https://schema.org/StrikethroughPrice'
-                    }
-                ];
-            }
-
-            // لا نخترع GTIN/MPN/Brand غير موجودة في بيانات المنتج.
-            if (product.gtin) schema.gtin = String(product.gtin);
-            if (product.gtin8) schema.gtin8 = String(product.gtin8);
-            if (product.gtin12) schema.gtin12 = String(product.gtin12);
-            if (product.gtin13) schema.gtin13 = String(product.gtin13);
-            if (product.gtin14) schema.gtin14 = String(product.gtin14);
-            if (product.mpn) schema.mpn = String(product.mpn);
-            if (product.brand) {
-                schema.brand = {
-                    '@type': 'Brand',
-                    'name': String(product.brand)
-                };
-            }
-
+            if (oldPrice > price) offer.priceSpecification = [
+                {'@type':'UnitPriceSpecification','price':price,'priceCurrency':'EGP'},
+                {'@type':'UnitPriceSpecification','price':oldPrice,'priceCurrency':'EGP','priceType':'https://schema.org/StrikethroughPrice'}
+            ];
+            const schema = {
+                '@type':'Product','@id':url+'#product','name':name,'description':description,'url':url,
+                'image':product?.img ? [product.img] : [], 'sku':String(product?.id ?? ''),
+                'category':cleanSeoText(product?.cat,'منتجات كهربائية وتحكم آلي'),'offers':offer
+            };
+            if (product?.brand) schema.brand={'@type':'Brand','name':cleanSeoText(product.brand)};
+            if (product?.gtin) schema.gtin=String(product.gtin);
+            if (product?.mpn) schema.mpn=String(product.mpn);
             return schema;
         }
 
         function renderProductStructuredData(product) {
-            const schemaEl = document.getElementById('dynamic-product-schema');
-            if (!schemaEl) return;
-
-            const productSchema = buildProductSchema(product);
-            if (!productSchema) {
-                schemaEl.textContent = '';
-                return;
-            }
-
-            schemaEl.textContent = JSON.stringify({
-                '@context': 'https://schema.org',
-                '@graph': [
-                    {
-                        '@type': 'WebPage',
-                        '@id': productUrl(product) + '#webpage',
-                        'url': productUrl(product),
-                        'name': product.name + ' | مؤسسة الحمد 4K',
-                        'isPartOf': { '@id': SITE_URL + '#website' },
-                        'mainEntity': { '@id': productUrl(product) + '#product' }
-                    },
-                    productSchema
-                ]
-            });
+            const el=document.getElementById('dynamic-product-schema');
+            if(!el || !product) return;
+            const url=productUrl(product);
+            const name=cleanSeoText(product.name,'منتج كهربائي');
+            const description=cleanSeoText(product.desc,'شراء '+name+' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.');
+            el.textContent=JSON.stringify({'@context':'https://schema.org','@graph':[
+                {'@type':'WebPage','@id':url+'#webpage','url':url,'name':name+' | مؤسسة الحمد 4K','description':description,'mainEntity':{'@id':url+'#product'}},
+                buildProductSchema(product)
+            ]});
         }
 
         function renderProductListStructuredData() {
-            const schemaEl = document.getElementById('dynamic-product-list-schema');
-            if (!schemaEl) return;
-
-            // الصفحة الرئيسية ليست صفحة منتج مفردة، لذلك لا نضع عدة Product
-            // كأنها صفحة منتج واحد. نستخدم ItemList للإشارة إلى المنتجات الظاهرة.
-            const items = products
-                .filter(p => buildProductSchema(p))
-                .slice(0, 100)
-                .map((p, index) => ({
-                    '@type': 'ListItem',
-                    'position': index + 1,
-                    'url': productUrl(p),
-                    'name': cleanSeoText(p.name, 'منتج')
-                }));
-
-            schemaEl.textContent = JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'ItemList',
-                'name': 'منتجات مؤسسة الحمد 4K',
-                'url': SITE_URL,
-                'numberOfItems': items.length,
-                'itemListElement': items
-            });
+            const el=document.getElementById('dynamic-product-list-schema');
+            if(!el || !Array.isArray(products) || !products.length) return;
+            el.textContent=JSON.stringify({'@context':'https://schema.org','@type':'ItemList','itemListElement':products.slice(0,100).map((p,i)=>({'@type':'ListItem','position':i+1,'url':productUrl(p),'name':cleanSeoText(p.name,'منتج كهربائي')}))});
         }
 
+        function setMeta(selector, content) { const el=document.querySelector(selector); if(el) el.setAttribute('content',content); }
+
         function updateProductSeo(product) {
-            if (!product) return;
-
-            const description = cleanSeoText(
-                product.desc,
-                'شراء ' + product.name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.'
-            );
-            const url = productUrl(product);
-
-            document.title = product.name + ' | مؤسسة الحمد 4K';
-            setMeta('meta[name="description"]', description);
-            setMeta('meta[property="og:title"]', product.name + ' | مؤسسة الحمد 4K');
-            setMeta('meta[property="og:description"]', description);
-            setMeta('meta[property="og:url"]', url);
-
-            let canonical = document.querySelector('link[rel="canonical"]');
-            if (canonical) canonical.href = url;
-
+            if(!product) return;
+            const name=cleanSeoText(product.name,'منتج كهربائي');
+            const description=cleanSeoText(product.desc,'شراء '+name+' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.');
+            const url=productUrl(product);
+            document.title=name+' | مؤسسة الحمد 4K';
+            setMeta('meta[name="description"]',description);
+            setMeta('meta[property="og:title"]',name+' | مؤسسة الحمد 4K');
+            setMeta('meta[property="og:description"]',description);
+            setMeta('meta[property="og:url"]',url);
+            const ogImage=document.querySelector('meta[property="og:image"]');
+            if(ogImage && product.img) ogImage.setAttribute('content',product.img);
+            const canonical=document.querySelector('link[rel="canonical"]');
+            if(canonical) canonical.href=url;
             renderProductStructuredData(product);
         }
 
         function resetProductSeo() {
-            document.title = DEFAULT_TITLE;
-            setMeta('meta[name="description"]', DEFAULT_DESCRIPTION);
-            setMeta('meta[property="og:title"]', DEFAULT_OG_TITLE);
-            setMeta('meta[property="og:description"]', DEFAULT_OG_DESCRIPTION);
-            setMeta('meta[property="og:url"]', DEFAULT_CANONICAL);
-
-            const canonical = document.querySelector('link[rel="canonical"]');
-            if (canonical) canonical.href = DEFAULT_CANONICAL;
-
-            const schema = document.getElementById('dynamic-product-schema');
-            if (schema) schema.textContent = '';
-
-            renderProductListStructuredData();
+            document.title=DEFAULT_TITLE;
+            setMeta('meta[name="description"]',DEFAULT_DESCRIPTION);
+            setMeta('meta[property="og:title"]',DEFAULT_OG_TITLE);
+            setMeta('meta[property="og:description"]',DEFAULT_OG_DESCRIPTION);
+            setMeta('meta[property="og:url"]',DEFAULT_CANONICAL);
+            const canonical=document.querySelector('link[rel="canonical"]');
+            if(canonical) canonical.href=DEFAULT_CANONICAL;
+            const ogImage=document.querySelector('meta[property="og:image"]');
+            if(ogImage && ogImage.dataset.defaultContent) ogImage.setAttribute('content',ogImage.dataset.defaultContent);
+            const schema=document.getElementById('dynamic-product-schema');
+            if(schema) schema.textContent='';
         }
 
         function openProductFromUrl() {
@@ -1218,43 +1119,25 @@
             renderProducts();
         }
 
-        function getDiscountPercent(product) {
-            const price = Number(product?.price);
-            const oldPrice = Number(product?.oldPrice);
-            if (!Number.isFinite(price) || !Number.isFinite(oldPrice) || oldPrice <= price || price <= 0) return 0;
-            return Math.round(((oldPrice - price) / oldPrice) * 100);
-        }
-
-        function formatPrice(value) {
-            const n = Number(value);
-            return Number.isFinite(n) ? n.toLocaleString('ar-EG', { maximumFractionDigits: 2 }) : '0';
-        }
-
         function renderProducts() {
             const catalog=document.getElementById('store-catalog'); if(!catalog)return; catalog.innerHTML='';
             const activeCats=currentFilter==='all'?categories.map(c=>c.name):[currentFilter]; let filtered=[]; activeCats.forEach(cat=>filtered.push(...products.filter(p=>p.cat===cat))); if(currentFilter==='all'&&categories.length===0)filtered=[...products];
             const visible=filtered.slice(0,visibleProductCount);
-
+            
             visible.forEach(p=>{
                 const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);
-                const discountPercent = getDiscountPercent(p);
-                let priceHtml=`<span class="product-price">${formatPrice(p.price)} ج.م</span>`;
-                if(discountPercent > 0) {
-                    priceHtml=`<span class="product-price">${formatPrice(p.price)} ج.م</span><span class="old-price">${formatPrice(p.oldPrice)} ج.م</span>`;
-                }
-
-                const discountBadge = discountPercent > 0
-                    ? `<span class="discount-badge" aria-label="خصم ${discountPercent}%">خصم ${discountPercent}%</span>`
-                    : '';
-
+                const discountPercent=getDiscountPercent(p);
+                let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;
+                if(p.oldPrice&&Number(p.oldPrice)>Number(p.price))priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
+                
                 const adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>` : '';
-
+                
                 catalog.innerHTML+=`
                     <div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}">
+                        ${discountPercent ? `<div class="discount-badge">خصم ${discountPercent}%</div>` : ''}
                         ${isAdmin ? `<button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>` : ''}
                         <a href="${productUrl(p)}" class="product-seo-link" onclick="openProductPage(${p.id});return false;">
                             <div class="product-img-wrap" style="height:${currentImgHeight};">
-                                ${discountBadge}
                                 <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
                             </div>
                         </a>
@@ -1269,16 +1152,14 @@
                                 <span style="min-width:34px;text-align:center;font-weight:800;">${qty}</span>
                                 <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
                             </div>
-                            <div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${formatPrice(sub)} ج.م</span></div>
+                            <div style="text-align:center;margin-top:4px;"><span class="card-subtotal">المجموع: ${sub} ج.م</span></div>
                         </div>
                     </div>`;
             });
 
             if(!visible.length)catalog.innerHTML='<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:1.5rem;font-size:.85rem;">لا توجد منتجات مضافة حالياً في هذا القسم.</p>';
             const oldMore=document.getElementById('more-products-wrap');if(oldMore)oldMore.remove();if(visible.length<filtered.length){const wrap=document.createElement('div');wrap.id='more-products-wrap';wrap.className='more-products-wrap';wrap.innerHTML=`<button class="btn more-products-btn" onclick="showMoreProducts()">عرض المزيد (${Math.min(PRODUCTS_MORE_COUNT,filtered.length-visible.length)} منتج)</button>`;catalog.parentNode.insertBefore(wrap,catalog.nextSibling);}
-            const title=document.getElementById('current-catalog-title');if(title)title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`;
-
-            renderProductListStructuredData();
+            const title=document.getElementById('current-catalog-title');if(title)title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`; renderProductListStructuredData();
         }
         function showMoreProducts(){visibleProductCount+=PRODUCTS_MORE_COUNT;renderProducts();}
 
@@ -1294,11 +1175,14 @@
             document.getElementById('single-prod-img').src = p.img;
             document.getElementById('single-prod-cat').textContent = '📁 القسم: ' + (p.cat || 'عام');
             document.getElementById('single-prod-title').textContent = p.name;
+            const detailDiscount=getDiscountPercent(p);
+            const oldBadge=document.getElementById('single-product-discount-badge');
+            if(oldBadge) oldBadge.remove();
+            if(detailDiscount){ const b=document.createElement('span'); b.id='single-product-discount-badge'; b.className='discount-badge'; b.style.position='static'; b.style.display='inline-block'; b.style.margin='8px 0'; b.textContent='خصم '+detailDiscount+'%'; document.getElementById('single-prod-title').parentNode.insertBefore(b,document.getElementById('single-prod-title').nextSibling); }
             
-            const singleDiscount = getDiscountPercent(p);
-            let priceHtml = `<span class="product-price">${formatPrice(p.price)} ج.م</span>`;
-            if (singleDiscount > 0) {
-                priceHtml += ` <span class="old-price">${formatPrice(p.oldPrice)} ج.م</span> <span class="discount-badge" style="position:static;display:inline-block;">خصم ${singleDiscount}%</span>`;
+            let priceHtml = `${p.price} ج.م`;
+            if (p.oldPrice && p.oldPrice > p.price) {
+                priceHtml = `${p.price} ج.م <span class="old-price">${p.oldPrice} ج.م</span>`;
             }
             document.getElementById('single-prod-price').innerHTML = priceHtml;
             document.getElementById('single-prod-desc').textContent = p.desc;
