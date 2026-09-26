@@ -664,24 +664,25 @@
                     categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
                     products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.data().id || Date.now()) }));
                     products.forEach(p => { p.id = p.idNum; });
-                    const settings = settingsSnap.exists ? settingsSnap.data() : {};
-                    
-                    // تحميل البنرات (صور أو فيديو)
-                    if (settings.banner1) applyBannerMedia(1, settings.banner1);
-                    if (settings.banner2) applyBannerMedia(2, settings.banner2);
-                    if (settings.banner3) applyBannerMedia(3, settings.banner3);
-
-                    if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
-                } else {
-                    categories = [
-                        { id:'cat_bosh', name:'بوش', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                        { id:'cat_mm', name:'Mm', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                        { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
-                        { id:'cat_relay', name:'رداي', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true }
-                    ];
-                    products = [{ id:1789609784133, cat:'بوش', name:'ب ش', price:20, oldPrice:19, desc:'لا توجد تفاصيل إضافية.', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500', sold:0 }];
-                    await saveAllDataToCloud();
                 }
+
+                // احتياطي: لو البيانات موجودة في المستند القديم main_config
+                const doc = await db.collection('store_data').doc('main_config').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (!categories.length && data.categories) {
+                        categories = (data.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now()), ...c }));
+                    }
+                    if (!products.length && data.products) {
+                        products = data.products || [];
+                    }
+                }
+
+                const settings = settingsSnap.exists ? settingsSnap.data() : {};
+                if (settings.banner1) applyBannerMedia(1, settings.banner1);
+                if (settings.banner2) applyBannerMedia(2, settings.banner2);
+                if (settings.banner3) applyBannerMedia(3, settings.banner3);
+                if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
 
                 renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
                 if (isAdmin) loadAdminOrdersCloud();
