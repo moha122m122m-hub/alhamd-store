@@ -82,7 +82,6 @@
         .sub-nav button { background: none; border: none; color: #cbd5e1; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
         .sub-nav button.active, .sub-nav button:hover { color: var(--primary); }
         
-        /* تنسيق البنرات (صور أو فيديوهات) */
         .dynamic-banner-wrap { max-width: 1280px; margin: 1rem auto 0 auto; padding: 0 1rem; }
         .dynamic-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
         @media (min-width: 768px) { .dynamic-banner-card { height: 240px; } }
@@ -161,8 +160,6 @@
         @media (min-width: 576px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
         
         .product-card { background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        
-        /* شارة نسبة الخصم في أعلى كرت المنتج */
         .discount-badge { position: absolute; top: 6px; right: 6px; background: #dc2626; color: white; padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; z-index: 5; }
 
         .product-img-wrap { width: 100%; height: 240px; background: #ffffff; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f1f5f9; overflow: hidden; cursor: pointer; }
@@ -654,27 +651,32 @@
 
         async function loadDataFromCloud() {
             try {
+                // جلب البيانات من المجموعات المنفصلة أو من المستند القديم main_config لضمان ظهور منتجاتك فوراً
                 const [catSnap, prodSnap, settingsSnap] = await Promise.all([
                     db.collection('store_categories').get(),
                     db.collection('store_products').get(),
                     db.collection('store_settings').doc('main').get()
                 ]);
 
-                if (!catSnap.empty || !prodSnap.empty) {
+                if (!catSnap.empty) {
                     categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                }
+                if (!prodSnap.empty) {
                     products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.data().id || Date.now()) }));
                     products.forEach(p => { p.id = p.idNum; });
                 }
 
-                // احتياطي: لو البيانات موجودة في المستند القديم main_config
-                const doc = await db.collection('store_data').doc('main_config').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (!categories.length && data.categories) {
-                        categories = (data.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now()), ...c }));
-                    }
-                    if (!products.length && data.products) {
-                        products = data.products || [];
+                // لو لم توجد في المجموعات، نقرأ من المستند القديم الاحتياطي main_config
+                if (!categories.length || !products.length) {
+                    const legacyDoc = await db.collection('store_data').doc('main_config').get();
+                    if (legacyDoc.exists) {
+                        const legacyData = legacyDoc.data();
+                        if (!categories.length && legacyData.categories) {
+                            categories = (legacyData.categories || []).map(c => ({ id:c.id || ('cat_' + Date.now()), ...c }));
+                        }
+                        if (!products.length && legacyData.products) {
+                            products = legacyData.products || [];
+                        }
                     }
                 }
 
@@ -688,7 +690,7 @@
                 if (isAdmin) loadAdminOrdersCloud();
                 openProductFromUrl();
             } catch (error) {
-                console.error(error);
+                console.error('خطأ في جلب البيانات:', error);
             }
         }
 
