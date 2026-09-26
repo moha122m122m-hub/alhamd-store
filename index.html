@@ -6,7 +6,6 @@
     <meta name="keywords" content="مؤسسة الحمد 4K, توريدات كهربائية, تحكم آلي, كونتاكتور, بوش باتن, تايمر, لمبات إشارة, لوحات كهرباء, 26 نجيب الريحاني">
     <link rel="canonical" href="https://alhamd4k.shop/">
     
-    <!-- Open Graph for Search & Social Sharing -->
     <meta property="og:title" content="مؤسسة الحمد 4K للتوريدات الكهربائية">
     <meta property="og:description" content="متخصصون في مستلزمات التحكم الآلي وتوزيع الكهرباء - 26 نجيب الريحاني مول رويال.">
     <meta property="og:url" content="https://alhamd4k.shop/">
@@ -619,25 +618,44 @@
 
         async function loadDataFromCloud() {
             try {
-                const doc = await db.collection('store_data').doc('main_config').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    categories = (data.categories || []).map(c => ({ id: c.id || ('cat_' + Date.now()), ...c }));
-                    products = (data.products || []).map(p => ({ ...p, idNum: Number(p.id || Date.now()) }));
-                    products.forEach(p => { p.id = p.idNum; });
+                // جلب البيانات من المجموعات المنفصلة ومن المستند القديم لضمان عدم ضياع أي منتج
+                const [catSnap, prodSnap, legacyDoc, settingsSnap] = await Promise.all([
+                    db.collection('store_categories').get(),
+                    db.collection('store_products').get(),
+                    db.collection('store_data').doc('main_config').get(),
+                    db.collection('store_settings').doc('main').get()
+                ]);
+
+                let cloudCategories = [];
+                let cloudProducts = [];
+
+                if (!catSnap.empty) {
+                    cloudCategories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                }
+                if (!prodSnap.empty) {
+                    cloudProducts = prodSnap.docs.map(d => ({ id: d.id, ...d.data(), idNum: Number(d.data().idNum || d.data().id || Date.now()) }));
+                    cloudProducts.forEach(p => { p.id = p.idNum; });
                 }
 
-                if (!categories.length || !products.length) {
-                    const [catSnap, prodSnap] = await Promise.all([
-                        db.collection('store_categories').get(),
-                        db.collection('store_products').get()
-                    ]);
-                    if (!catSnap.empty) categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    if (!prodSnap.empty) {
-                        products = prodSnap.docs.map(d => ({ id: d.id, ...d.data(), idNum: Number(d.data().idNum || d.data().id || Date.now()) }));
-                        products.forEach(p => { p.id = p.idNum; });
+                if (legacyDoc.exists) {
+                    const legacyData = legacyDoc.data();
+                    if (legacyData.categories) {
+                        legacyData.categories.forEach(lc => {
+                            if (!cloudCategories.some(cc => cc.name === lc.name)) cloudCategories.push(lc);
+                        });
+                    }
+                    if (legacyData.products) {
+                        legacyData.products.forEach(lp => {
+                            if (!cloudProducts.some(cp => String(cp.id) === String(lp.id) || cp.name === lp.name)) {
+                                lp.id = Number(lp.id || Date.now());
+                                cloudProducts.push(lp);
+                            }
+                        });
                     }
                 }
+
+                categories = cloudCategories;
+                products = cloudProducts;
 
                 if (!categories.length) {
                     categories = [
@@ -646,7 +664,6 @@
                     ];
                 }
 
-                const settingsSnap = await db.collection('store_settings').doc('main').get();
                 const settings = settingsSnap.exists ? settingsSnap.data() : {};
                 if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
                 if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
@@ -693,6 +710,16 @@
 
         async function saveDataToCloud() {
             try {
+                const batch = db.batch();
+                categories.forEach(c => {
+                    if (!c.id) c.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+                    batch.set(db.collection('store_categories').doc(String(c.id)), c);
+                });
+                products.forEach(p => {
+                    const id = String(p.id);
+                    batch.set(db.collection('store_products').doc(id), { ...p, idNum:Number(p.id) });
+                });
+                await batch.commit();
                 await db.collection('store_data').doc('main_config').set({ categories, products }, { merge: true });
                 return true;
             } catch (error) {
