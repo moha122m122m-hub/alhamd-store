@@ -82,10 +82,10 @@
         .sub-nav button { background: none; border: none; color: #cbd5e1; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
         .sub-nav button.active, .sub-nav button:hover { color: var(--primary); }
         
-        .dynamic-banner-wrap { max-width: 1280px; margin: 1rem auto 0 auto; padding: 0 1rem; }
-        .dynamic-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-        @media (min-width: 768px) { .dynamic-banner-card { height: 240px; } }
-        .dynamic-banner-card img, .dynamic-banner-card video { width: 100%; height: 100%; object-fit: cover; }
+        .hero-banner-wrap { max-width: 1280px; margin: 1rem auto 0 auto; padding: 0 1rem; }
+        .hero-banner-card { width: 100%; height: 180px; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        @media (min-width: 768px) { .hero-banner-card { height: 240px; } }
+        .hero-banner-card img { width: 100%; height: 100%; object-fit: cover; }
 
         .main-layout { max-width: 1280px; margin: 1.5rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 992px) { .main-layout { grid-template-columns: 3fr 1fr; } }
@@ -250,10 +250,10 @@
         <button onclick="switchView('contact', this)">📞 اتصل بنا</button>
     </div>
 
-    <!-- البنر الأول (أعلى الصفحة الرئيسية) -->
-    <div class="dynamic-banner-wrap" id="banner-wrap-1">
-        <div class="dynamic-banner-card" id="banner-container-1">
-            <img id="banner-media-1" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="مؤسسة الحمد 4K">
+    <!-- صورة الغلاف الأصلية الثابتة فقط -->
+    <div class="hero-banner-wrap" id="main-banner-container">
+        <div class="hero-banner-card">
+            <img id="main-banner-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي">
         </div>
     </div>
 
@@ -263,36 +263,13 @@
             <div id="view-store" class="app-view active-view">
                 <div class="admin-box" id="admin-control-panel">
                     <h3 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; color:var(--text-main); font-size:1rem;">
-                        <span>🛠️ لوحة الإدارة السحابية والبنرات</span>
+                        <span>🛠️ لوحة الإدارة السحابية</span>
                         <button class="btn btn-danger" style="width:auto; padding:2px 8px; font-size:0.7rem;" onclick="adminLogout()">خروج</button>
                     </h3>
                     
                     <div style="background:#eff6ff; padding:10px; border-radius:8px; border:1px solid #2563eb; margin-bottom:1rem; text-align:center;">
                         <h4 style="color:#2563eb; margin-bottom:0.3rem; font-size:0.85rem;">☁️ السيرفر السحابي متصل بنجاح:</h4>
-                        <p style="font-size:0.75rem; color:#1e3a8a;">أي منتج، قسم، أو بنر تضيفه سيتم حفظه تلقائياً على السحاب!</p>
-                    </div>
-
-                    <!-- إدارة البنرات (صور أو فيديوهات) -->
-                    <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
-                        <h4 style="color:var(--text-main); margin-bottom:0.5rem; font-size:0.85rem;">📢 إدارة البنرات الإعلانية (صور أو فيديو):</h4>
-                        
-                        <div class="input-group">
-                            <label>1️⃣ بنر أعلى الصفحة الرئيسية:</label>
-                            <input type="file" id="banner-file-1" accept="image/*,video/*" style="font-size:0.7rem;">
-                            <button class="btn" style="padding:4px; font-size:0.75rem; margin-top:4px;" onclick="updateCustomBanner(1)">حفظ البنر الأول</button>
-                        </div>
-
-                        <div class="input-group">
-                            <label>2️⃣ بنر أسفل زر "عرض المزيد":</label>
-                            <input type="file" id="banner-file-2" accept="image/*,video/*" style="font-size:0.7rem;">
-                            <button class="btn" style="padding:4px; font-size:0.75rem; margin-top:4px;" onclick="updateCustomBanner(2)">حفظ البنر الثاني</button>
-                        </div>
-
-                        <div class="input-group">
-                            <label>3️⃣ بنر صفحة السلة:</label>
-                            <input type="file" id="banner-file-3" accept="image/*,video/*" style="font-size:0.7rem;">
-                            <button class="btn" style="padding:4px; font-size:0.75rem; margin-top:4px;" onclick="updateCustomBanner(3)">حفظ بنر السلة</button>
-                        </div>
+                        <p style="font-size:0.75rem; color:#1e3a8a;">أي منتج أو قسم تضيفه أو تعدله سيتم حفظه تلقائياً على السحاب للجميع!</p>
                     </div>
 
                     <div style="background:var(--card-bg); padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
@@ -321,6 +298,11 @@
                         </div>
                     </div>
 
+                    <div class="input-group" style="background:var(--card-bg); padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
+                        <label>🖼️ تغيير صورة الغلاف الأصلية:</label>
+                        <input type="file" id="banner-img-file" accept="image/*" style="font-size:0.75rem; margin-bottom:4px;">
+                        <button class="btn" style="padding:0.3rem; font-size:0.8rem;" onclick="updateHeroBanner()">حفظ الغلاف</button>
+                    </div>
                     <hr style="margin:0.8rem 0; border:0; border-top:1px solid #e2e8f0;">
 
                     <div style="font-weight: bold; margin-bottom: 0.4rem; color: var(--text-main); font-size:0.85rem;">إضافة قسم جديد:</div>
@@ -341,7 +323,7 @@
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
                         <input type="number" id="prod-price-input" placeholder="السعر" style="padding:0.4rem; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:6px;">
-                        <input type="number" id="prod-old-price-input" placeholder="سعر الخصم القديم" style="padding:0.4rem; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:6px;">
+                        <input type="number" id="prod-old-price-input" placeholder="سعر الخصم (اختياري)" style="padding:0.4rem; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:6px;">
                     </div>
                     <input type="file" id="prod-img-file" accept="image/*" style="font-size:0.75rem; margin-bottom:0.5rem; display:block;">
                     <textarea id="prod-desc-input" rows="2" placeholder="تفاصيل المنتج..." style="width:100%; padding:0.4rem; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:0.5rem;"></textarea>
@@ -364,13 +346,6 @@
                     <h3 id="current-catalog-title">قسم: الكل</h3>
                 </div>
                 <div class="products-grid" id="store-catalog"></div>
-                
-                <!-- البنر الثاني (أسفل عرض المزيد في الرئيسية) -->
-                <div class="dynamic-banner-wrap" id="banner-wrap-2" style="margin-top:2rem;">
-                    <div class="dynamic-banner-card" id="banner-container-2">
-                        <img id="banner-media-2" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="بانر ترويجي">
-                    </div>
-                </div>
             </div>
 
             <!-- صفحة عرض المنتج المستقلة للعملاء -->
@@ -393,13 +368,6 @@
             </div>
 
             <div id="view-cart" class="app-view">
-                <!-- البنر الثالث (داخل صفحة السلة) -->
-                <div class="dynamic-banner-wrap" id="banner-wrap-3" style="margin-bottom:1.5rem; margin-top:0;">
-                    <div class="dynamic-banner-card" id="banner-container-3">
-                        <img id="banner-media-3" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80" alt="بانر السلة">
-                    </div>
-                </div>
-
                 <div class="cart-page-card">
                     <h2 style="text-align:center;color:var(--text-main);font-size:1.15rem;margin-bottom:1rem;">🛒 سلة المشتريات والفاتورة</h2>
                     <div id="cart-page-list" class="cart-page-list"></div>
@@ -651,7 +619,6 @@
 
         async function loadDataFromCloud() {
             try {
-                // جلب مباشر من المستند القديم main_config الذي يحتوي على منتجاتك وأقسامك الحقيقية
                 const doc = await db.collection('store_data').doc('main_config').get();
                 if (doc.exists) {
                     const data = doc.data();
@@ -660,7 +627,6 @@
                     products.forEach(p => { p.id = p.idNum; });
                 }
 
-                // لو لم توجد في main_config نجرب المجموعات المنفصلة
                 if (!categories.length || !products.length) {
                     const [catSnap, prodSnap] = await Promise.all([
                         db.collection('store_categories').get(),
@@ -673,7 +639,6 @@
                     }
                 }
 
-                // لو مفيش خالص نحط الأقسام الافتراضية
                 if (!categories.length) {
                     categories = [
                         { id:'cat_contactor', name:'كونتاكتور', img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=200', showOnMain:true },
@@ -683,9 +648,7 @@
 
                 const settingsSnap = await db.collection('store_settings').doc('main').get();
                 const settings = settingsSnap.exists ? settingsSnap.data() : {};
-                if (settings.banner1) applyBannerMedia(1, settings.banner1);
-                if (settings.banner2) applyBannerMedia(2, settings.banner2);
-                if (settings.banner3) applyBannerMedia(3, settings.banner3);
+                if (settings.banner) document.getElementById('main-banner-img').src = settings.banner;
                 if (settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
 
                 renderCategories(); renderProducts(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
@@ -696,37 +659,36 @@
             }
         }
 
-        function applyBannerMedia(index, url) {
-            const container = document.getElementById('banner-container-' + index);
-            if (!container) return;
-            container.innerHTML = '';
-            if (url.includes('data:video') || url.endsWith('.mp4') || url.includes('webm')) {
-                container.innerHTML = `<video src="${url}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`;
-            } else {
-                container.innerHTML = `<img id="banner-media-${index}" src="${url}" alt="بانر ترويجي" style="width:100%; height:100%; object-fit:cover;">`;
-            }
-        }
-
-        async function updateCustomBanner(index) {
+        async function updateHeroBanner() {
             if (!isAdmin) return;
-            const input = document.getElementById('banner-file-' + index);
-            if (!input || !input.files || !input.files[0]) { alert('اختر ملف صورة أو فيديو أولاً.'); return; }
-            const file = input.files[0];
+            const input = document.getElementById('banner-img-file');
+            if (!input || !input.files || !input.files[0]) { alert('اختر صورة أولاً.'); return; }
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Data = e.target.result;
-                try {
-                    let updateObj = {};
-                    updateObj['banner' + index] = base64Data;
-                    await db.collection('store_settings').doc('main').set(updateObj, { merge: true });
-                    applyBannerMedia(index, base64Data);
-                    input.value = '';
-                    alert('تم حفظ وتحديث البنر بنجاح على السحاب ✅');
-                } catch(err) {
-                    alert('تعذر حفظ البنر.');
-                }
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const maxWidth = 1400;
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round(img.width * scale));
+                    canvas.height = Math.max(1, Math.round(img.height * scale));
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0,0,canvas.width,canvas.height);
+                    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                    let compressed = canvas.toDataURL('image/jpeg',0.72);
+                    try {
+                        await db.collection('store_settings').doc('main').set({ banner: compressed }, { merge: true });
+                        document.getElementById('main-banner-img').src = compressed;
+                        input.value = '';
+                        alert('تم تغيير صورة الغلاف وحفظها بنجاح على السحاب.');
+                    } catch(err) {
+                        alert('تعذر الحفظ.');
+                    }
+                };
+                img.src = e.target.result;
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(input.files[0]);
         }
 
         async function saveDataToCloud() {
@@ -826,8 +788,8 @@
             if (target) target.classList.add('active-view');
             if (btnEl) btnEl.classList.add('active');
             
-            const banner1 = document.getElementById('banner-wrap-1');
-            if (banner1) banner1.style.display = (viewName === 'store') ? 'block' : 'none';
+            const banner = document.getElementById('main-banner-container');
+            if (banner) banner.style.display = (viewName === 'store') ? 'block' : 'none';
 
             if (viewName === 'myorders') { loadMyOrdersCloud(); }
             if (viewName === 'cart') { updateCartUI(); }
@@ -1128,7 +1090,7 @@
             document.getElementById('single-prod-add-btn').onclick = function() { changeQty(p.id, 1); alert('تمت إضافة المنتج إلى السلة 🛒'); };
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
             document.getElementById('view-single-product').classList.add('active-view');
-            const banner = document.getElementById('banner-wrap-1');
+            const banner = document.getElementById('main-banner-container');
             if (banner) banner.style.display = 'none';
             window.scrollTo({top:0, behavior:'smooth'});
         }
