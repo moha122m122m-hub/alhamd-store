@@ -353,7 +353,7 @@
                 </div>
 
                 <div class="section-title-bar">
-                    <h3 id="current-catalog-title">قسم: الكل</h3>
+                    <h3 id="current-catalog-title">المنتجات</h3>
                 </div>
                 <div class="products-grid" id="store-catalog"></div>
             </div>
@@ -508,9 +508,14 @@
         let currentSiteTheme = localStorage.getItem('alhamd_site_theme') || 'white';
         let visibleProductCount = 6;
         let dataLoaded = false;
+        let productPageCursor = null;
+        let productHasMore = false;
+        let productPageLoading = false;
+        let productObserver = null;
+        const productCache = new Map();
         let dataLoadFailed = false;
-        const PRODUCTS_INITIAL_COUNT = 6;
-        const PRODUCTS_MORE_COUNT = 8;
+        const PRODUCTS_INITIAL_COUNT = 12;
+        const PRODUCTS_MORE_COUNT = 12;
         let myOrdersLoadTimer = null;
         let myOrdersUnsubscribe = null;
         const SITE_URL = 'https://alhamd4k.shop/';
@@ -676,10 +681,20 @@
             if(schema) schema.textContent='';
         }
 
-        function openProductFromUrl() {
+        async function openProductFromUrl() {
             const id = new URLSearchParams(window.location.search).get('product');
             if (!id) { resetProductSeo(); return; }
-            const product = products.find(p => String(p.id) === String(id));
+            let product = productCache.get(String(id)) || products.find(p => String(p.id) === String(id));
+            if (!product) {
+                try {
+                    const snap = await db.collection('store_products').doc(String(id)).get();
+                    if (snap.exists) {
+                        const data = snap.data() || {};
+                        product = { ...data, id:Number(data.idNum || data.id || id) };
+                        productCache.set(String(product.id), product);
+                    }
+                } catch(e) { console.error('تعذر تحميل المنتج من الرابط:', e); }
+            }
             if (product) openProductPage(product.id, false);
         }
 
@@ -697,13 +712,17 @@
         auth.onAuthStateChanged(async function(user) {
             isAdmin = !!user;
             checkAdminState();
-            if(dataLoaded) renderProducts();
             renderAdminTagBox();
             renderAdminOrdersInbox();
             if (isAdmin) {
+                await loadAllProductsForAdmin();
                 await loadAdminOrdersCloud();
                 if(dataLoaded) await migrateExistingImagesToStorage();
-            } else { adminOrders = []; renderAdminOrdersInbox(); }
+            } else {
+                adminOrders = [];
+                renderAdminOrdersInbox();
+                if(dataLoaded) renderProducts();
+            }
         });
 
         async function loadAdminOrdersCloud() {
@@ -734,29 +753,74 @@
             }
         }
 
+        function normalizeProductDoc(doc) {
+            const data = doc.data() || {};
+            const id = Number(data.idNum || data.id || doc.id);
+            return { ...data, id, idNum:id };
+        }
+
+        async function loadProductsPage(reset=false) {
+            if (productPageLoading || (!reset && !productHasMore)) return;
+            productPageLoading = true;
+            const catalog=document.getElementById('store-catalog');
+            if (catalog && reset) catalog.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:28px;color:#64748b;"><div class="loading-spinner" style="margin:0 auto 10px;"></div>جاري تحميل المنتجات...</div>';
+            try {
+                let q = db.collection('store_products');
+                if (currentFilter !== 'all') q = q.where('cat','==',currentFilter);
+                q = q.orderBy('idNum','desc').limit(PRODUCTS_INITIAL_COUNT);
+                if (!reset && productPageCursor) q = q.startAfter(productPageCursor);
+                const snap = await q.get();
+                const page = snap.docs.map(normalizeProductDoc);
+                page.forEach(p => productCache.set(String(p.id), p));
+                if (reset) products = [];
+                products = products.concat(page);
+                productPageCursor = snap.docs.length ? snap.docs[snap.docs.length-1] : productPageCursor;
+                productHasMore = snap.docs.length === PRODUCTS_INITIAL_COUNT;
+                dataLoaded = true;
+                renderProducts();
+            } catch(e) {
+                console.error('خطأ تحميل المنتجات:',e);
+                productHasMore=false;
+                if (catalog && reset) catalog.innerHTML='<div class="data-error-box">تعذر تحميل المنتجات. تحقق من الإنترنت ثم أعد المحاولة.</div>';
+            } finally {
+                productPageLoading=false;
+            }
+        }
+
+        async function loadAllProductsForAdmin() {
+            if (!isAdmin) return;
+            try {
+                const snap = await db.collection('store_products').get();
+                products = snap.docs.map(normalizeProductDoc);
+                products.forEach(p => productCache.set(String(p.id),p));
+                productPageCursor = null; productHasMore=false; dataLoaded=true;
+                renderProducts();
+            } catch(e) { console.error('تعذر تحميل منتجات الأدمن:',e); }
+        }
+
         async function loadDataFromCloud() {
             dataLoadFailed=false;
             try {
-                const [catSnap, prodSnap, settingsSnap] = await Promise.all([
+                const [catSnap, settingsSnap] = await Promise.all([
                     db.collection('store_categories').get(),
-                    db.collection('store_products').get(),
                     db.collection('store_settings').doc('main').get()
                 ]);
 
                 categories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
-                products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.data().id || Date.now()) }));
-                products.forEach(p => { p.id = p.idNum; });
 
                 const settings = settingsSnap.exists ? settingsSnap.data() : {};
                 const bannerEl=document.getElementById('main-banner-img');
                 if(settings.banner && bannerEl){ bannerEl.src=settings.banner; bannerEl.style.display='block'; }
                 if(settings.theme) { currentSiteTheme = settings.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
 
-                // لا ننشئ منتجات أو صوراً وهمية تلقائياً. إذا كانت قاعدة البيانات فارغة تظهر رسالة حقيقية فقط بعد اكتمال التحميل.
+                renderCategories(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+                await loadProductsPage(true);
+                if (isAdmin) {
+                    await loadAllProductsForAdmin();
+                    await loadAdminOrdersCloud();
+                    await migrateExistingImagesToStorage();
+                }
                 dataLoaded=true;
-                renderCategories(); renderProducts(); renderProductListStructuredData(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
-                if (isAdmin) await loadAdminOrdersCloud();
-                await migrateExistingImagesToStorage();
                 hideLoadingOverlay();
                 openProductFromUrl();
             } catch (error) {
@@ -765,7 +829,6 @@
                 showLoadingError('تأكد من اتصال الإنترنت وإعدادات Firebase ثم حاول مرة أخرى.');
             }
         }
-
         async function saveAllDataToCloud(bannerOverride = null) {
             const bannerEl=document.getElementById('main-banner-img');
             const bannerSrc = bannerOverride || bannerEl?.src || '';
@@ -1091,6 +1154,7 @@
                 const imgSrc = imgFile?.files?.[0] ? await uploadImageToStorage(imgFile.files[0], 'products', 1800, 0.84) : '';
                 const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
                 products.push(product);
+                productCache.set(String(product.id), product);
                 await saveDataToCloud();
                 document.getElementById('prod-name-input').value = '';
                 document.getElementById('prod-price-input').value = '';
@@ -1108,6 +1172,7 @@
             if (!isAdmin) return;
             if (!confirm('حذف المنتج؟')) return;
             products = products.filter(p => p.id !== id);
+            productCache.delete(String(id));
             try {
                 await db.collection('store_products').doc(String(id)).delete();
                 renderProducts();
@@ -1180,35 +1245,45 @@
             if (e.target.id === 'edit-price-modal') document.getElementById('edit-price-modal').style.display = 'none';
         }
 
-        function filterCat(cat) {
+        async function filterCat(cat) {
             currentFilter = cat;
             visibleProductCount = PRODUCTS_INITIAL_COUNT;
-            document.getElementById('current-catalog-title').textContent = cat === 'all' ? 'قسم: الكل' : `قسم: ${cat}`;
+            productPageCursor = null;
+            productHasMore = false;
+            const title=document.getElementById('current-catalog-title');
+            if(title) title.textContent = cat === 'all' ? 'المنتجات' : `قسم: ${cat}`;
             renderCategories();
-            renderProducts();
+            if (isAdmin) {
+                renderProducts();
+            } else {
+                await loadProductsPage(true);
+            }
         }
 
         function renderProducts() {
-            const catalog=document.getElementById('store-catalog'); if(!catalog)return; catalog.innerHTML='';
-            if(!dataLoaded){ return; }
-            const activeCats=currentFilter==='all'?categories.map(c=>c.name):[currentFilter]; let filtered=[]; activeCats.forEach(cat=>filtered.push(...products.filter(p=>p.cat===cat))); if(currentFilter==='all'&&categories.length===0)filtered=[...products];
-            const visible=filtered.slice(0,visibleProductCount);
-            
-            visible.forEach(p=>{
+            const catalog=document.getElementById('store-catalog'); if(!catalog)return;
+            if(!dataLoaded && !productPageLoading) return;
+            catalog.innerHTML='';
+            let filtered;
+            if (isAdmin) {
+                filtered = currentFilter==='all' ? [...products] : products.filter(p=>p.cat===currentFilter);
+            } else {
+                filtered = [...products];
+            }
+
+            filtered.forEach(p=>{
                 const qty=cart[p.id]?cart[p.id].qty:0,sub=(qty*Number(p.price||0)).toFixed(2);
                 const discountPercent=getDiscountPercent(p);
                 let priceHtml=`<span class="product-price">${p.price} ج.م</span>`;
                 if(p.oldPrice&&Number(p.oldPrice)>Number(p.price))priceHtml=`<span class="product-price">${p.price} ج.م</span><span class="old-price">${p.oldPrice} ج.م</span>`;
-                
                 const adminEditBtn = isAdmin ? `<button class="btn" style="background:#2563eb;color:#fff;padding:2px 6px;font-size:.7rem;margin-top:4px;" onclick="openEditPriceModal(${p.id})">✏️ تعديل المنتج</button>` : '';
-                
                 catalog.innerHTML+=`
                     <div class="product-card ${isAdmin?'admin-mode':''}" id="product-${p.id}">
                         ${discountPercent ? `<div class="discount-badge">خصم ${discountPercent}%</div>` : ''}
                         ${isAdmin ? `<button class="delete-prod-badge" onclick="deleteProduct(${p.id})">حذف</button>` : ''}
                         <a href="${productUrl(p)}" class="product-seo-link" onclick="openProductPage(${p.id});return false;">
                             <div class="product-img-wrap" style="height:${currentImgHeight};">
-                                <img src="${p.img}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
+                                <img src="${p.img||''}" class="product-img" alt="${p.name}" loading="lazy" decoding="async">
                             </div>
                         </a>
                         <div class="product-body">
@@ -1227,14 +1302,40 @@
                     </div>`;
             });
 
-            if(!visible.length){ const msg = currentFilter==='all' ? 'لا توجد منتجات مضافة حالياً.' : 'لا توجد منتجات مضافة حالياً في هذا القسم.'; catalog.innerHTML='<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:1.5rem;font-size:.85rem;">'+msg+'</p>'; }
-            const oldMore=document.getElementById('more-products-wrap');if(oldMore)oldMore.remove();if(visible.length<filtered.length){const wrap=document.createElement('div');wrap.id='more-products-wrap';wrap.className='more-products-wrap';wrap.innerHTML=`<button class="btn more-products-btn" onclick="showMoreProducts()">عرض المزيد (${Math.min(PRODUCTS_MORE_COUNT,filtered.length-visible.length)} منتج)</button>`;catalog.parentNode.insertBefore(wrap,catalog.nextSibling);}
-            const title=document.getElementById('current-catalog-title');if(title)title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`; renderProductListStructuredData();
-        }
-        function showMoreProducts(){visibleProductCount+=PRODUCTS_MORE_COUNT;renderProducts();}
+            if(!filtered.length){
+                const msg = currentFilter==='all' ? 'لا توجد منتجات مضافة حالياً.' : 'لا توجد منتجات مضافة حالياً في هذا القسم.';
+                catalog.innerHTML='<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:1.5rem;font-size:.85rem;">'+msg+'</p>';
+            }
 
+            const oldMore=document.getElementById('more-products-wrap');if(oldMore)oldMore.remove();
+            if(!isAdmin && productHasMore){
+                const wrap=document.createElement('div');
+                wrap.id='more-products-wrap'; wrap.className='more-products-wrap';
+                wrap.innerHTML=`<button class="btn more-products-btn" id="load-more-products-btn" onclick="showMoreProducts()">عرض المزيد</button>`;
+                catalog.parentNode.insertBefore(wrap,catalog.nextSibling);
+                if(productObserver) productObserver.disconnect();
+                productObserver=new IntersectionObserver(entries=>{ if(entries.some(e=>e.isIntersecting)) showMoreProducts(); },{rootMargin:'500px'});
+                productObserver.observe(wrap);
+            }
+            const title=document.getElementById('current-catalog-title');
+            if(title){
+                if(isAdmin) title.textContent=currentFilter==='all'?`المنتجات (${filtered.length})`:`قسم: ${currentFilter} (${filtered.length})`;
+                else title.textContent=currentFilter==='all'?`المنتجات (${filtered.length}${productHasMore?'+':''})`:`قسم: ${currentFilter} (${filtered.length}${productHasMore?'+':''})`;
+            }
+            renderProductListStructuredData();
+        }
+
+        async function showMoreProducts(){
+            if (isAdmin) {
+                renderProducts();
+                return;
+            }
+            const btn=document.getElementById('load-more-products-btn');
+            if(btn) { btn.disabled=true; btn.textContent='جاري تحميل المزيد...'; }
+            await loadProductsPage(false);
+        }
         function openProductPage(prodId, updateUrl = true) {
-            const p = products.find(prod => Number(prod.id) === Number(prodId));
+            const p = productCache.get(String(prodId)) || products.find(prod => Number(prod.id) === Number(prodId));
             if (!p) return;
             updateProductSeo(p);
             if (updateUrl) {
