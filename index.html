@@ -697,6 +697,8 @@
                     const prodSnap = await db.collection('store_products').get();
                     products = prodSnap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.id) }));
                     products.forEach(p => { p.id = p.idNum; });
+                    // تعديل الترتيب تصاعدياً للمدير أيضاً
+                    products.sort((a,b) => Number(a.idNum||0) - Number(b.idNum||0));
                     renderProducts();
                     renderProductListStructuredData();
                     loadAdminOrdersCloud();
@@ -718,7 +720,8 @@
             const snap = await q.get();
             const page = snap.docs.map(d => ({ id:d.id, ...d.data(), idNum:Number(d.data().idNum || d.id) }));
             page.forEach(p => { p.id = p.idNum; });
-            page.sort((a,b) => Number(b.idNum||0) - Number(a.idNum||0));
+            // تم تعديل الترتيب هنا ليصبح تصاعدياً (من الأقدم للأحدث / من الصغير للكبير)
+            page.sort((a,b) => Number(a.idNum||0) - Number(b.idNum||0));
             return { snap, page, cursor: snap.docs.length ? snap.docs[snap.docs.length-1] : cursor };
         }
 
@@ -759,7 +762,8 @@
                         const snap=await db.collection('store_products').limit(PRODUCTS_INITIAL_COUNT).get();
                         const page=snap.docs.map(d=>({id:d.id,...d.data(),idNum:Number(d.data().idNum||d.id)}));
                         page.forEach(p=>p.id=p.idNum);
-                        page.sort((a,b)=>Number(b.idNum||0)-Number(a.idNum||0));
+                        // الترتيب تصاعدي
+                        page.sort((a,b)=>Number(a.idNum||0)-Number(b.idNum||0));
                         products=products.concat(page);
                         productHasMore=snap.docs.length===PRODUCTS_INITIAL_COUNT;
                         productPageCursor=snap.docs.length?snap.docs[snap.docs.length-1]:null;
@@ -1110,6 +1114,8 @@
                 const imgSrc = imgFile?.files?.[0] ? await compressImage(imgFile.files[0], 1200, 0.72) : 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500';
                 const product = { id:Date.now(), cat, name, price, oldPrice, desc:desc || 'لا توجد تفاصيل إضافية.', img:imgSrc, sold:0 };
                 products.push(product);
+                // الحفاظ على الترتيب التصاعدي عند الإضافة المحلية
+                products.sort((a,b) => Number(a.id||0) - Number(b.id||0));
                 await saveDataToCloud();
                 document.getElementById('prod-name-input').value = '';
                 document.getElementById('prod-price-input').value = '';
