@@ -42,6 +42,7 @@
     }
     </script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -69,17 +70,17 @@
         body.theme-white { --bg-light:#ffffff; --text-main:#1e293b; --text-muted:#64748b; }
         body.theme-black .section-title-bar h3, body.theme-black .logo-text h1 { color:#f8fafc !important; }
         body.theme-black .section-title-bar { border-color:#374151; }
-        .top-ticker { background: var(--primary); color: #000; font-weight: 700; font-size: 0.8rem; padding: 5px 0; overflow: hidden; white-space: nowrap; }
+        .top-ticker { background: var(--primary); color: #fff; font-weight: 700; font-size: 0.8rem; padding: 5px 0; overflow: hidden; white-space: nowrap; }
         header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 0.7rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 1000; }
         .header-content { max-width: 1300px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
         .logo-box { display: flex; align-items: center; gap: 0.5rem; }
-        .logo-badge { background: var(--primary); color: #000; font-weight: 900; font-size: 1.2rem; padding: 0.2rem 0.5rem; border-radius: 8px; }
+        .logo-badge { background: var(--primary); color: #fff; font-weight: 900; font-size: 1.2rem; padding: 0.2rem 0.5rem; border-radius: 8px; }
         .logo-text h1 { font-size: 1rem; color: var(--dark); font-weight: 800; }
         .logo-text p { color: var(--text-muted); font-size: 0.65rem; }
         .header-left { display: flex; align-items: center; gap: 0.4rem; }
         .whatsapp-header-badge { background: var(--success); color: white; padding: 0.3rem 0.6rem; border-radius: 20px; text-decoration: none; font-weight: 700; font-size: 0.7rem; display: flex; align-items: center; gap: 0.2rem; white-space: nowrap; }
         .admin-trigger-btn { background: #e2e8f0; border: none; padding: 5px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; color: var(--text-muted); font-weight: bold; }
-        .admin-trigger-btn:hover { background: var(--primary); color: #000; }
+        .admin-trigger-btn:hover { background: var(--primary); color: #fff; }
         .sub-nav { background: #0f172a; padding: 0.4rem 1rem; display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; }
         .sub-nav button { background: none; border: none; color: #cbd5e1; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
         .sub-nav button.active, .sub-nav button:hover { color: var(--primary); }
@@ -188,7 +189,7 @@
         .input-group { margin-bottom: 0.7rem; }
         .input-group label { display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; color: var(--text-muted); }
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.8rem; outline: none; }
-        .btn { background-color: var(--primary); color: #000; border: none; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.2s; width: 100%; }
+        .btn { background-color: var(--primary); color: #fff; border: none; padding: 0.6rem; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.2s; width: 100%; }
         .btn:hover { background-color: var(--primary-dark); color: #fff; }
         .btn-danger { background-color: var(--danger); color: #fff; }
         .btn-success { background-color: var(--success); color: #fff; }
@@ -209,8 +210,7 @@
         .more-products-btn { max-width:220px; margin:auto; }
         .order-status-box { margin-top:8px; padding:7px; border-radius:8px; background:#eff6ff; border:1px solid #bfdbfe; font-size:.75rem; }
         .order-status-history { margin-top:7px; font-size:.7rem; color:var(--text-muted); line-height:1.7; }
-    
-        /* ===== شكل جديد (تنسيق فقط) ===== */
+            /* ===== شكل جديد (تنسيق فقط) ===== */
         :root { --primary:#f59e0b; --primary-dark:#d97706; --dark:#0b1220; --success:#16a34a; --radius:18px; --shadow:0 6px 24px rgba(15,23,42,.08); }
         body:not(.theme-black):not(.theme-blue):not(.theme-red):not(.theme-white) { --bg-light:#f3f5f9; }
         * { font-family:'Cairo','Segoe UI',Tahoma,sans-serif; }
@@ -308,7 +308,7 @@
 
                     <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
                         <h4 style="color:var(--dark); margin-bottom:0.4rem; font-size:0.85rem;">📥 طلبات العملاء وحالاتها:</h4>
-                        <div id="admin-orders-inbox" style="max-height:200px; overflow-y:auto;"><p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات جديدة.</p></div>
+                        <button class="btn" style="margin-bottom:.6rem;" onclick="exportSeoPack()">📈 تصدير ملفات جوجل (صفحات المنتجات + sitemap)</button><div id="admin-orders-inbox" style="max-height:200px; overflow-y:auto;"><p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات جديدة.</p></div>
                     </div>
 
                     <div class="input-group">
@@ -464,6 +464,28 @@
         </div>
     </div>
 
+    <footer style="text-align:center;padding:1rem;font-size:.8rem;"><a href="/p/" style="color:var(--text-muted);">كل المنتجات</a></footer>
+
+    <!-- نافذة تسجيل دخول الأدمن -->
+    <div class="modal-overlay" id="admin-login-modal" onclick="closeAdminLogin()" style="display:none;">
+        <form class="modal-card" onclick="event.stopPropagation()" onsubmit="submitAdminLogin(event)">
+            <h3 style="margin-bottom: 0.8rem; color: var(--dark); font-size:1rem;">🔒 دخول الأدمن</h3>
+            <div class="input-group">
+                <label>الإيميل:</label>
+                <input type="email" id="admin-login-email" autocomplete="username" dir="ltr">
+            </div>
+            <div class="input-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="admin-login-pass" autocomplete="current-password" dir="ltr">
+            </div>
+            <p id="admin-login-error" style="color:#dc2626; font-size:.75rem; min-height:1rem;"></p>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+                <button type="submit" class="btn btn-success">دخول</button>
+                <button type="button" class="btn btn-danger" onclick="closeAdminLogin()">إلغاء</button>
+            </div>
+        </form>
+    </div>
+
     <!-- نافذة تعديل المنتج للأدمن (مخفية افتراضياً) -->
     <div class="modal-overlay" id="edit-price-modal" onclick="closeEditModal(event)" style="display:none;">
         <div class="modal-card" onclick="event.stopPropagation()">
@@ -525,6 +547,24 @@
         let cart = {};
         let currentFilter = 'all';
         let isAdmin = false;
+
+        // ===== أدوات الأمان والمساعدة =====
+        function esc(v) {
+            return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        // يجهّز قيمة آمنة لوضعها داخل onclick="..."
+        function jsArg(v) { return esc(JSON.stringify(String(v == null ? '' : v))); }
+        // توحيد رقم الهاتف المصري: 01xxxxxxxxx
+        function normPhone(v) {
+            let s = String(v || '')
+                .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+                .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
+                .replace(/\D/g, '');
+            if (s.startsWith('0020')) s = s.slice(4);
+            else if (s.startsWith('20') && s.length === 12) s = s.slice(2);
+            if (s.length === 10 && s.startsWith('1')) s = '0' + s;
+            return s;
+        }
         let adminOrders = [];
         let currentImgHeight = localStorage.getItem('alhamd_img_height') || '540px';
         if (currentImgHeight === '240px') currentImgHeight = '540px';
@@ -676,7 +716,7 @@
         };
 
         auth.onAuthStateChanged(async function(user) {
-            isAdmin = !!user;
+            isAdmin = !!user && !user.isAnonymous;
             checkAdminState();
             renderProducts();
             renderAdminTagBox();
@@ -697,7 +737,7 @@
                     const data = doc.data() || {};
                     return {
                         ...data,
-                        id: data.id || doc.id,
+                        id: doc.id,
                         itemsObj: Array.isArray(data.itemsObj) ? data.itemsObj : [],
                         itemsText: data.itemsText || '',
                         total: data.total || '0.00',
@@ -821,19 +861,30 @@
             } finally { productPageLoading=false; }
         }
 
+        const savedDocsCache = {};
         async function saveAllDataToCloud(bannerOverride = null) {
             const bannerSrc = bannerOverride || document.getElementById('main-banner-img').src;
-            const batch = db.batch();
+            const ops = [];
             categories.forEach(c => {
                 if (!c.id) c.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-                batch.set(db.collection('store_categories').doc(String(c.id)), c);
+                const json = JSON.stringify(c);
+                if (savedDocsCache['c' + c.id] !== json) ops.push({ key:'c' + c.id, json, ref:db.collection('store_categories').doc(String(c.id)), data:c });
             });
             products.forEach(p => {
-                const id = String(p.id);
-                batch.set(db.collection('store_products').doc(id), { ...p, idNum:Number(p.id) });
+                const data = { ...p, idNum:Number(p.id) };
+                const json = JSON.stringify(data);
+                if (savedDocsCache['p' + p.id] !== json) ops.push({ key:'p' + p.id, json, ref:db.collection('store_products').doc(String(p.id)), data });
             });
-            batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc, theme: currentSiteTheme || 'white' }, { merge:true });
-            await batch.commit();
+            // حد الـ batch في Firestore = 500 عملية، فنقسّم على دفعات
+            for (let i = 0; i < ops.length; i += 400) {
+                const batch = db.batch();
+                const chunk = ops.slice(i, i + 400);
+                chunk.forEach(o => batch.set(o.ref, o.data));
+                if (i + 400 >= ops.length) batch.set(db.collection('store_settings').doc('main'), { banner: bannerSrc, theme: currentSiteTheme || 'white' }, { merge:true });
+                await batch.commit();
+                chunk.forEach(o => { savedDocsCache[o.key] = o.json; });
+            }
+            if (!ops.length) await db.collection('store_settings').doc('main').set({ banner: bannerSrc, theme: currentSiteTheme || 'white' }, { merge:true });
         }
 
         async function saveDataToCloud(bannerOverride = null) {
@@ -866,6 +917,63 @@
             });
         }
 
+        // ===== تصدير صفحات المنتجات الثابتة + sitemap لأرشفة جوجل =====
+        const SEO_PHONE = '201126758975';
+        function seoStaticUrl(p) { return SITE_URL + 'p/' + encodeURIComponent(p.id) + '.html'; }
+        function seoImage(p, files) {
+            const m = /^data:image\/(\w+);base64,(.+)$/.exec(p.img || '');
+            if (!m) return p.img || '';
+            const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+            files['img/' + p.id + '.' + ext] = { b64: m[2] };
+            return SITE_URL + 'img/' + p.id + '.' + ext;
+        }
+        function seoProductPage(p, img) {
+            const url = seoStaticUrl(p), name = cleanSeoText(p.name, 'منتج كهربائي');
+            const desc = cleanSeoText(p.desc, 'شراء ' + name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.').slice(0, 300);
+            const price = numericPrice(p.price);
+            const ld = { '@context':'https://schema.org', '@type':'Product', name, description:desc, sku:String(p.id),
+                image: img ? [img] : [], category: cleanSeoText(p.cat, 'منتجات كهربائية'), url,
+                offers:{ '@type':'Offer', url, priceCurrency:'EGP', price, availability:'https://schema.org/InStock', itemCondition:'https://schema.org/NewCondition' } };
+            const wa = 'https://wa.me/' + SEO_PHONE + '?text=' + encodeURIComponent('أريد طلب: ' + name + '\n' + url);
+            return '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+              + '<title>' + esc(name) + ' | مؤسسة الحمد 4K</title><meta name="description" content="' + esc(desc) + '">'
+              + '<link rel="canonical" href="' + url + '"><meta name="robots" content="index, follow, max-image-preview:large">'
+              + '<meta property="og:type" content="product"><meta property="og:title" content="' + esc(name) + '"><meta property="og:description" content="' + esc(desc) + '"><meta property="og:url" content="' + url + '">'
+              + (img ? '<meta property="og:image" content="' + esc(img) + '">' : '')
+              + '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '<\/script>'
+              + '<style>body{font-family:Tahoma,sans-serif;max-width:640px;margin:0 auto;padding:1rem;color:#1e293b;line-height:1.7}img{max-width:100%;border-radius:12px}.price{font-size:1.4rem;font-weight:800;color:#2563eb}.b{display:block;text-align:center;padding:.8rem;margin:.5rem 0;border-radius:10px;text-decoration:none;font-weight:700;background:#2563eb;color:#fff}.b.w{background:#16a34a}</style></head><body>'
+              + '<nav><a href="/">الرئيسية</a> › <a href="/p/">المنتجات</a></nav><h1>' + esc(name) + '</h1>'
+              + (img ? '<img src="' + esc(img) + '" alt="' + esc(name) + '">' : '')
+              + '<p>القسم: ' + esc(p.cat || 'عام') + '</p><p class="price">' + price + ' ج.م</p><p>' + esc(cleanSeoText(p.desc, '')) + '</p>'
+              + '<a class="b w" href="' + wa + '">اطلب عبر واتساب</a><a class="b" href="/?product=' + encodeURIComponent(p.id) + '">افتح المنتج في المتجر وأضفه للسلة</a>'
+              + '<p>مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي - 26 نجيب الريحاني، مول رويال، القاهرة.</p></body></html>';
+        }
+        function buildSeoFiles(list) {
+            const files = {}, today = new Date().toISOString().slice(0, 10), items = [];
+            list.forEach(p => { files['p/' + p.id + '.html'] = seoProductPage(p, seoImage(p, files)); items.push(p); });
+            files['p/index.html'] = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>كل المنتجات | مؤسسة الحمد 4K</title>'
+              + '<meta name="description" content="قائمة منتجات مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي."><link rel="canonical" href="' + SITE_URL + 'p/"></head><body style="font-family:Tahoma,sans-serif;max-width:640px;margin:0 auto;padding:1rem"><h1>كل المنتجات</h1><p><a href="/">الرئيسية</a></p><ul>'
+              + items.map(p => '<li><a href="/p/' + encodeURIComponent(p.id) + '.html">' + esc(cleanSeoText(p.name)) + '</a></li>').join('') + '</ul></body></html>';
+            const urls = [SITE_URL, SITE_URL + 'p/'].concat(items.map(seoStaticUrl));
+            files['sitemap.xml'] = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+              + urls.map(u => '<url><loc>' + u + '</loc><lastmod>' + today + '</lastmod></url>').join('\n') + '\n</urlset>';
+            files['robots.txt'] = 'User-agent: *\nAllow: /\n\nSitemap: ' + SITE_URL + 'sitemap.xml\n';
+            return files;
+        }
+        async function exportSeoPack() {
+            if (!isAdmin) return;
+            if (!window.JSZip) { alert('تعذر تحميل أداة الضغط. تحقق من الإنترنت.'); return; }
+            const list = products.filter(p => p && p.id && p.name);
+            if (!list.length) { alert('لا توجد منتجات.'); return; }
+            const files = buildSeoFiles(list), zip = new JSZip();
+            Object.keys(files).forEach(k => files[k].b64 ? zip.file(k, files[k].b64, { base64:true }) : zip.file(k, files[k]));
+            const blob = await zip.generateAsync({ type:'blob' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob); a.download = 'seo-pack.zip'; a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+            alert('تم التنزيل (' + list.length + ' منتج). فك الضغط وارفع المجلدات والملفات بجانب index.html.');
+        }
+
         function checkAdminState() {
             const panel = document.getElementById('admin-control-panel');
             if (panel) {
@@ -874,20 +982,33 @@
             }
         }
 
-        async function adminLoginPrompt() {
+        function adminLoginPrompt() {
             if (auth.currentUser) {
                 alert('أنت مسجل دخول بالفعل كأدمن!');
                 return;
             }
-            const email = prompt('إيميل الأدمن:');
-            if (email === null) return;
-            const pass = prompt('كلمة مرور الأدمن:');
-            if (pass === null) return;
+            document.getElementById('admin-login-error').textContent = '';
+            document.getElementById('admin-login-pass').value = '';
+            document.getElementById('admin-login-modal').style.display = 'flex';
+            setTimeout(() => document.getElementById('admin-login-email').focus(), 50);
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('admin-login-modal').style.display = 'none';
+            document.getElementById('admin-login-pass').value = '';
+        }
+
+        async function submitAdminLogin(ev) {
+            if (ev) ev.preventDefault();
+            const email = document.getElementById('admin-login-email').value.trim();
+            const pass = document.getElementById('admin-login-pass').value;
+            const errEl = document.getElementById('admin-login-error');
+            if (!email || !pass) { errEl.textContent = 'أدخل الإيميل وكلمة المرور.'; return; }
             try {
-                await auth.signInWithEmailAndPassword(email.trim(), pass);
-                alert('تم تسجيل دخول الأدمن بنجاح ✅');
+                await auth.signInWithEmailAndPassword(email, pass);
+                closeAdminLogin();
             } catch (e) {
-                alert('فشل تسجيل الدخول: ' + (e.message || ''));
+                errEl.textContent = 'فشل تسجيل الدخول: ' + (e.message || '');
             }
         }
 
@@ -1339,19 +1460,19 @@
             if(!cart[prodId])cart[prodId]={...prod,qty:0}; cart[prodId].qty+=delta; if(cart[prodId].qty<=0)delete cart[prodId]; renderProducts(); updateCartUI();
         }
         
-        function updateCartUI(){const list=document.getElementById('cart-page-list'),totalEl=document.getElementById('cart-page-total'),badge=document.getElementById('cart-count-badge');let total=0,count=0;if(list){list.innerHTML='';Object.keys(cart).forEach(id=>{const item=cart[id],sub=Number(item.qty||0)*Number(item.price||0);total+=sub;count+=Number(item.qty||0);list.innerHTML+=`<div class="cart-page-item"><img src="${item.img||''}" alt="${item.name}" loading="lazy"><div><div class="cart-page-item-name">${item.name}</div><div class="cart-page-item-price">${item.price} ج.م للقطعة</div><div class="cart-page-qty"><button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button><span class="qty-number">${item.qty}</span><button class="qty-btn" onclick="changeQty(${item.id},1)">+</button></div></div><div class="cart-page-subtotal">${sub.toFixed(2)} ج.م</div></div>`;});if(!Object.keys(cart).length)list.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;">السلة فارغة حالياً. أضف منتجات من الرئيسية.</p>';}if(totalEl)totalEl.textContent=total.toFixed(2)+' ج.م';if(badge)badge.textContent=count;}
+        function updateCartUI(){const list=document.getElementById('cart-page-list'),totalEl=document.getElementById('cart-page-total'),badge=document.getElementById('cart-count-badge');let total=0,count=0;if(list){list.innerHTML='';Object.keys(cart).forEach(id=>{const item=cart[id],sub=Number(item.qty||0)*Number(item.price||0);total+=sub;count+=Number(item.qty||0);list.innerHTML+=`<div class="cart-page-item"><img src="${esc(item.img||'')}" alt="${esc(item.name)}" loading="lazy"><div><div class="cart-page-item-name">${esc(item.name)}</div><div class="cart-page-item-price">${item.price} ج.م للقطعة</div><div class="cart-page-qty"><button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button><span class="qty-number">${item.qty}</span><button class="qty-btn" onclick="changeQty(${item.id},1)">+</button></div></div><div class="cart-page-subtotal">${sub.toFixed(2)} ج.م</div></div>`;});if(!Object.keys(cart).length)list.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;">السلة فارغة حالياً. أضف منتجات من الرئيسية.</p>';}if(totalEl)totalEl.textContent=total.toFixed(2)+' ج.م';if(badge)badge.textContent=count;}
         function saveCustomerInfo(){['client-name','client-phone','client-address','client-note'].forEach(id=>{const el=document.getElementById(id);if(el)localStorage.setItem('alhamd_'+id,el.value);});}
         function loadCustomerInfo(){['client-name','client-phone','client-address','client-note'].forEach(id=>{const el=document.getElementById(id),v=localStorage.getItem('alhamd_'+id);if(el&&v)el.value=v;});const lookup=document.getElementById('orders-phone-lookup');if(lookup)lookup.value=localStorage.getItem('alhamd_client-phone')||'';}
-        function getOrdersPhone(){return(document.getElementById('orders-phone-lookup')?.value||document.getElementById('client-phone')?.value||localStorage.getItem('alhamd_client-phone')||'').trim();}
+        function getOrdersPhone(){return normPhone(document.getElementById('orders-phone-lookup')?.value||document.getElementById('client-phone')?.value||localStorage.getItem('alhamd_client-phone')||'');}
         function scheduleLoadMyOrders(){clearTimeout(myOrdersLoadTimer);myOrdersLoadTimer=setTimeout(()=>loadMyOrdersCloud(),500);}
         
         async function sendOrderWhatsApp(){
-            const keys=Object.keys(cart);if(!keys.length){alert('السلة فارغة.');return;}saveCustomerInfo();const name=document.getElementById('client-name').value.trim(),phone=document.getElementById('client-phone').value.trim(),address=document.getElementById('client-address').value.trim(),note=document.getElementById('client-note').value.trim();if(!name||!phone){alert('أدخل الاسم ورقم الهاتف.');return;}
+            const keys=Object.keys(cart);if(!keys.length){alert('السلة فارغة.');return;}saveCustomerInfo();const name=document.getElementById('client-name').value.trim(),phone=normPhone(document.getElementById('client-phone').value),address=document.getElementById('client-address').value.trim(),note=document.getElementById('client-note').value.trim();if(!name||!phone){alert('أدخل الاسم ورقم الهاتف.');return;}const waWin=window.open('','_blank');
             let msg=`🛒 *طلب جديد من مؤسسة الحمد 4K*%0A👤 *العميل:* ${encodeURIComponent(name)}%0A📞 *الهاتف:* ${encodeURIComponent(phone)}%0A📍 *العنوان:* ${encodeURIComponent(address||'غير محدد')}%0A📝 *ملاحظة:* ${encodeURIComponent(note||'لا توجد')}%0A----------------------------------%0A`,total=0,items=[];keys.forEach(id=>{const item=cart[id],sub=Number(item.qty)*Number(item.price);total+=sub;items.push({id:item.id,name:item.name,qty:Number(item.qty),price:Number(item.price)});msg+=`• ${encodeURIComponent(item.name)} (×${item.qty}) = ${sub} ج.م%0A`;});msg+=`----------------------------------%0A💰 *الإجمالي الكلي:* *${total.toFixed(2)} ج.م*%0A`;
-            const newOrder={id:Date.now(),clientName:name,phone,address,note,itemsObj:items,itemsText:items.map(i=>`${i.name} (×${i.qty})`).join(', '),total:total.toFixed(2),date:new Date().toLocaleDateString('ar-EG'),status:'قيد المعالجة (في انتظار التأكيد) 🟡',statusHistory:[{status:'قيد المعالجة (في انتظار التأكيد) 🟡',date:new Date().toLocaleString('ar-EG')}]};
+            const newOrder={id:Date.now()*1000+Math.floor(Math.random()*1000),clientName:name,phone,address,note,itemsObj:items,itemsText:items.map(i=>`${i.name} (×${i.qty})`).join(', '),total:total.toFixed(2),date:new Date().toLocaleDateString('ar-EG'),status:'قيد المعالجة (في انتظار التأكيد) 🟡',statusHistory:[{status:'قيد المعالجة (في انتظار التأكيد) 🟡',date:new Date().toLocaleString('ar-EG')}]};
             myOrders.unshift(newOrder);localStorage.setItem('alhamd_my_orders',JSON.stringify(myOrders));
             try{await db.collection('store_orders').doc(String(newOrder.id)).set({...newOrder,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){console.error(e);}
-            cart={};renderProducts();updateCartUI();renderAdminOrdersInbox();await loadMyOrdersCloud(phone);window.open(`https://wa.me/201126758975?text=${msg}`,'_blank');alert('تم إرسال الطلب وتسجيله. يمكنك متابعة حالته لحظياً من «طلباتي».');switchView('myorders',document.querySelector('.sub-nav button:nth-child(3)'));
+            cart={};renderProducts();updateCartUI();renderAdminOrdersInbox();await loadMyOrdersCloud(phone);const waUrl=`https://wa.me/201126758975?text=${msg}`;if(waWin&&!waWin.closed){waWin.location.href=waUrl;}else{window.location.href=waUrl;}alert('تم إرسال الطلب وتسجيله. يمكنك متابعة حالته لحظياً من «طلباتي».');switchView('myorders',document.querySelector('.sub-nav button:nth-child(3)'));
         }
 
         async function adminUpdateOrderStatus(orderId,newStatus){
@@ -1371,11 +1492,11 @@
             if(!activeOrders.length){inbox.innerHTML='<p style="color:var(--text-muted);font-size:.75rem;text-align:center;">لا توجد طلبات جديدة معلقة.</p>';return;}
             inbox.innerHTML='';
             
-            activeOrders.forEach(ord=>{inbox.innerHTML+=`<div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px;margin-bottom:6px;font-size:.75rem;"><div><b>العميل:</b> ${ord.clientName} (${ord.phone})</div><div><b>العنوان:</b> ${ord.address||'غير محدد'}</div><div><b>الطلب:</b> ${ord.itemsText||''}</div><div><b>المبلغ:</b> ${ord.total} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${ord.status}</span></div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;"><button class="btn btn-success" style="padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم التأكيد ✅')">تأكيد</button><button class="btn" style="background:#2563eb;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الشحن 🚚')">شحن</button><button class="btn" style="background:#8b5cf6;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الاستلام 🎉')">تم الاستلام</button><button class="btn" style="background:#dc2626;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus('${ord.id}','تم الإلغاء ❌')">إلغاء</button></div></div>`;});
+            activeOrders.forEach(ord=>{inbox.innerHTML+=`<div style="background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:6px;margin-bottom:6px;font-size:.75rem;"><div><b>العميل:</b> ${esc(ord.clientName)} (${esc(ord.phone)})</div><div><b>العنوان:</b> ${esc(ord.address||'غير محدد')}</div>${ord.note?`<div><b>ملاحظة:</b> ${esc(ord.note)}</div>`:''}<div><b>الطلب:</b> ${esc(ord.itemsText||'')}</div><div><b>المبلغ:</b> ${esc(ord.total)} ج.م | <b>الحالة:</b> <span style="color:#1d4ed8;font-weight:bold;">${esc(ord.status)}</span></div><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;"><button class="btn btn-success" style="padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus(${jsArg(ord.id)},'تم التأكيد ✅')">تأكيد</button><button class="btn" style="background:#2563eb;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus(${jsArg(ord.id)},'تم الشحن 🚚')">شحن</button><button class="btn" style="background:#8b5cf6;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus(${jsArg(ord.id)},'تم الاستلام 🎉')">تم الاستلام</button><button class="btn" style="background:#dc2626;color:#fff;padding:2px 4px;font-size:.65rem;" onclick="adminUpdateOrderStatus(${jsArg(ord.id)},'تم الإلغاء ❌')">إلغاء</button></div></div>`;});
         }
 
         async function loadMyOrdersCloud(phoneOverride=''){
-            const phone=(phoneOverride||getOrdersPhone()).trim();
+            const phone=normPhone(phoneOverride||getOrdersPhone());
             const listDiv=document.getElementById('my-orders-list');
             if(!listDiv)return;
             
@@ -1401,8 +1522,5 @@
         }
 
         function renderMyOrders(){
-            const listDiv=document.getElementById('my-orders-list');if(!listDiv)return;const phone=getOrdersPhone(),orders=phone?myOrders.filter(o=>String(o.phone)===String(phone)):myOrders;if(!orders.length){listDiv.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>';return;}listDiv.innerHTML='';
-            orders.forEach(ord=>{const history=(ord.statusHistory||[]).map(h=>`• ${h.status} — ${h.date}`).join('<br>');listDiv.innerHTML+=`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.8rem;margin-bottom:.6rem;"><div style="display:flex;justify-content:space-between;font-weight:bold;font-size:.8rem;color:var(--dark);margin-bottom:3px;"><span>📦 طلب #${String(ord.id).slice(-5)}</span><span style="color:#2563eb;">${ord.status}</span></div><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:3px;">المنتجات: ${ord.itemsText||''}</div><div style="display:flex;justify-content:space-format;font-size:.7rem;color:#94a3b8;"><span>الإجمالي: ${ord.total} ج.م</span><span>التاريخ: ${ord.date||''}</span></div><div class="order-status-box"><b>📢 آخر تحديث:</b> ${ord.status}</div><div class="order-status-history"><b>سجل الحالة:</b><br>${history||'لا يوجد تحديثات إضافية.'}</div></div>`;});
-        }
-    </script>
-</body></html>
+            const listDiv=document.getElementById('my-orders-list');if(!listDiv)return;const phone=getOrdersPhone(),orders=phone?myOrders.filter(o=>normPhone(o.phone)===phone):myOrders;if(!orders.length){listDiv.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>';return;}listDiv.innerHTML='';
+            orders.forEach(ord=>{const history=(ord.statusHistory||[]).map(h=>`• ${esc(h.status)} — ${esc(h.date)}`).join('<br>');listDiv.innerHTML+=`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.8rem;margin-bottom:.6rem;"><div style="display:flex;justify-content:space-between;font-weight:bold;font-size:.8rem;color:var(--dark);margin-bottom:3px;"><span>📦 طلب #${esc(String(ord.id).slice(-5))}</span><span style="color:#2563eb;">${esc(ord.status)}</span></div><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:3px;">المنتجات: ${esc(ord.itemsText||'')}</div><div style="display:flex;justify-content:space-between;font-size:.7rem;color:#94a3b8;"><span>الإجمالي: ${esc(ord.total)} ج
