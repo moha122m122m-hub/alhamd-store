@@ -1,4 +1,10 @@
 <html lang="ar" dir="rtl"><head>
+<script>
+(function(){function show(m){try{var b=document.getElementById('js-error-bar');if(!b){b=document.createElement('div');b.id='js-error-bar';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;font:12px/1.5 monospace;padding:8px;direction:ltr;max-height:30%;overflow:auto';(document.body||document.documentElement).appendChild(b);}b.textContent='ERROR: '+m;}catch(e){}}
+window.addEventListener('error',function(e){show((e.message||'')+' @'+(e.lineno||''));});
+window.addEventListener('unhandledrejection',function(e){show('Promise: '+((e.reason&&(e.reason.code||e.reason.message))||e.reason));});})();
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي</title>
@@ -1523,4 +1529,4 @@
 
         function renderMyOrders(){
             const listDiv=document.getElementById('my-orders-list');if(!listDiv)return;const phone=getOrdersPhone(),orders=phone?myOrders.filter(o=>normPhone(o.phone)===phone):myOrders;if(!orders.length){listDiv.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>';return;}listDiv.innerHTML='';
-            orders.forEach(ord=>{const history=(ord.statusHistory||[]).map(h=>`• ${esc(h.status)} — ${esc(h.date)}`).join('<br>');listDiv.innerHTML+=`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.8rem;margin-bottom:.6rem;"><div style="display:flex;justify-content:space-between;font-weight:bold;font-size:.8rem;color:var(--dark);margin-bottom:3px;"><span>📦 طلب #${esc(String(ord.id).slice(-5))}</span><span style="color:#2563eb;">${esc(ord.status)}</span></div><div style="font-size:.75rem;color:var(--text-muted);margin-bottom:3px;">المنتجات: ${esc(ord.itemsText||'')}</div><div style="display:flex;justify-content:space-between;font-size:.7rem;color:#94a3b8;"><span>الإجمالي: ${esc(ord.total)} ج
+            orders.forEach(ord=>{const history=(ord.statusHistory||[
