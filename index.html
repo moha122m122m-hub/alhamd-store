@@ -48,12 +48,9 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+((e.re
     }
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
@@ -968,7 +965,11 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+((e.re
         }
         async function exportSeoPack() {
             if (!isAdmin) return;
-            if (!window.JSZip) { alert('تعذر تحميل أداة الضغط. تحقق من الإنترنت.'); return; }
+            if (!window.JSZip) {
+                try {
+                    await new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+                } catch (e) { alert('تعذر تحميل أداة الضغط. تحقق من الإنترنت.'); return; }
+            }
             const list = products.filter(p => p && p.id && p.name);
             if (!list.length) { alert('لا توجد منتجات.'); return; }
             const files = buildSeoFiles(list), zip = new JSZip();
@@ -1529,4 +1530,4 @@ window.addEventListener('unhandledrejection',function(e){show('Promise: '+((e.re
 
         function renderMyOrders(){
             const listDiv=document.getElementById('my-orders-list');if(!listDiv)return;const phone=getOrdersPhone(),orders=phone?myOrders.filter(o=>normPhone(o.phone)===phone):myOrders;if(!orders.length){listDiv.innerHTML='<p style="text-align:center;color:var(--text-muted);padding:1.5rem;font-size:.85rem;">لا توجد طلبات مسجلة لهذا الرقم.</p>';return;}listDiv.innerHTML='';
-            orders.forEach(ord=>{const history=(ord.statusHistory||[
+            orders.forEach(ord=>{const
