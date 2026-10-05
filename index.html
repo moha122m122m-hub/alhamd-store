@@ -51,6 +51,7 @@
     }
     </script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -343,6 +344,12 @@
                         <p style="font-size:0.75rem; color:#1e3a8a;">أي منتج أو قسم تضيفه أو تعدله سيتم حفظه تلقائياً على السحاب للجميع!</p>
                     </div>
 
+                    <div style="background:#fff7ed; padding:10px; border-radius:8px; border:1px solid #f59e0b; margin-bottom:1rem; text-align:center;">
+                        <h4 style="color:#b45309; margin-bottom:0.3rem; font-size:0.85rem;">📦 نسخة الموقع بالكود</h4>
+                        <p style="font-size:0.72rem; color:#7c2d12; margin-bottom:7px;">بعد تعديل الأقسام والمنتجات والصور، اضغط الزر لتنزيل HTML جديد يحتوي على البيانات والصور الحالية داخل الكود.</p>
+                        <button class="btn btn-success" style="width:100%;" onclick="exportSiteWithCurrentData()">⬇️ حفظ داخل الكود وتنزيل نسخة الموقع</button>
+                    </div>
+
                     <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:1rem;">
                         <h4 style="color:var(--dark); margin-bottom:0.4rem; font-size:0.85rem;">📥 طلبات العملاء وحالاتها:</h4>
                         <div id="admin-orders-inbox" style="max-height:200px; overflow-y:auto;"><p style="color:var(--text-muted); font-size:0.75rem; text-align:center;">لا توجد طلبات جديدة.</p></div>
@@ -541,6 +548,7 @@
 
     <script type="application/ld+json" id="dynamic-product-list-schema"></script>
     <script type="application/ld+json" id="dynamic-product-schema"></script>
+    <script id="embedded-store-data" type="application/json" data-static="false">{"version":1,"categories":[],"products":[],"banner":"./og-cover.jpg","theme":"classic","imgHeight":"540px"}</script>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC0cSbJV8eju2u1D5eOI5bFu7EOg3LD31Y",
@@ -589,7 +597,12 @@
         const DEFAULT_CANONICAL = document.querySelector('link[rel="canonical"]')?.href || SITE_URL;
 
         function productUrl(product) {
-            return SITE_URL + '?product=' + encodeURIComponent(product.id);
+            const id = encodeURIComponent(product.id);
+            // في النسخة المصدّرة تكون لكل منتج صفحة HTML فعلية قابلة للأرشفة.
+            if (typeof isEmbeddedStaticBuild === 'function' && isEmbeddedStaticBuild()) {
+                return SITE_URL + 'products/' + id + '.html';
+            }
+            return SITE_URL + '?product=' + id;
         }
 
         function cleanSeoText(value, fallback='') {
@@ -687,7 +700,13 @@
         }
 
         async function openProductFromUrl() {
-            const id = new URLSearchParams(window.location.search).get('product');
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get('product');
+            // صفحات المنتجات المصدّرة تستخدم المسار /products/ID.html بدل query string.
+            if (!id) {
+                const embeddedEl = document.getElementById('embedded-store-data');
+                id = embeddedEl?.dataset.productId || '';
+            }
             if (!id) { resetProductSeo(); return; }
             let product = products.find(p => String(p.id) === String(id));
             if (!product) {
@@ -752,7 +771,240 @@
             }
         }
 
+        function getEmbeddedStoreData() {
+            const el = document.getElementById('embedded-store-data');
+            if (!el) return null;
+            try { return JSON.parse(el.textContent || '{}'); } catch (e) { console.warn('تعذر قراءة البيانات المضمنة:', e); return null; }
+        }
+
+        function isEmbeddedStaticBuild() {
+            return document.getElementById('embedded-store-data')?.dataset.static === 'true';
+        }
+
+        function escapeJsonForScript(obj) {
+            return JSON.stringify(obj)
+                .replace(/</g, '\u003c')
+                .replace(/>/g, '\u003e')
+                .replace(/&/g, '\u0026');
+        }
+
+        function slugSafe(value, fallback='product') {
+            const s = String(value || fallback).trim().toLowerCase()
+                .replace(/[^\u0600-\u06FFa-z0-9]+/gi, '-')
+                .replace(/^-+|-+$/g, '');
+            return s || fallback;
+        }
+
+        function dataUrlToFile(dataUrl) {
+            const m = String(dataUrl || '').match(/^data:([^;]+);base64,(.*)$/);
+            if (!m) return null;
+            const mime = m[1];
+            const binary = atob(m[2]);
+            const bytes = new Uint8Array(binary.length);
+            for (let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            let ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : mime.includes('gif') ? 'gif' : 'jpg';
+            return { mime, bytes, ext };
+        }
+
+        function makeAbsoluteSiteUrl(path) {
+            return new URL(path, SITE_URL).href;
+        }
+
+        async function fetchAllProductsForExport() {
+            const snap = await db.collection('store_products').get();
+            const list = snap.docs.map(doc => {
+                const data = doc.data() || {};
+                return { ...data, id: Number(data.idNum || data.id || doc.id), idNum: Number(data.idNum || data.id || doc.id) };
+            });
+            list.sort((a,b) => Number(a.id||0) - Number(b.id||0));
+            return list;
+        }
+
+        async function exportSiteWithCurrentData() {
+            if (!isAdmin) { alert('يجب تسجيل الدخول كأدمن أولاً.'); return; }
+            if (typeof JSZip === 'undefined') {
+                alert('تعذر تشغيل التصدير. تأكد من وجود اتصال بالإنترنت ثم أعد تحميل صفحة الأدمن.');
+                return;
+            }
+            const btn = document.querySelector('[onclick="exportSiteWithCurrentData()"]');
+            const oldText = btn ? btn.textContent : '';
+            let tempObjectUrls = [];
+            try {
+                if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري تجهيز صفحات المنتجات والـ sitemap...'; }
+
+                // تحديث السحاب أولاً.
+                await saveAllDataToCloud();
+
+                // جلب كل المنتجات من السحاب، وليس فقط المنتجات الظاهرة حاليًا.
+                const [allProducts, catSnap, settingsSnap] = await Promise.all([
+                    fetchAllProductsForExport(),
+                    db.collection('store_categories').get(),
+                    db.collection('store_settings').doc('main').get()
+                ]);
+                const allCategories = catSnap.docs.map(d => ({ id:d.id, ...d.data() }));
+                const settings = settingsSnap.exists ? (settingsSnap.data() || {}) : {};
+                const banner = document.getElementById('main-banner-img')?.src || settings.banner || makeAbsoluteSiteUrl('og-cover.jpg');
+
+                // نحفظ صور المنتجات المضمنة Base64 كملفات حقيقية؛ ده أفضل للـSEO ولصور Google.
+                const exportedProducts = [];
+                const imageFiles = [];
+                for (const p of allProducts) {
+                    const copy = { ...p };
+                    if (typeof copy.img === 'string' && copy.img.startsWith('data:image/')) {
+                        const file = dataUrlToFile(copy.img);
+                        if (file) {
+                            const fileName = 'product-images/' + encodeURIComponent(String(copy.id)) + '.' + file.ext;
+                            imageFiles.push({ name:fileName, bytes:file.bytes });
+                            copy.img = makeAbsoluteSiteUrl(fileName);
+                        }
+                    }
+                    exportedProducts.push(copy);
+                }
+
+                const payload = {
+                    version: 2,
+                    exportedAt: new Date().toISOString(),
+                    categories: allCategories,
+                    products: exportedProducts,
+                    banner: makeAbsoluteSiteUrl('og-cover.jpg'),
+                    theme: settings.theme || currentSiteTheme || 'classic',
+                    imgHeight: currentImgHeight || '540px'
+                };
+
+                const originalHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(originalHtml, 'text/html');
+                const embedded = doc.getElementById('embedded-store-data');
+                if (!embedded) throw new Error('embedded-store-data missing');
+                embedded.textContent = escapeJsonForScript(payload);
+                embedded.dataset.static = 'true';
+                delete embedded.dataset.productId;
+
+                // الصفحة الرئيسية: روابط المنتجات الجديدة تكون صفحات HTML فعلية.
+                doc.title = 'مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي';
+                const rootCanonical = doc.querySelector('link[rel="canonical"]');
+                if (rootCanonical) rootCanonical.href = SITE_URL;
+                const rootOgUrl = doc.querySelector('meta[property="og:url"]');
+                if (rootOgUrl) rootOgUrl.content = SITE_URL;
+                const rootOgImage = doc.querySelector('meta[property="og:image"]');
+                if (rootOgImage) rootOgImage.content = makeAbsoluteSiteUrl('og-cover.jpg');
+                const rootTwitterImage = doc.querySelector('meta[name="twitter:image"]');
+                if (rootTwitterImage) rootTwitterImage.content = makeAbsoluteSiteUrl('og-cover.jpg');
+
+                const zip = new JSZip();
+                zip.file('index.html', '<!DOCTYPE html>\n' + doc.documentElement.outerHTML);
+
+                // إضافة صورة الغلاف الحالية من الاستضافة إن كانت متاحة من نفس الأصل.
+                try {
+                    const coverResp = await fetch(makeAbsoluteSiteUrl('og-cover.jpg'), { cache:'no-store' });
+                    if (coverResp.ok) zip.file('og-cover.jpg', await coverResp.blob());
+                } catch(e) { console.warn('تعذر تضمين og-cover.jpg تلقائيًا:', e); }
+
+                imageFiles.forEach(f => zip.file(f.name, f.bytes));
+
+                // إنشاء صفحة HTML فعلية لكل منتج.
+                for (const product of exportedProducts) {
+                    const page = parser.parseFromString(originalHtml, 'text/html');
+                    const pageEmbedded = page.getElementById('embedded-store-data');
+                    pageEmbedded.textContent = escapeJsonForScript(payload);
+                    pageEmbedded.dataset.static = 'true';
+                    pageEmbedded.dataset.productId = String(product.id);
+
+                    const url = productUrl(product);
+                    const name = cleanSeoText(product.name, 'منتج كهربائي');
+                    const desc = cleanSeoText(product.desc, 'شراء ' + name + ' من مؤسسة الحمد 4K للتوريدات الكهربائية والتحكم الآلي.');
+                    page.title = name + ' | مؤسسة الحمد 4K';
+                    const setPageMeta = (selector, content) => { const el = page.querySelector(selector); if (el) el.setAttribute('content', content); };
+                    setPageMeta('meta[name="description"]', desc);
+                    setPageMeta('meta[property="og:title"]', name + ' | مؤسسة الحمد 4K');
+                    setPageMeta('meta[property="og:description"]', desc);
+                    setPageMeta('meta[property="og:url"]', url);
+                    setPageMeta('meta[property="og:image"]', product.img || makeAbsoluteSiteUrl('og-cover.jpg'));
+                    setPageMeta('meta[property="og:image:secure_url"]', product.img || makeAbsoluteSiteUrl('og-cover.jpg'));
+                    setPageMeta('meta[name="twitter:title"]', name + ' | مؤسسة الحمد 4K');
+                    setPageMeta('meta[name="twitter:description"]', desc);
+                    setPageMeta('meta[name="twitter:image"]', product.img || makeAbsoluteSiteUrl('og-cover.jpg'));
+                    const canonical = page.querySelector('link[rel="canonical"]');
+                    if (canonical) canonical.href = url;
+
+                    const schema = page.getElementById('dynamic-product-schema');
+                    if (schema) schema.textContent = JSON.stringify({'@context':'https://schema.org','@graph':[
+                        {'@type':'WebPage','@id':url+'#webpage','url':url,'name':name+' | مؤسسة الحمد 4K','description':desc,'mainEntity':{'@id':url+'#product'}},
+                        buildProductSchema(product)
+                    ]}).replace(/</g, '\u003c').replace(/>/g, '\u003e').replace(/&/g, '\u0026');
+
+                    const listSchema = page.getElementById('dynamic-product-list-schema');
+                    if (listSchema) listSchema.textContent = '';
+
+                    const safeId = String(product.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+                    const slug = slugSafe(product.name, 'product');
+                    page.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+                    const single = page.getElementById('view-single-product');
+                    if (single) single.classList.add('active-view');
+                    const bannerEl = page.getElementById('main-banner-container');
+                    if (bannerEl) bannerEl.style.display = 'none';
+                    const singleImg = page.getElementById('single-prod-img');
+                    if (singleImg) { singleImg.src = product.img || makeAbsoluteSiteUrl('og-cover.jpg'); singleImg.alt = name; }
+                    const singleCat = page.getElementById('single-prod-cat');
+                    if (singleCat) singleCat.textContent = '📁 القسم: ' + (product.cat || 'عام');
+                    const singleTitle = page.getElementById('single-prod-title');
+                    if (singleTitle) singleTitle.textContent = name;
+                    const singlePrice = page.getElementById('single-prod-price');
+                    if (singlePrice) singlePrice.textContent = numericPrice(product.price) + ' ج.م';
+                    const singleDesc = page.getElementById('single-prod-desc');
+                    if (singleDesc) singleDesc.textContent = desc;
+
+                    zip.file('products/' + safeId + '-' + slug + '.html', '<!DOCTYPE html>\n' + page.documentElement.outerHTML);
+                }
+
+                // sitemap.xml + robots.txt
+                const urls = [SITE_URL].concat(exportedProducts.map(p => {
+                    const safeId = String(p.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+                    const slug = slugSafe(p.name, 'product');
+                    return SITE_URL + 'products/' + safeId + '-' + slug + '.html';
+                }));
+                const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+                    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+                    urls.map(u => '  <url><loc>' + u.replace(/&/g,'&amp;') + '</loc></url>').join('\n') +
+                    '\n</urlset>';
+                zip.file('sitemap.xml', sitemap);
+                zip.file('robots.txt', 'User-agent: *\nAllow: /\nSitemap: ' + SITE_URL + 'sitemap.xml\n');
+
+                const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{level:6} });
+                const url = URL.createObjectURL(blob);
+                tempObjectUrls.push(url);
+                const a = document.createElement('a');
+                a.href = url;
+                const stamp = new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');
+                a.download = 'alhamd4k-seo-site-' + stamp + '.zip';
+                document.body.appendChild(a); a.click(); a.remove();
+                alert('تم إنشاء نسخة SEO كاملة بنجاح ✅\n\nالنسخة تحتوي على: index.html + صفحة HTML مستقلة لكل منتج + sitemap.xml + robots.txt + صور المنتجات المضمنة.\n\nارفع محتويات الملف المضغوط كلها إلى الاستضافة.');
+            } catch (e) {
+                console.error(e);
+                alert('تعذر إنشاء نسخة الموقع: ' + (e?.message || e));
+            } finally {
+                tempObjectUrls.forEach(u => URL.revokeObjectURL(u));
+                if (btn) { btn.disabled = false; btn.textContent = oldText || '⬇️ حفظ داخل الكود وتنزيل نسخة الموقع'; }
+            }
+        }
+
         async function loadDataFromCloud() {
+            const embedded = getEmbeddedStoreData();
+            if (isEmbeddedStaticBuild() && embedded && Array.isArray(embedded.categories) && Array.isArray(embedded.products)) {
+                categories = embedded.categories;
+                products = embedded.products;
+                if (embedded.banner) document.getElementById('main-banner-img').src = embedded.banner;
+                if (embedded.theme) { currentSiteTheme = embedded.theme; localStorage.setItem('alhamd_site_theme', currentSiteTheme); applySiteTheme(currentSiteTheme); }
+                if (embedded.imgHeight) { currentImgHeight = embedded.imgHeight; localStorage.setItem('alhamd_img_height', currentImgHeight); }
+                products.forEach(p => { p.id = Number(p.idNum || p.id); });
+                products.sort((a,b) => Number(a.id||0) - Number(b.id||0));
+                dataLoaded = true;
+                renderCategories(); renderAdminTagBox(); renderAdminOrdersInbox(); renderMyOrders(); updateCartUI();
+                renderProducts(); renderProductListStructuredData();
+                if (isAdmin) loadAdminOrdersCloud();
+                openProductFromUrl();
+                return;
+            }
             try {
                 const [catSnap, settingsSnap] = await Promise.all([
                     db.collection('store_categories').get(),
